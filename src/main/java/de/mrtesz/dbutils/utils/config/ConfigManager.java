@@ -1,4 +1,4 @@
-package net.floose.mrtesz.dbutils.utils.config;
+package de.mrtesz.dbutils.utils.config;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

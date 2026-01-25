@@ -1,9 +1,10 @@
-package net.floose.mrtesz.dbutils.utils.mariadb;
+package de.mrtesz.dbutils.utils.mariadb;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import de.mrtesz.dbutils.api.DBUtilsApi;
 import lombok.Getter;
-import net.floose.mrtesz.dbutils.utils.logger.DebugLevel;
+import de.mrtesz.dbutils.utils.logger.DebugLevel;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -11,7 +12,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
-import static net.floose.mrtesz.dbutils.api.DBUtilsApi.logging;
+import static de.mrtesz.dbutils.api.DBUtilsApi.logging;
 
 @SuppressWarnings("unused")
 public abstract class AbstractMariaDBManager {
@@ -88,13 +89,13 @@ public abstract class AbstractMariaDBManager {
 
         if ((url == null || user == null || password == null)) {
             if(infoWhenCredentialsAreNull) {
-                logging(DebugLevel.LEVEL1, projectName).warning(
+                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).warning(
                         "url, user or password were null while connecting MariaDB for Project: " + projectName +
                                 " url=null: " + (url == null) +
                                 " user=null: " + (user == null) +
                                 " password=null: " + (password == null)
                 );
-                logging(DebugLevel.LEVEL0, projectName).logException(new NullPointerException(
+                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(new NullPointerException(
                         "url, user or password were null while connecting MariaDB for Project: " + projectName +
                                 " url=null: " + (url == null) +
                                 " user=null: " + (user == null) +
@@ -108,16 +109,16 @@ public abstract class AbstractMariaDBManager {
         HikariConfig config = createHikariConfig();
         dataSource = new HikariDataSource(config);
 
-        logging(DebugLevel.LEVEL3, projectName).info("Connected to '" + config.getJdbcUrl() + "' in " + (System.currentTimeMillis() - start) + " ms");
+        DBUtilsApi.logging(DebugLevel.LEVEL3, projectName).info("Connected to '" + config.getJdbcUrl() + "' in " + (System.currentTimeMillis() - start) + " ms");
     }
     public void disconnect() {
         long start = System.currentTimeMillis();
         if(dataSource != null && !dataSource.isClosed()) {
             dataSource.close();
             dataSource = null;
-            logging(DebugLevel.LEVEL3, projectName).info("Disconnected from '" + url + "' in " + (System.currentTimeMillis() - start) + " ms");
+            DBUtilsApi.logging(DebugLevel.LEVEL3, projectName).info("Disconnected from '" + url + "' in " + (System.currentTimeMillis() - start) + " ms");
         } else
-            logging(DebugLevel.LEVEL1, projectName).info("Couldn't disconnect from '" + url + "': Not connected");
+            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).info("Couldn't disconnect from '" + url + "': Not connected");
     }
     public void checkConnection() {
         if (isClosed())
@@ -126,7 +127,7 @@ public abstract class AbstractMariaDBManager {
         if (getDataSource() == null || getDataSource().isClosed()) {
             connect();
             if (getDataSource() == null || getDataSource().isClosed())
-                logging(DebugLevel.LEVEL1, projectName).error("Error after trying to connect to database: Cant connect!");
+                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error after trying to connect to database: Cant connect!");
         }
     }
 
@@ -139,8 +140,8 @@ public abstract class AbstractMariaDBManager {
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {
-            logging(DebugLevel.LEVEL1, projectName).error("Error while getConnection: " + e.getMessage());
-            logging(DebugLevel.LEVEL0, projectName).logException(e);
+            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while getConnection: " + e.getMessage());
+            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
             return null;
         }
     }

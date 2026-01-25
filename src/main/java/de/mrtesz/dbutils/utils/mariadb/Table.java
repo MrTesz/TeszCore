@@ -1,4 +1,4 @@
-package net.floose.mrtesz.dbutils.utils.mariadb;
+package de.mrtesz.dbutils.utils.mariadb;
 
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;

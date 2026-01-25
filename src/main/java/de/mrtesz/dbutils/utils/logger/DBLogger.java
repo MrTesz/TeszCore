@@ -1,4 +1,4 @@
-package net.floose.mrtesz.dbutils.utils.logger;
+package de.mrtesz.dbutils.utils.logger;
 
 import de.mrtesz.ansi.Console;
 import org.apache.logging.log4j.Logger;

@@ -1,12 +1,12 @@
-package net.floose.mrtesz.dbutils.api;
+package de.mrtesz.dbutils.api;
 
 import lombok.Getter;
-import net.floose.mrtesz.dbutils.utils.Init;
-import net.floose.mrtesz.dbutils.utils.exceptions.DatabaseException;
-import net.floose.mrtesz.dbutils.utils.logger.DBLogger;
-import net.floose.mrtesz.dbutils.utils.logger.DebugLevel;
-import net.floose.mrtesz.dbutils.utils.mariadb.MariaDBManager;
-import net.floose.mrtesz.dbutils.utils.data.ProjectData;
+import de.mrtesz.dbutils.utils.Init;
+import de.mrtesz.dbutils.utils.exceptions.DatabaseException;
+import de.mrtesz.dbutils.utils.logger.DBLogger;
+import de.mrtesz.dbutils.utils.logger.DebugLevel;
+import de.mrtesz.dbutils.utils.mariadb.MariaDBManager;
+import de.mrtesz.dbutils.utils.data.ProjectData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

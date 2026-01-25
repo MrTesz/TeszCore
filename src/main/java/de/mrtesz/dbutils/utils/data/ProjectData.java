@@ -1,8 +1,8 @@
-package net.floose.mrtesz.dbutils.utils.data;
+package de.mrtesz.dbutils.utils.data;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.floose.mrtesz.dbutils.utils.mariadb.MariaDBManager;
+import de.mrtesz.dbutils.utils.mariadb.MariaDBManager;
 
 import java.util.ArrayList;
 import java.util.List;

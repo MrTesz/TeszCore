@@ -1,4 +1,4 @@
-package net.floose.mrtesz.dbutils.utils.logger;
+package de.mrtesz.dbutils.utils.logger;
 
 import lombok.Getter;
 

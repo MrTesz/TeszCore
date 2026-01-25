@@ -1,6 +1,6 @@
-package net.floose.mrtesz.dbutils.utils.utilClasses;
+package de.mrtesz.dbutils.utils.utilClasses;
 
-import net.floose.mrtesz.dbutils.utils.exceptions.DatabaseException;
+import de.mrtesz.dbutils.utils.exceptions.DatabaseException;
 
 import java.sql.Date;
 import java.util.Map;

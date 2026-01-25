@@ -1,4 +1,4 @@
-package net.floose.mrtesz.dbutils.utils.exceptions;
+package de.mrtesz.dbutils.utils.exceptions;
 
 public class DatabaseException extends RuntimeException {
 

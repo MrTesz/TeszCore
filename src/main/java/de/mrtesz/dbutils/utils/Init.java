@@ -1,9 +1,9 @@
-package net.floose.mrtesz.dbutils.utils;
+package de.mrtesz.dbutils.utils;
 
+import de.mrtesz.dbutils.utils.config.ConfigManager;
+import de.mrtesz.dbutils.utils.logger.DBLogger;
+import de.mrtesz.dbutils.utils.logger.DebugLevel;
 import lombok.Getter;
-import net.floose.mrtesz.dbutils.utils.config.ConfigManager;
-import net.floose.mrtesz.dbutils.utils.logger.DBLogger;
-import net.floose.mrtesz.dbutils.utils.logger.DebugLevel;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

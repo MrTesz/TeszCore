@@ -1,4 +1,4 @@
-package net.floose.mrtesz.dbutils;
+package de.mrtesz.dbutils;
 
 import de.mrtesz.ansi.Console;
 
