@@ -1,0 +1,17 @@
+net/floose/mrtesz/dbutils/utils/GeneralManager.class
+net/floose/mrtesz/dbutils/utils/exceptions/DatabaseException.class
+net/floose/mrtesz/dbutils/utils/utilClasses/SelectionResult.class
+net/floose/mrtesz/dbutils/utils/logger/DebugLevel.class
+net/floose/mrtesz/dbutils/api/DBUtilsApi.class
+net/floose/mrtesz/dbutils/utils/logger/LoggerLevel.class
+net/floose/mrtesz/dbutils/utils/logger/DBLogger.class
+net/floose/mrtesz/dbutils/utils/mariadb/Table.class
+net/floose/mrtesz/dbutils/Main.class
+net/floose/mrtesz/dbutils/utils/data/ProjectData.class
+net/floose/mrtesz/dbutils/utils/Init.class
+net/floose/mrtesz/dbutils/utils/mariadb/AsyncMariaDBManager.class
+net/floose/mrtesz/dbutils/utils/mariadb/MariaDBManager.class
+net/floose/mrtesz/dbutils/utils/logger/DBLogger$1.class
+net/floose/mrtesz/dbutils/utils/config/ConfigManager.class
+net/floose/mrtesz/dbutils/utils/mariadb/AbstractMariaDBManager.class
+net/floose/mrtesz/dbutils/utils/utilClasses/SelectionResults.class

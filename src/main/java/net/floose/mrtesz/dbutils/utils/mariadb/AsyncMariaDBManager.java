@@ -1,0 +1,594 @@
+package net.floose.mrtesz.dbutils.utils.mariadb;
+
+import com.zaxxer.hikari.HikariDataSource;
+import net.floose.mrtesz.dbutils.utils.logger.DebugLevel;
+import net.floose.mrtesz.dbutils.utils.utilClasses.SelectionResults;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.sql.Date;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
+import static net.floose.mrtesz.dbutils.api.DBUtilsApi.logging;
+
+@SuppressWarnings("unused")
+public class AsyncMariaDBManager extends AbstractMariaDBManager {
+
+    private final String projectName;
+
+    public AsyncMariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
+                               @Nullable String url, @Nullable String user, @Nullable String password, HikariDataSource dataSource, String projectName) {
+        super(infoWhenCredentialsAreNull, name, url, user, password, dataSource, projectName);
+        this.projectName = projectName;
+    }
+    public AsyncMariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
+                               @Nullable String url, @Nullable String user, @Nullable String password, String projectName) {
+        super(infoWhenCredentialsAreNull, name, url, user, password, projectName);
+        this.projectName = projectName;
+    }
+
+    /**
+     * Create a MariaDB Table using a Table object
+     * @param table The Table that has to be created or altered
+     */
+    public CompletableFuture<Void> createOrAlter(@NotNull Table table) {
+        return createOrAlter(table, 2);
+    }
+    /**
+     * Create a MariaDB Table using a Table object
+     * @param table The Table that has to be created or altered
+     */
+    public CompletableFuture<Void> createOrAlter(@NotNull Table table, int timeoutSeconds) {
+        String name = table.getName();
+        long start = System.currentTimeMillis();
+
+        checkConnection();
+        return CompletableFuture.runAsync(() -> {
+            try (Connection conn = getConnection(); Statement statement = conn.createStatement()) {
+                String createCmd = table.getCreateCommand();
+                statement.executeUpdate(createCmd);
+                logging(DebugLevel.LEVEL8, projectName).debug("Created table " + name + " if not exists in " + (System.currentTimeMillis() - start) + " ms");
+
+                for (Map.Entry<String, String> entry : table.getAlterColumnsCommands().entrySet()) {
+                    columnExists(name, entry.getKey()).thenAcceptAsync(b -> {
+                        if (!b) {
+                            try {
+                                statement.executeUpdate(entry.getValue());
+                                logging(DebugLevel.LEVEL8, projectName).debug("Altered Table " + name + "'s column in " + (System.currentTimeMillis() - start) + " ms");
+                            } catch (SQLException e) {
+                                logging(DebugLevel.LEVEL1, projectName).error("Error while altering table '" + name + "' with '" + entry.getValue() + "': " + e.getMessage());
+                                logging(DebugLevel.LEVEL0, projectName).logException(e);
+                            }
+                        }
+                    });
+                }
+                for (Map.Entry<String, String> entry : table.getAlterIndexCommands().entrySet()) {
+                    indexExists(name, entry.getKey()).thenAcceptAsync(b -> {
+                        if (!b) {
+                            try {
+                                statement.executeUpdate(entry.getValue());
+                                logging(DebugLevel.LEVEL8, projectName).debug("Altered Table " + name + "'s index in " + (System.currentTimeMillis() - start) + " ms");
+                            } catch (SQLException e) {
+
+                                logging(DebugLevel.LEVEL1, projectName).error("Error while altering table '" + name + "' with '" + entry.getValue() + "': " + e.getMessage());
+                                logging(DebugLevel.LEVEL0, projectName).logException(e);
+                            }
+                        }
+                    });
+                }
+            } catch (SQLException e) {
+                logging(DebugLevel.LEVEL1, projectName).error("Error while create/alter table '" + name + "' with '" + table.getCreateCommand() + "': " + e.getMessage());
+                logging(DebugLevel.LEVEL0, projectName).logException(e);
+            }
+        })
+                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
+                .whenComplete(
+                        (result, ex) -> {
+                            if (ex == null)
+                                logging(DebugLevel.LEVEL0, projectName).warning("Async executeSql task of AsyncMariaDBManager " + getName() + " of Project " + projectName
+                                        + " timed out after " + timeoutSeconds + " seconds.");
+                            if (ex != null)
+                                logging(DebugLevel.LEVEL0, projectName).logException(ex);
+                        }
+                );
+    }
+
+    /**
+     * Execute a SQL Query <br>
+     * e.g.: <code>executeSql("UPDATE playerInfos SET name = ? WHERE uuid = ?", List.of(player.getName(), player.getUniqueId()), "playerInfos", "update player name")</code>
+     * @param sql The query that should be executed
+     * @param values The values replacing the ?'s in the param sql
+     * @param tableName The Name of the Table that is worked with
+     * @param type The Type of the execution
+     * @return the return value of PreparedStatement.executeUpdate
+     */
+    public CompletableFuture<Integer> executeSql(String sql, @NotNull List<Object> values, String tableName, String type) {
+        return executeSql(sql, values, tableName, type, 2);
+    }
+    /**
+     * Execute a SQL Query with set timeout <br>
+     * e.g.: <code>executeSql("UPDATE playerInfos SET name = ? WHERE uuid = ?", List.of(player.getName(), player.getUniqueId()), "playerInfos", "update player name")</code>
+     * @param sql The query that should be executed
+     * @param values The values replacing the ?'s in the param sql
+     * @param tableName The Name of the Table that is worked with
+     * @param type The Type of the execution
+     * @param timeoutSeconds completeOnTimeout value in seconds
+     * @return the return value of PreparedStatement.executeUpdate
+     */
+    public CompletableFuture<Integer> executeSql(String sql, @NotNull List<Object> values, String tableName, String type, int timeoutSeconds) {
+        long start = System.currentTimeMillis();
+
+        checkConnection();
+        return CompletableFuture.supplyAsync(() -> {
+                    try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+                        int i = 1;
+                        for (Object o : values) {
+                            switch (o) {
+                                case null -> ps.setObject(i++, null);
+                                case String s -> ps.setString(i++, s);
+                                case Integer n -> ps.setInt(i++, n);
+                                case Long l -> ps.setLong(i++, l);
+                                case Boolean b -> ps.setBoolean(i++, b);
+                                case Date d -> ps.setDate(i++, d);
+                                default -> ps.setObject(i++, o);
+                            }
+                        }
+                        int result = ps.executeUpdate();
+                        logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, values, true) + " in "
+                                + (System.currentTimeMillis() - start) + " ms Result: " + result);
+                        return result;
+                    } catch (SQLException e) {
+                        logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, values, false) + "' in '" + tableName +
+                                "' Error: " + e.getMessage());
+                        logging(DebugLevel.LEVEL0, projectName).logException(e);
+                    }
+
+                    return 0;
+                })
+                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
+                .whenComplete(
+                        (result, ex) -> {
+                            if (result == null && ex == null)
+                                logging(DebugLevel.LEVEL0, projectName).warning("Async executeSql task of AsyncMariaDBManager " + getName() + " of Project " + projectName
+                                        + " timed out after " + timeoutSeconds + " seconds.");
+                            if (ex != null)
+                                logging(DebugLevel.LEVEL0, projectName).logException(ex);
+                        }
+                );
+    }
+    /**
+     * Execute a SQL Query <br>
+     * e.g.: <code>executeSql("UPDATE playerInfos SET name = " + player.getName() + " WHERE uuid = " + player.getUniqueId(), "playerInfos", "update player name")</code>
+     * @param sql The query that should be executed
+     * @param tableName The Name of the Table that is worked with
+     * @param type The Type of the execution
+     * @return the return value of PreparedStatement.executeUpdate
+     */
+    public CompletableFuture<Integer> executeSql(String sql, String tableName, String type) {
+        return executeSql(sql, tableName, type, 2);
+    }
+    /**
+     * Execute a SQL Query with set timeout <br>
+     * e.g.: <code>executeSql("UPDATE playerInfos SET name = " + player.getName() + " WHERE uuid = " + player.getUniqueId(), "playerInfos", "update player name")</code>
+     * @param sql The query that should be executed
+     * @param tableName The Name of the Table that is worked with
+     * @param type The Type of the execution
+     * @param timeoutSeconds completeOnTimeout value in seconds
+     * @return the return value of PreparedStatement.executeUpdate
+     */
+    public CompletableFuture<Integer> executeSql(String sql, String tableName, String type, int timeoutSeconds) {
+        long start = System.currentTimeMillis();
+
+        checkConnection();
+        return CompletableFuture.supplyAsync(() -> {
+                    try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+                        int result = ps.executeUpdate();
+                        logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, List.of(), true) + " in "
+                                + (System.currentTimeMillis() - start) + " ms Result: " + result);
+                        return result;
+                    } catch (SQLException e) {
+                        logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, List.of(), false) + "' in '" + tableName +
+                                "' Error: " + e.getMessage());
+                        logging(DebugLevel.LEVEL0, projectName).logException(e);
+                    }
+
+                    return 0;
+                })
+                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
+                .whenComplete(
+                        (result, ex) -> {
+                            if (result == null && ex == null)
+                                logging(DebugLevel.LEVEL0, projectName).warning("Async executeSql task of AsyncMariaDBManager " + getName() + " of Project " + projectName
+                                        + " timed out after " + timeoutSeconds + " seconds.");
+                            if (ex != null)
+                                logging(DebugLevel.LEVEL0, projectName).logException(ex);
+                        }
+                );
+    }
+
+    /**
+     * Execute a Selection Query
+     * e.g. <code>executeSelect("SELECT email, number FROM users WHERE username = ?", List.of("Mr_Tesz"), "users")</code>
+     * @param sql Sql Query
+     * @param questionMarks List of ?'s in the sql
+     * @param tableName Name of selected Table for logging
+     * @return SelectionResult wich represents a list of rows in Map<column, value>
+     */
+    public CompletableFuture<SelectionResults> executeSelect(String sql, @NotNull List<Object> questionMarks, String tableName) {
+        return executeSelect(sql, questionMarks, tableName, 2);
+    }
+    /**
+     * Execute a Selection Query with set timeout
+     * e.g. <code>executeSelect("SELECT email, number FROM users WHERE username = ?", List.of("Mr_Tesz"), "users")</code>
+     * @param sql Sql Query
+     * @param questionMarks List of ?'s in the sql
+     * @param tableName Name of selected Table for logging
+     * @param timeoutSeconds completeOnTimeout value in seconds
+     * @return SelectionResult wich represents a list of rows in Map<column, value>
+     */
+    public CompletableFuture<SelectionResults> executeSelect(String sql, @NotNull List<Object> questionMarks, String tableName, int timeoutSeconds) {
+        List<Map<String, Object>> returnValue = new ArrayList<>();
+        long start = System.currentTimeMillis();
+
+        checkConnection();
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement(sql)) {
+                for (int i = 0; i < questionMarks.size(); i++) {
+                    Object o = questionMarks.get(i);
+
+                    switch (o) {
+                        case null -> statement.setObject(i + 1, null);
+                        case String s -> statement.setString(i + 1, s);
+                        case Integer n -> statement.setInt(i + 1, n);
+                        case Long l -> statement.setLong(i + 1, l);
+                        case Boolean b -> statement.setBoolean(i + 1, b);
+                        default -> statement.setObject(i + 1, o);
+                    }
+                }
+
+                try (ResultSet rs = statement.executeQuery()) {
+                    ResultSetMetaData metaData = rs.getMetaData();
+                    int columnCount = metaData.getColumnCount();
+
+                    while (rs.next()) {
+                        Map<String, Object> thisRow = new HashMap<>();
+                        for (int i = 1; i <= columnCount; i++) {
+                            String columnName = metaData.getColumnLabel(i);
+                            Object value = rs.getObject(i);
+                            thisRow.put(columnName, value);
+                        }
+                        returnValue.add(thisRow);
+                    }
+                    // kein rs.close wegen try
+                    logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
+                            "' Using: '" + buildSqlWithParams(sql, questionMarks, true) + "' in " + (System.currentTimeMillis() - start) + " ms");
+                    if (!returnValue.isEmpty()) {
+                        logging(DebugLevel.LEVEL11, projectName).debug("Results:");
+                        for (Map<String, Object> map : returnValue) {
+                            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                                logging(DebugLevel.LEVEL11, projectName).
+                                        debug("Column: " + entry.getKey()
+                                                + " Value-Type: " + (entry.getValue() != null ? entry.getValue().getClass().getName() : "null (Any errors?)")
+                                                + " Value: " + (entry.getValue() != null ? entry.getValue() : "null (Any errors?)"));
+                            }
+                        }
+                    } else
+                        logging(DebugLevel.LEVEL11, projectName).debug("Results: [empty]");
+                }
+
+            } catch (SQLException e) {
+                logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
+                        "' Command: '" + buildSqlWithParams(sql, questionMarks, false) + "' Error: " + e.getMessage());
+                logging(DebugLevel.LEVEL0, projectName).logException(e);
+            }
+            return new SelectionResults(returnValue);
+        }).completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS).whenComplete(
+                (result, ex) -> {
+                    if (ex == null)
+                        logging(DebugLevel.LEVEL0, projectName).warning("Async executeSelect task of AsyncMariaDBManager " + getName() + " of Project " + projectName
+                                + " timed out after " + timeoutSeconds + " seconds.");
+                }
+        );
+    }
+    /**
+     * Execute a Selection Query
+     * e.g. <code>executeSelect("SELECT email, number FROM users WHERE username = Mr_Tesz", "users")</code>
+     * @param sql Sql Query
+     * @param tableName Name of selected Table for logging
+     * @return SelectionResult wich represents a list of rows in Map<column, value>
+     */
+    public CompletableFuture<SelectionResults> executeSelect(String sql, String tableName) {
+        return executeSelect(sql, tableName, 2);
+    }
+    /**
+     * Execute a Selection Query with set timeout
+     * e.g. <code>executeSelect("SELECT email, number FROM users WHERE username = Mr_Tesz", "users")</code>
+     * @param sql Sql Query
+     * @param tableName Name of selected Table for logging
+     * @param timeoutSeconds completeOnTimeout value in seconds
+     * @return SelectionResult wich represents a list of rows in Map<column, value>
+     */
+    public CompletableFuture<SelectionResults> executeSelect(String sql, String tableName, int timeoutSeconds) {
+        List<Map<String, Object>> returnValue = new ArrayList<>();
+        long start = System.currentTimeMillis();
+
+        checkConnection();
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement(sql)) {
+                try (ResultSet rs = statement.executeQuery()) {
+                    ResultSetMetaData metaData = rs.getMetaData();
+                    int columnCount = metaData.getColumnCount();
+
+                    while (rs.next()) {
+                        Map<String, Object> thisRow = new HashMap<>();
+                        for (int i = 1; i <= columnCount; i++) {
+                            String columnName = metaData.getColumnLabel(i);
+                            Object value = rs.getObject(i);
+                            thisRow.put(columnName, value);
+                        }
+                        returnValue.add(thisRow);
+                    }
+                    // kein rs.close wegen try
+                    logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
+                            "' Using: '" + buildSqlWithParams(sql, List.of(), true) + "' in " + (System.currentTimeMillis() - start) + " ms");
+                    if (!returnValue.isEmpty()) {
+                        logging(DebugLevel.LEVEL11, projectName).debug("Results:");
+                        for (Map<String, Object> map : returnValue) {
+                            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                                logging(DebugLevel.LEVEL11, projectName).
+                                        debug("Column: " + entry.getKey()
+                                                + " Value-Type: " + (entry.getValue() != null ? entry.getValue().getClass().getName() : "null (Any errors?)")
+                                                + " Value: " + (entry.getValue() != null ? entry.getValue() : "null (Any errors?)"));
+                            }
+                        }
+                    } else
+                        logging(DebugLevel.LEVEL11, projectName).debug("Results: [empty]");
+                }
+
+            } catch (SQLException e) {
+                logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
+                        "' Command: '" + buildSqlWithParams(sql, List.of(), false) + "' Error: " + e.getMessage());
+                logging(DebugLevel.LEVEL0, projectName).logException(e);
+            }
+            return new SelectionResults(returnValue);
+        }).completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS).whenComplete(
+                (result, ex) -> {
+                    if (ex == null)
+                        logging(DebugLevel.LEVEL0, projectName).warning("Async executeSelect task of AsyncMariaDBManager " + getName() + " of Project " + projectName
+                                + " timed out after " + timeoutSeconds + " seconds.");
+                }
+        );
+    }
+
+    /**
+     * Insert something into a Table <br>
+     * e.g.: <code>Map[String, Object] values = new HashMap<>()<br>values.put("uuid", player.getUniqueId())<br>
+     * values.put("name", player.getName())<br>mariaDBManager.insertInto("playerInfos", values)</code>
+     * @param tableName Name of the table, wich should be inserted in
+     * @param values The values, that should be inserted
+     */
+    public CompletableFuture<Integer> insertInto(String tableName, @NotNull Map<String, Object> values) {
+        return insertInto(tableName, values, 2);
+    }
+    /**
+     * Insert something into a Table with set timeout<br>
+     * e.g.: <code>Map[String, Object] values = new HashMap<>()<br>values.put("uuid", player.getUniqueId())<br>
+     * values.put("name", player.getName())<br>mariaDBManager.insertInto("playerInfos", values)</code>
+     * @param tableName Name of the table, wich should be inserted in
+     * @param values The values, that should be inserted
+     * @param timeoutSeconds completeOnTimeout value in seconds
+     */
+    public CompletableFuture<Integer> insertInto(String tableName, @NotNull Map<String, Object> values, int timeoutSeconds) {
+        String columns = String.join(", ", values.keySet());
+        String placeholders = String.join(", ", Collections.nCopies(values.size(), "?"));
+        String sql = "INSERT INTO `" + tableName + "` (" + columns + ") VALUES (" + placeholders + ")";
+
+        return this.executeSql(sql, values.values().stream().toList(), tableName, "insert", timeoutSeconds);
+    }
+
+    public CompletableFuture<Integer> insertIgnore(String tableName, @NotNull Map<String, Object> values) {
+        return insertIgnore(tableName, values, 2);
+    }
+    public CompletableFuture<Integer> insertIgnore(String tableName, @NotNull Map<String, Object> values, int timeoutSeconds) {
+        String columns = String.join(", ", values.keySet());
+        String placeholders = String.join(", ", Collections.nCopies(values.size(), "?"));
+        String sql = "INSERT IGNORE INTO `" + tableName + "` (" + columns + ") VALUES (" + placeholders + ")";
+
+        return this.executeSql(sql, values.values().stream().toList(), tableName, "insert_ignore", timeoutSeconds);
+    }
+
+    /**
+     * Delete an entry
+     * @param tableName Name of the table, wich should be deleted from
+     * @param whereClause Clause, narrowing the targeted columns
+     * @param params The parameter for the ?'s in the whereClause
+     */
+    public CompletableFuture<Integer> deleteFrom(String tableName, String whereClause, List<Object> params) {
+        String sql = "DELETE FROM `" + tableName + "` WHERE " + whereClause;
+
+        return this.executeSql(sql, params, tableName, "delete");
+    }
+    /**
+     * Delete an entry
+     * @param tableName Name of the table, wich should be deleted from
+     * @param whereClause Clause, narrowing the targeted columns
+     * @param params The parameter for the ?'s in the whereClause
+     * @param timeoutSeconds completeOnTimeout value in seconds
+     */
+    public CompletableFuture<Integer> deleteFrom(String tableName, String whereClause, List<Object> params, int timeoutSeconds) {
+        String sql = "DELETE FROM `" + tableName + "` WHERE " + whereClause;
+
+        return this.executeSql(sql, params, tableName, "delete", timeoutSeconds);
+    }
+    /**
+     * Delete an entry
+     * @param tableName Name of the table, wich should be deleted from
+     * @param whereClause Clause, narrowing the targeted columns
+     */
+    public CompletableFuture<Integer> deleteFrom(String tableName, String whereClause) {
+        String sql = "DELETE FROM `" + tableName + "` WHERE " + whereClause;
+
+        return this.executeSql(sql, tableName, "delete");
+    }
+    /**
+     * Delete an entry
+     * @param tableName Name of the table, wich should be deleted from
+     * @param whereClause Clause, narrowing the targeted columns
+     * @param timeoutSeconds completeOnTimeout value in seconds
+     */
+    public CompletableFuture<Integer> deleteFrom(String tableName, String whereClause, int timeoutSeconds) {
+        String sql = "DELETE FROM `" + tableName + "` WHERE " + whereClause;
+
+        return this.executeSql(sql, tableName, "delete", timeoutSeconds);
+    }
+
+    /**
+     * Update a Table <br>
+     * e.g.: <code>
+     * Map[String, Object] values = new HashMap<>()<br>
+     * values.put("name", player.getName())<br>
+     * update("playerInfos", values, "uuid = ?", List.of(player.getUniqueId())
+     * </code>
+     * @param tableName Name of the table, wich should be updated
+     * @param values Values that should be updated
+     * @param whereClause Clause, narrowing the targeted columns
+     * @param whereParams The parameter for the ?'s in the whereClause
+     */
+    public CompletableFuture<Integer> update(String tableName, @NotNull Map<String, Object> values, @Nullable String whereClause, List<Object> whereParams) {
+        return update(tableName, values, whereClause, whereParams, 2);
+    }
+    /**
+     * Update a Table <br>
+     * e.g.: <code>
+     * Map[String, Object] values = new HashMap<>()<br>
+     * values.put("name", player.getName())<br>
+     * update("playerInfos", values, "uuid = ?", List.of(player.getUniqueId())
+     * </code>
+     * @param tableName Name of the table, wich should be updated
+     * @param values Values that should be updated
+     * @param whereClause Clause, narrowing the targeted columns
+     * @param whereParams The parameter for the ?'s in the whereClause
+     * @param timeoutSeconds completeOnTimeout value in seconds
+     */
+    public CompletableFuture<Integer> update(String tableName, @NotNull Map<String, Object> values, @Nullable String whereClause, List<Object> whereParams, int timeoutSeconds) {
+        String setClause = String.join(", ", values.keySet().stream().map(k -> "`" + k + "` = ?").toList());
+        String sql = "UPDATE `" + tableName + "` SET " + setClause +
+                (whereClause == null ? "" :  " WHERE " + whereClause.replace("WHERE", "").replace("  ", " "));
+
+        List<Object> sqlValues = new ArrayList<>();
+        sqlValues.addAll(values.values());
+        sqlValues.addAll(whereParams);
+
+        return this.executeSql(sql, sqlValues, tableName, "update", timeoutSeconds);
+    }
+    /**
+     * Update a Table <br>
+     * e.g.: <code>
+     * Map[String, Object] values = new HashMap<>()<br>
+     * values.put("name", player.getName())<br>
+     * update("playerInfos", values, "uuid = " + player.getUniqueId())
+     * </code>
+     * @param tableName Name of the table, wich should be updated
+     * @param values Values that should be updated
+     * @param whereClause Clause, narrowing the targeted columns
+     */
+    public CompletableFuture<Integer> update(String tableName, @NotNull Map<String, Object> values, @Nullable String whereClause) {
+        return update(tableName, values, whereClause, 2);
+    }
+    /**
+     * Update a Table <br>
+     * e.g.: <code>
+     * Map[String, Object] values = new HashMap<>()<br>
+     * values.put("name", player.getName())<br>
+     * update("playerInfos", values, "uuid = " + player.getUniqueId())
+     * </code>
+     * @param tableName Name of the table, wich should be updated
+     * @param values Values that should be updated
+     * @param whereClause Clause, narrowing the targeted columns
+     * @param timeoutSeconds completeOnTimeout value in seconds
+     */
+    public CompletableFuture<Integer> update(String tableName, @NotNull Map<String, Object> values, @Nullable String whereClause, int timeoutSeconds) {
+        String setClause = String.join(", ", values.keySet().stream().map(k -> "`" + k + "` = ?").toList());
+        String sql = "UPDATE `" + tableName + "` SET " + setClause +
+                (whereClause == null ? "" :  " WHERE " + whereClause.replace("WHERE", "").replace("  ", " "));
+
+        List<Object> sqlValues = new ArrayList<>(values.values());
+
+        return this.executeSql(sql, sqlValues, tableName, "update", timeoutSeconds);
+    }
+
+    public CompletableFuture<Integer> dropTable(String tableName) {
+        return this.executeSql("DROP TABLE IF EXISTS " + tableName, List.of(), tableName, "drop table");
+    }
+
+    public CompletableFuture<Boolean> columnExists(String tableName, String columnName) {
+        return columnExists(tableName, columnName, 2);
+    }
+    public CompletableFuture<Boolean> columnExists(String tableName, String columnName, int timeoutSeconds) {
+        long start = System.currentTimeMillis();
+        checkConnection();
+
+        return CompletableFuture.supplyAsync(
+                () -> {
+                    try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement("SHOW COLUMNS FROM " + tableName + " LIKE ?")) {
+                        statement.setString(1, columnName);
+
+                        boolean returnValue;
+                        try (ResultSet set = statement.executeQuery()) {
+                            returnValue = set.next();
+                        }
+                        logging(DebugLevel.LEVEL11, projectName).debug("Column '" + columnName + "' exists in '" + tableName + "'? -> " + returnValue + " - "
+                                + (System.currentTimeMillis() - start) + " ms");
+                        return returnValue;
+                    } catch (SQLException e) {
+                        logging(DebugLevel.LEVEL1, projectName).error("Error while check if column '" + columnName + "' exists in '" + tableName + "' Error: " + e.getMessage());
+                        logging(DebugLevel.LEVEL0, projectName).logException(e);
+                        return false;
+                    }
+                }
+        ).completeOnTimeout(false, timeoutSeconds, TimeUnit.SECONDS).whenComplete(
+                (result, ex) -> {
+                    if (ex == null)
+                        logging(DebugLevel.LEVEL0, projectName).warning("Async columnExists task of AsyncMariaDBManager " + getName() + " of Project " + projectName
+                                + " timed out after " + timeoutSeconds + " seconds.");
+                }
+        );
+    }
+
+    public CompletableFuture<Boolean> indexExists(String tableName, String indexName) {
+        return indexExists(tableName, indexName, 2);
+    }
+    public CompletableFuture<Boolean> indexExists(String tableName, String indexName, int timeoutSeconds) {
+        long start = System.currentTimeMillis();
+        checkConnection();
+
+        return CompletableFuture.supplyAsync(
+                () -> {
+                    try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement("SHOW INDEX FROM " + tableName + " WHERE Key_name = ?")) {
+                        statement.setString(1, indexName);
+
+                        boolean returnValue;
+                        try (ResultSet set = statement.executeQuery()) {
+                            returnValue = set.next();
+                        }
+                        logging(DebugLevel.LEVEL11, projectName).debug("Index '" + indexName + "' exists in '" + tableName + "'? -> " + returnValue + " - " +
+                                (System.currentTimeMillis() - start) + " ms");
+                        return returnValue;
+                    } catch (SQLException e) {
+                        logging(DebugLevel.LEVEL1, projectName).error("Error while check if index " + indexName + " exists in " + tableName + " Error: " + e.getMessage());
+                        logging(DebugLevel.LEVEL0, projectName).logException(e);
+                        return false;
+                    }
+                }
+        ).completeOnTimeout(false, timeoutSeconds, TimeUnit.SECONDS).whenComplete(
+                (result, ex) -> {
+                    if (ex == null)
+                        logging(DebugLevel.LEVEL0, projectName).warning("Async indexExists task of AsyncMariaDBManager " + getName() + " of Project " + projectName
+                                + " timed out after " + timeoutSeconds + " seconds.");
+                }
+        );
+    }
+}
