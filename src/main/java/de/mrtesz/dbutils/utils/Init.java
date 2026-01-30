@@ -1,6 +1,6 @@
 package de.mrtesz.dbutils.utils;
 
-import de.mrtesz.dbutils.utils.config.ConfigManager;
+import de.mrtesz.dbutils.utils.config.YamlConfig;
 import de.mrtesz.dbutils.utils.logger.DBLogger;
 import de.mrtesz.dbutils.utils.logger.DebugLevel;
 import lombok.Getter;
@@ -23,14 +23,14 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 public class Init {
 
     private final Logger logger;
-    private final ConfigManager configManager;
+    private final YamlConfig configManager;
 
     public Init() {
         logger = setupLogger("DBUtilsLogger", "logs/", "DBUtils");
 
         setDefaultUncaughtExceptionHandler();
 
-        this.configManager = new ConfigManager("config");
+        this.configManager = new YamlConfig("config");
     }
 
     @SuppressWarnings("SameParameterValue")

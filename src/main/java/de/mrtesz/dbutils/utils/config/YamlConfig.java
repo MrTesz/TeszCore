@@ -14,17 +14,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-@Deprecated(forRemoval = true)
-public class ConfigManager {
+public class YamlConfig {
 
     private final Path filePath;
     private final Yaml yaml;
     private Map<String, Object> data;
 
-    public ConfigManager(@NotNull String name) {
+    public YamlConfig(@NotNull String name) {
         this(null, name);
     }
-    public ConfigManager(@Nullable String path, @NotNull String name) {
+    public YamlConfig(@Nullable String path, @NotNull String name) {
         this.filePath = path == null
                 ? Paths.get(name + ".yml")
                 : Paths.get(path, name + ".yml");
