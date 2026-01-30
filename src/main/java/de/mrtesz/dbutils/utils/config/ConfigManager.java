@@ -40,7 +40,8 @@ public class ConfigManager {
     @SuppressWarnings("unchecked")
     public void load() {
         try {
-            Files.createDirectories(filePath.getParent());
+            if (filePath.getParent() != null)
+                Files.createDirectories(filePath.getParent());
 
             if (!Files.exists(filePath)) {
                 Files.createFile(filePath);

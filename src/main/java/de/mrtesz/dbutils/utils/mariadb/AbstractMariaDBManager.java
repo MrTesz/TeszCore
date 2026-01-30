@@ -87,7 +87,7 @@ public abstract class AbstractMariaDBManager {
         if(closed)
             throw new IllegalStateException(projectName + " executed after disable! Manager already closed");
 
-        if ((url == null || user == null || password == null)) {
+        if (url == null || user == null || password == null || url.isBlank() || user.isBlank() || password.isBlank()) {
             if(infoWhenCredentialsAreNull) {
                 DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).warning(
                         "url, user or password were null while connecting MariaDB for Project: " + projectName +

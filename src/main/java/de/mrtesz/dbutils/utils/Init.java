@@ -25,16 +25,12 @@ public class Init {
     private final Logger logger;
     private final ConfigManager configManager;
 
-    private GeneralManager generalManager;
-
     public Init() {
         logger = setupLogger("DBUtilsLogger", "logs/", "DBUtils");
 
         setDefaultUncaughtExceptionHandler();
 
         this.configManager = new ConfigManager("config");
-
-        registerManagers();
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -93,10 +89,6 @@ public class Init {
         context.updateLoggers();
 
         return LogManager.getLogger(name);
-    }
-
-    private void registerManagers() {
-        this.generalManager = new GeneralManager(this);
     }
 
     private void setDefaultUncaughtExceptionHandler() {

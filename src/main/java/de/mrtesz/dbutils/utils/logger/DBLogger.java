@@ -1,6 +1,5 @@
 package de.mrtesz.dbutils.utils.logger;
 
-import de.mrtesz.ansi.Console;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,13 +52,11 @@ public class DBLogger {
     }
 
     public void debug(String msg) {
-        msg = Console.replaceParagraphs(msg);
         if (lvl < 11)
             logger.debug("{}[{}] {}", (projectName != null ? "[" + projectName + "] " : ""), lvl, msg);
     }
 
     public void info(String msg) {
-        msg = Console.replaceParagraphs(msg);
         if (lvl >= 8)
             debug(msg);
         else
@@ -67,12 +64,10 @@ public class DBLogger {
     }
 
     public void warning(String msg) {
-        msg = Console.replaceParagraphs(msg);
         logger.warn("{}[{}] {}", (projectName != null ? "[" + projectName + "] " : ""), lvl, msg);
     }
 
     public void error(String msg) {
-        msg = Console.replaceParagraphs(msg);
         logger.error("{}[{}] {}", (projectName != null ? "[" + projectName + "] " : ""), lvl, msg);
     }
 

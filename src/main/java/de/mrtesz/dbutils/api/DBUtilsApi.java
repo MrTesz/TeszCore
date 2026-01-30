@@ -1,16 +1,13 @@
 package de.mrtesz.dbutils.api;
 
-import lombok.Getter;
 import de.mrtesz.dbutils.utils.Init;
 import de.mrtesz.dbutils.utils.exceptions.DatabaseException;
 import de.mrtesz.dbutils.utils.logger.DBLogger;
 import de.mrtesz.dbutils.utils.logger.DebugLevel;
 import de.mrtesz.dbutils.utils.mariadb.MariaDBManager;
-import de.mrtesz.dbutils.utils.data.ProjectData;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 @SuppressWarnings("unused")
 public class DBUtilsApi {
@@ -56,16 +53,6 @@ public class DBUtilsApi {
     }
 
     /**
-     * Initializes a project that uses the DBUtils project
-     * @param projectName The name of the Project using the method
-     */
-    public void initializeProject(String projectName) {
-        ProjectData projectData = new ProjectData(projectName, List.of());
-
-        init.getGeneralManager().initializeProject(projectData);
-    }
-
-    /**
      * Creates a functional MariaDBManager for your Project
      * @param projectName The name of the Project using the method
      * @param infoWhenCredentialsAreNull Should it be logged, when url, user or password is null?
@@ -78,6 +65,6 @@ public class DBUtilsApi {
      */
     public MariaDBManager createMariaDBManager(@NotNull String projectName, boolean infoWhenCredentialsAreNull, @Nullable String name,
                                                @Nullable String url, @Nullable String user, @Nullable String password) throws DatabaseException {
-        return init.getGeneralManager().addManager(projectName, new MariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, null, projectName));
+        return new MariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, null, projectName);
     }
 }

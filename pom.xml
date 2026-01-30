@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.floose.mrtesz</groupId>
+    <groupId>de.mrtesz</groupId>
     <artifactId>dbutils</artifactId>
-    <version>1.2.1</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>dbutils</name>
@@ -71,13 +71,6 @@
             <artifactId>annotations</artifactId>
             <version>24.0.1</version>
             <scope>compile</scope>
-        </dependency>
-
-        <!-- Ansi -->
-        <dependency>
-            <groupId>de.mrtesz.ansi</groupId>
-            <artifactId>Ansi</artifactId>
-            <version>1.0</version>
         </dependency>
 
         <!-- Logger -->
