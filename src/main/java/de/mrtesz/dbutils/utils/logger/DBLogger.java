@@ -1,6 +1,7 @@
 package de.mrtesz.dbutils.utils.logger;
 
 import lombok.Setter;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,6 +57,13 @@ public class DBLogger {
         }
     }
 
+    public void log(Level level, String msg) {
+        if (level == Level.ERROR) error(msg);
+        else if (level == Level.WARN) warning(msg);
+        else if (level == Level.INFO) info(msg);
+        else if (level == Level.DEBUG) debug(msg);
+    }
+
     public void debug(String msg) {
         if (lvl < 11)
             logger.debug("{}[{}] {}", (projectName != null ? "[" + projectName + "] " : ""), lvl, msg);
@@ -74,6 +82,10 @@ public class DBLogger {
 
     public void error(String msg) {
         logger.error("{}[{}] {}", (projectName != null ? "[" + projectName + "] " : ""), lvl, msg);
+    }
+
+    public void throwing(Throwable t) {
+        logger.throwing(t);
     }
 
     public void printStackTrace(Throwable t) {
