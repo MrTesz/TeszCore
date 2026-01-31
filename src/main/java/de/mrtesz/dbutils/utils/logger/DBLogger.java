@@ -1,13 +1,18 @@
 package de.mrtesz.dbutils.utils.logger;
 
+import lombok.Setter;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.OutputStream;
 
 public class DBLogger {
 
     private final DebugLevel level;
     private final int lvl;
     private final Logger logger;
+    @Setter
+    private @Nullable OutputStream outputStream = null;
     private final @Nullable String projectName;
 
     public DBLogger(Logger logger, DebugLevel level, @Nullable String projectName) {
