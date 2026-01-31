@@ -14,12 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-<<<<<<<< HEAD:src/main/java/de/mrtesz/dbutils/utils/config/ConfigManager.java
-@Deprecated(forRemoval = true)
-public class ConfigManager {
-========
 public class YamlConfig {
->>>>>>>> 66432b3 (Adding Sqlite Support):src/main/java/de/mrtesz/dbutils/utils/config/YamlConfig.java
 
     private final Path filePath;
     private final Yaml yaml;
