@@ -14,7 +14,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+<<<<<<<< HEAD:src/main/java/de/mrtesz/dbutils/utils/config/ConfigManager.java
+@Deprecated(forRemoval = true)
+public class ConfigManager {
+========
 public class YamlConfig {
+>>>>>>>> 66432b3 (Adding Sqlite Support):src/main/java/de/mrtesz/dbutils/utils/config/YamlConfig.java
 
     private final Path filePath;
     private final Yaml yaml;
@@ -107,9 +112,36 @@ public class YamlConfig {
         return val instanceof Number ? ((Number) val).intValue() : def;
     }
 
-    public double getDouble(String path) {
+    public long getLong(String path) {
+        return this.getLong(path, 0);
+    }
+    public long getLong(String path, long def) {
         Object val = get(path);
-        return val instanceof Number ? ((Number) val).doubleValue() : 0D;
+        return val instanceof Number ? ((Number) val).longValue() : def;
+    }
+
+    public float getFloat(String path) {
+        return this.getFloat(path, 0);
+    }
+    public float getFloat(String path, float def) {
+        Object val = get(path);
+        return val instanceof Number ? ((Number) val).floatValue() : def;
+    }
+
+    public short getShort(String path) {
+        return this.getShort(path, (short) 0);
+    }
+    public short getShort(String path, short def) {
+        Object val = get(path);
+        return val instanceof Number ? ((Number) val).shortValue() : def;
+    }
+
+    public double getDouble(String path) {
+        return getDouble(path, 0);
+    }
+    public double getDouble(String path, double def) {
+        Object val = get(path);
+        return val instanceof Number ? ((Number) val).doubleValue() : def;
     }
 
     public boolean getBoolean(String path) {

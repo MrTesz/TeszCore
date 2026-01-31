@@ -1,9 +1,9 @@
-package de.mrtesz.dbutils.utils.mariadb;
+package de.mrtesz.dbutils.utils.sqlite;
 
 import com.zaxxer.hikari.HikariDataSource;
 import de.mrtesz.dbutils.api.DBUtilsApi;
-import de.mrtesz.dbutils.utils.utilClasses.SelectionResults;
 import de.mrtesz.dbutils.utils.logger.DebugLevel;
+import de.mrtesz.dbutils.utils.utilClasses.SelectionResults;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,69 +11,89 @@ import java.sql.Date;
 import java.sql.*;
 import java.util.*;
 
-import static de.mrtesz.dbutils.api.DBUtilsApi.logging;
-
 @SuppressWarnings("unused")
-public class MariaDBManager extends AbstractMariaDBManager {
+public class SqliteManager extends AbstractSqliteManager {
 
     private final String projectName;
 
-    public MariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
-                          @Nullable String url, @Nullable String user, @Nullable String password, HikariDataSource dataSource, String projectName) {
-        super(infoWhenCredentialsAreNull, name, url, user, password, dataSource, projectName);
+    public SqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path,
+                         @NotNull String name, HikariDataSource dataSource, String projectName) {
+        super(infoWhenCredentialsAreNull, name, path, dataSource, projectName);
         this.projectName = projectName;
     }
-    public MariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
-                               @Nullable String url, @Nullable String user, @Nullable String password, String projectName) {
-        super(infoWhenCredentialsAreNull, name, url, user, password, projectName);
+    public SqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path,
+                         @NotNull String name, String projectName) {
+        super(infoWhenCredentialsAreNull, name, path, projectName);
         this.projectName = projectName;
     }
 
     /**
-     * Create a MariaDB Table using a Table object
-     * @param mariaDBTable The Table that has to be created or altered
+     * Create a Sqlite Table using a Table object
+     * @param sqliteTable The Table that has to be created or altered
      */
-    public void createOrAlter(@NotNull MariaDBTable mariaDBTable) {
-        String name = mariaDBTable.getName();
+    public void createOrAlter(@NotNull SqliteTable sqliteTable) {
+        String tableName = sqliteTable.getName();
         long start = System.currentTimeMillis();
 
         checkConnection();
         try (Connection conn = getConnection(); Statement statement = conn.createStatement()) {
-            String createCmd = mariaDBTable.getCreateCommand();
+            String createCmd = sqliteTable.getCreateCommand();
             statement.executeUpdate(createCmd);
-            DBUtilsApi.logging(DebugLevel.LEVEL8, projectName).debug("Created table " + name + " if not exists in " + (System.currentTimeMillis() - start) + " ms");
+            DBUtilsApi.logging(DebugLevel.LEVEL8, projectName).debug("Created table " + tableName + " if not exists in " + (System.currentTimeMillis() - start) + " ms");
 
-            for (Map.Entry<String, String> entry : mariaDBTable.getAlterColumnsCommands().entrySet()) {
-                if (!columnExists(name, entry.getKey())) {
+            Set<String> existingColumns = new HashSet<>();
+            try (ResultSet rs = statement.executeQuery("PRAGMA table_info(´" + tableName + "´)")) {
+                while (rs.next()) {
+                    existingColumns.add(rs.getString("name"));
+                }
+            }
+
+            for (Map.Entry<String, String> entry : sqliteTable.getAlterColumnsCommands().entrySet()) {
+                String column = entry.getKey();
+                String sql = entry.getValue();
+                if (!existingColumns.contains(column)) {
                     try {
-                        statement.executeUpdate(entry.getValue());
-                        DBUtilsApi.logging(DebugLevel.LEVEL8, projectName).debug("Altered Table " + name + "'s column in " + (System.currentTimeMillis() - start) + " ms");
+                        statement.executeUpdate(sql);
+                        DBUtilsApi.logging(DebugLevel.LEVEL8, projectName)
+                                .debug("Added column '" + column + "' to table '" + tableName + "' in " + (System.currentTimeMillis() - start) + " ms");
                     } catch (SQLException e) {
-                        DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while altering table '" + name + "' with '" + entry.getValue() + "': " + e.getMessage());
+                        DBUtilsApi.logging(DebugLevel.LEVEL1, projectName)
+                                .error("Error while adding column '" + column + "' in table '" + tableName + "': " + e.getMessage());
                         DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
                     }
                 }
             }
-            for (Map.Entry<String, String> entry : mariaDBTable.getAlterIndexCommands().entrySet()) {
-                if (!indexExists(name, entry.getKey())) {
-                    try {
-                        statement.executeUpdate(entry.getValue());
-                        DBUtilsApi.logging(DebugLevel.LEVEL8, projectName).debug("Altered Table " + name + "'s index in " + (System.currentTimeMillis() - start) + " ms");
-                    } catch (SQLException e) {
 
-                        DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while altering table '" + name + "' with '" + entry.getValue() + "': " + e.getMessage());
+            Set<String> existingIndexes = new HashSet<>();
+            try (ResultSet rs = statement.executeQuery("PRAGMA index_list(`" + tableName + "`)")) {
+                while (rs.next()) {
+                    existingIndexes.add(rs.getString("name"));
+                }
+            }
+
+            for (Map.Entry<String, String> entry : sqliteTable.getAlterIndexCommands().entrySet()) {
+                String indexName = entry.getKey();
+                String sql = entry.getValue();
+                if (!existingIndexes.contains(indexName)) {
+                    try {
+                        statement.executeUpdate(sql);
+                        DBUtilsApi.logging(DebugLevel.LEVEL8, projectName)
+                                .debug("Created index '" + indexName + "' on table '" + tableName + "' in " + (System.currentTimeMillis() - start) + " ms");
+                    } catch (SQLException e) {
+                        DBUtilsApi.logging(DebugLevel.LEVEL1, projectName)
+                                .error("Error while creating index '" + indexName + "' on table '" + tableName + "': " + e.getMessage());
                         DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
                     }
                 }
             }
         } catch (SQLException e) {
-            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while create/alter table '" + name + "' with '" + mariaDBTable.getCreateCommand() + "': " + e.getMessage());
+            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while create/alter table '" + tableName + "' with '" + sqliteTable.getCreateCommand() + "': " + e.getMessage());
             DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
         }
     }
 
     /**
-     * Execute a SQL Query with set timeout <br>
+     * Execute a SQL Query <br>
      * e.g.: <code>executeSql("UPDATE playerInfos SET name = ? WHERE uuid = ?", List.of(player.getName(), player.getUniqueId()), "playerInfos", "update player name")</code>
      * @param sql The query that should be executed
      * @param values The values replacing the ?'s in the param sql
@@ -111,7 +131,7 @@ public class MariaDBManager extends AbstractMariaDBManager {
         return 0;
     }
     /**
-     * Execute a SQL Query with set timeout <br>
+     * Execute a SQL Query <br>
      * e.g.: <code>executeSql("UPDATE playerInfos SET name = " + player.getName() + " WHERE uuid = " + player.getUniqueId(), "playerInfos", "update player name")</code>
      * @param sql The query that should be executed
      * @param tableName The Name of the Table that is worked with
@@ -138,7 +158,7 @@ public class MariaDBManager extends AbstractMariaDBManager {
     }
 
     /**
-     * Execute a Selection Query with set timeout
+     * Execute a Selection Query
      * e.g. <code>executeSelect("SELECT email, number FROM users WHERE username = ?", List.of("Mr_Tesz"), "users")</code>
      * @param sql Sql Query
      * @param questionMarks List of ?'s in the sql
@@ -203,7 +223,7 @@ public class MariaDBManager extends AbstractMariaDBManager {
         return new SelectionResults(returnValue);
     }
     /**
-     * Execute a Selection Query with set timeout
+     * Execute a Selection Query
      * e.g. <code>executeSelect("SELECT email, number FROM users WHERE username = Mr_Tesz", "users")</code>
      * @param sql Sql Query
      * @param tableName Name of selected Table for logging
@@ -255,7 +275,7 @@ public class MariaDBManager extends AbstractMariaDBManager {
     }
 
     /**
-     * Insert something into a Table with set timeout<br>
+     * Insert something into a Table<br>
      * e.g.: <code>Map[String, Object] values = new HashMap<>()<br>values.put("uuid", player.getUniqueId())<br>
      * values.put("name", player.getName())<br>mariaDBManager.insertInto("playerInfos", values)</code>
      * @param tableName Name of the table, wich should be inserted in
@@ -272,7 +292,7 @@ public class MariaDBManager extends AbstractMariaDBManager {
     public int insertIgnore(String tableName, @NotNull Map<String, Object> values) {
         String columns = String.join(", ", values.keySet());
         String placeholders = String.join(", ", Collections.nCopies(values.size(), "?"));
-        String sql = "INSERT IGNORE INTO `" + tableName + "` (" + columns + ") VALUES (" + placeholders + ")";
+        String sql = "INSERT OR IGNORE INTO `" + tableName + "` (" + columns + ") VALUES (" + placeholders + ")";
 
         return this.executeSql(sql, values.values().stream().toList(), tableName, "insert_ignore");
     }
@@ -351,12 +371,16 @@ public class MariaDBManager extends AbstractMariaDBManager {
         long start = System.currentTimeMillis();
 
         checkConnection();
-        try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement("SHOW COLUMNS FROM " + tableName + " LIKE ?")) {
-            statement.setString(1, columnName);
+        try (Connection conn = getConnection();
+             PreparedStatement statement = conn.prepareStatement("PRAGMA table_info(´" + tableName + "´)");
+             ResultSet rs = statement.executeQuery()) {
 
-            boolean returnValue;
-            try (ResultSet set = statement.executeQuery()) {
-                returnValue = set.next();
+            boolean returnValue = false;
+            while (rs.next()) {
+                if (columnName.equals(rs.getObject("name"))) {
+                    returnValue = true;
+                    break;
+                }
             }
 
             DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Column '" + columnName + "' exists in '" + tableName + "'? -> " + returnValue + " - "
@@ -374,12 +398,16 @@ public class MariaDBManager extends AbstractMariaDBManager {
         long start = System.currentTimeMillis();
 
         checkConnection();
-        try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement("SHOW INDEX FROM " + tableName + " WHERE Key_name = ?")) {
-            statement.setString(1, indexName);
+        try (Connection conn = getConnection();
+             PreparedStatement statement = conn.prepareStatement("PRAGMA index_list(´" + tableName + "´)");
+             ResultSet rs = statement.executeQuery()) {
 
-            boolean returnValue;
-            try (ResultSet set = statement.executeQuery()) {
-                returnValue = set.next();
+            boolean returnValue = false;
+            while (rs.next()) {
+                if (indexName.equalsIgnoreCase(rs.getString("name"))) {
+                    returnValue = true;
+                    break;
+                }
             }
 
             DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Index '" + indexName + "' exists in '" + tableName + "'? -> " + returnValue + " - " +

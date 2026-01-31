@@ -1,4 +1,4 @@
-package de.mrtesz.dbutils.utils.mariadb;
+package de.mrtesz.dbutils.utils.sqlite;
 
 import com.zaxxer.hikari.HikariDataSource;
 import de.mrtesz.dbutils.api.DBUtilsApi;
@@ -11,96 +11,99 @@ import java.sql.Date;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
-public class AsyncMariaDBManager extends AbstractMariaDBManager {
+public class AsyncSqliteManager extends AbstractSqliteManager {
 
     private final String projectName;
     private final int timeoutSeconds;
 
-    public AsyncMariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
-                               @Nullable String url, @Nullable String user, @Nullable String password, HikariDataSource dataSource, String projectName) {
-        super(infoWhenCredentialsAreNull, name, url, user, password, dataSource, projectName);
-        this.timeoutSeconds = 2;
-        this.projectName = projectName;
+    public AsyncSqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path,
+                              @NotNull String name, HikariDataSource dataSource, String projectName) {
+        this(infoWhenCredentialsAreNull, path, name, dataSource, projectName, 2);
     }
-    public AsyncMariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
-                               @Nullable String url, @Nullable String user, @Nullable String password, String projectName) {
-        super(infoWhenCredentialsAreNull, name, url, user, password, projectName);
-        this.timeoutSeconds = 2;
-        this.projectName = projectName;
+    public AsyncSqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path,
+                              @NotNull String name, String projectName) {
+        this(infoWhenCredentialsAreNull, path, name, projectName, 2);
     }
-    public AsyncMariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
-                               @Nullable String url, @Nullable String user, @Nullable String password, HikariDataSource dataSource, String projectName, int timeoutSeconds) {
-        super(infoWhenCredentialsAreNull, name, url, user, password, dataSource, projectName);
+    public AsyncSqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path,
+                              @NotNull String name, HikariDataSource dataSource, String projectName, int timeoutSeconds) {
+        super(infoWhenCredentialsAreNull, path, name, dataSource, projectName);
         this.timeoutSeconds = timeoutSeconds;
         this.projectName = projectName;
     }
-    public AsyncMariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
-                               @Nullable String url, @Nullable String user, @Nullable String password, String projectName, int timeoutSeconds) {
-        super(infoWhenCredentialsAreNull, name, url, user, password, projectName);
+    public AsyncSqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path,
+                              @NotNull String name, String projectName, int timeoutSeconds) {
+        super(infoWhenCredentialsAreNull, path, name, projectName);
         this.timeoutSeconds = timeoutSeconds;
         this.projectName = projectName;
     }
 
     /**
-     * Create a MariaDB Table using a Table object
-     * @param mariaDBTable The Table that has to be created or altered
+     * Create a Sqlite Table using a Table object
+     * @param sqliteTable The Table that has to be created or altered
      */
-    public CompletableFuture<Void> createOrAlter(@NotNull MariaDBTable mariaDBTable) {
-        String name = mariaDBTable.getName();
-        long start = System.currentTimeMillis();
-
-        checkConnection();
+    public CompletableFuture<Void> createOrAlter(@NotNull SqliteTable sqliteTable) {
         return CompletableFuture.runAsync(() -> {
+            String tableName = sqliteTable.getName();
+            long start = System.currentTimeMillis();
+
+            checkConnection();
             try (Connection conn = getConnection(); Statement statement = conn.createStatement()) {
-                String createCmd = mariaDBTable.getCreateCommand();
+                String createCmd = sqliteTable.getCreateCommand();
                 statement.executeUpdate(createCmd);
-                DBUtilsApi.logging(DebugLevel.LEVEL8, projectName).debug("Created table " + name + " if not exists in " + (System.currentTimeMillis() - start) + " ms");
+                DBUtilsApi.logging(DebugLevel.LEVEL8, projectName).debug("Created table " + tableName + " if not exists in " + (System.currentTimeMillis() - start) + " ms");
 
-                for (Map.Entry<String, String> entry : mariaDBTable.getAlterColumnsCommands().entrySet()) {
-                    columnExists(name, entry.getKey()).thenAcceptAsync(b -> {
-                        if (!b) {
-                            try {
-                                statement.executeUpdate(entry.getValue());
-                                DBUtilsApi.logging(DebugLevel.LEVEL8, projectName).debug("Altered Table " + name + "'s column in " + (System.currentTimeMillis() - start) + " ms");
-                            } catch (SQLException e) {
-                                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while altering table '" + name + "' with '" + entry.getValue() + "': " + e.getMessage());
-                                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
-                            }
-                        }
-                    });
+                Set<String> existingColumns = new HashSet<>();
+                try (ResultSet rs = statement.executeQuery("PRAGMA table_info(´" + tableName + "´)")) {
+                    while (rs.next()) {
+                        existingColumns.add(rs.getString("name"));
+                    }
                 }
-                for (Map.Entry<String, String> entry : mariaDBTable.getAlterIndexCommands().entrySet()) {
-                    indexExists(name, entry.getKey()).thenAcceptAsync(b -> {
-                        if (!b) {
-                            try {
-                                statement.executeUpdate(entry.getValue());
-                                DBUtilsApi.logging(DebugLevel.LEVEL8, projectName).debug("Altered Table " + name + "'s index in " + (System.currentTimeMillis() - start) + " ms");
-                            } catch (SQLException e) {
 
-                                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while altering table '" + name + "' with '" + entry.getValue() + "': " + e.getMessage());
-                                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
-                            }
+                for (Map.Entry<String, String> entry : sqliteTable.getAlterColumnsCommands().entrySet()) {
+                    String column = entry.getKey();
+                    String sql = entry.getValue();
+                    if (!existingColumns.contains(column)) {
+                        try {
+                            statement.executeUpdate(sql);
+                            DBUtilsApi.logging(DebugLevel.LEVEL8, projectName)
+                                    .debug("Added column '" + column + "' to table '" + tableName + "' in " + (System.currentTimeMillis() - start) + " ms");
+                        } catch (SQLException e) {
+                            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName)
+                                    .error("Error while adding column '" + column + "' in table '" + tableName + "': " + e.getMessage());
+                            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
                         }
-                    });
+                    }
+                }
+
+                Set<String> existingIndexes = new HashSet<>();
+                try (ResultSet rs = statement.executeQuery("PRAGMA index_list(`" + tableName + "`)")) {
+                    while (rs.next()) {
+                        existingIndexes.add(rs.getString("name"));
+                    }
+                }
+
+                for (Map.Entry<String, String> entry : sqliteTable.getAlterIndexCommands().entrySet()) {
+                    String indexName = entry.getKey();
+                    String sql = entry.getValue();
+                    if (!existingIndexes.contains(indexName)) {
+                        try {
+                            statement.executeUpdate(sql);
+                            DBUtilsApi.logging(DebugLevel.LEVEL8, projectName)
+                                    .debug("Created index '" + indexName + "' on table '" + tableName + "' in " + (System.currentTimeMillis() - start) + " ms");
+                        } catch (SQLException e) {
+                            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName)
+                                    .error("Error while creating index '" + indexName + "' on table '" + tableName + "': " + e.getMessage());
+                            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+                        }
+                    }
                 }
             } catch (SQLException e) {
-                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while create/alter table '" + name + "' with '" + mariaDBTable.getCreateCommand() + "': " + e.getMessage());
+                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while create/alter table '" + tableName + "' with '" + sqliteTable.getCreateCommand() + "': " + e.getMessage());
                 DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
             }
-        })
-                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
-                .whenComplete(
-                        (result, ex) -> {
-                            if (ex == null)
-                                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).warning("Async executeSql task of AsyncMariaDBManager " + getName() + " of Project " + projectName
-                                        + " timed out after " + timeoutSeconds + " seconds.");
-                            if (ex != null)
-                                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(ex);
-                        }
-                );
+        });
     }
 
     /**
@@ -113,45 +116,35 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
      * @return the return value of PreparedStatement.executeUpdate
      */
     public CompletableFuture<Integer> executeSql(String sql, @NotNull List<Object> values, String tableName, String type) {
-        long start = System.currentTimeMillis();
-
-        checkConnection();
         return CompletableFuture.supplyAsync(() -> {
-                    try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-                        int i = 1;
-                        for (Object o : values) {
-                            switch (o) {
-                                case null -> ps.setObject(i++, null);
-                                case String s -> ps.setString(i++, s);
-                                case Integer n -> ps.setInt(i++, n);
-                                case Long l -> ps.setLong(i++, l);
-                                case Boolean b -> ps.setBoolean(i++, b);
-                                case Date d -> ps.setDate(i++, d);
-                                default -> ps.setObject(i++, o);
-                            }
-                        }
-                        int result = ps.executeUpdate();
-                        DBUtilsApi.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, values, true) + " in "
-                                + (System.currentTimeMillis() - start) + " ms Result: " + result);
-                        return result;
-                    } catch (SQLException e) {
-                        DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, values, false) + "' in '" + tableName +
-                                "' Error: " + e.getMessage());
-                        DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
-                    }
+            long start = System.currentTimeMillis();
 
-                    return 0;
-                })
-                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
-                .whenComplete(
-                        (result, ex) -> {
-                            if (result == null && ex == null)
-                                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).warning("Async executeSql task of AsyncMariaDBManager " + getName() + " of Project " + projectName
-                                        + " timed out after " + timeoutSeconds + " seconds.");
-                            if (ex != null)
-                                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(ex);
-                        }
-                );
+            checkConnection();
+            try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+                int i = 1;
+                for (Object o : values) {
+                    switch (o) {
+                        case null -> ps.setObject(i++, null);
+                        case String s -> ps.setString(i++, s);
+                        case Integer n -> ps.setInt(i++, n);
+                        case Long l -> ps.setLong(i++, l);
+                        case Boolean b -> ps.setBoolean(i++, b);
+                        case Date d -> ps.setDate(i++, d);
+                        default -> ps.setObject(i++, o);
+                    }
+                }
+                int result = ps.executeUpdate();
+                DBUtilsApi.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, values, true) + " in "
+                        + (System.currentTimeMillis() - start) + " ms Result: " + result);
+                return result;
+            } catch (SQLException e) {
+                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, values, false) + "' in '" + tableName +
+                        "' Error: " + e.getMessage());
+                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            }
+
+            return 0;
+        });
     }
     /**
      * Execute a SQL Query <br>
@@ -162,33 +155,24 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
      * @return the return value of PreparedStatement.executeUpdate
      */
     public CompletableFuture<Integer> executeSql(String sql, String tableName, String type) {
-        long start = System.currentTimeMillis();
-
-        checkConnection();
         return CompletableFuture.supplyAsync(() -> {
-                    try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-                        int result = ps.executeUpdate();
-                        DBUtilsApi.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, List.of(), true) + " in "
-                                + (System.currentTimeMillis() - start) + " ms Result: " + result);
-                        return result;
-                    } catch (SQLException e) {
-                        DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, List.of(), false) + "' in '" + tableName +
-                                "' Error: " + e.getMessage());
-                        DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
-                    }
+            long start = System.currentTimeMillis();
 
-                    return 0;
-                })
-                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
-                .whenComplete(
-                        (result, ex) -> {
-                            if (result == null && ex == null)
-                                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).warning("Async executeSql task of AsyncMariaDBManager " + getName() + " of Project " + projectName
-                                        + " timed out after " + timeoutSeconds + " seconds.");
-                            if (ex != null)
-                                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(ex);
-                        }
-                );
+            checkConnection();
+            try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+                int result = ps.executeUpdate();
+                DBUtilsApi.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, List.of(), true) + " in "
+                        + (System.currentTimeMillis() - start) + " ms Result: " + result);
+
+                return result;
+            } catch (SQLException e) {
+                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, List.of(), false) + "' in '" + tableName +
+                        "' Error: " + e.getMessage());
+                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            }
+
+            return 0;
+        });
     }
 
     /**
@@ -200,11 +184,11 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
      * @return SelectionResult wich represents a list of rows in Map<column, value>
      */
     public CompletableFuture<SelectionResults> executeSelect(String sql, @NotNull List<Object> questionMarks, String tableName) {
-        List<Map<String, Object>> returnValue = new ArrayList<>();
-        long start = System.currentTimeMillis();
-
-        checkConnection();
         return CompletableFuture.supplyAsync(() -> {
+            List<Map<String, Object>> returnValue = new ArrayList<>();
+            long start = System.currentTimeMillis();
+
+            checkConnection();
             try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement(sql)) {
                 for (int i = 0; i < questionMarks.size(); i++) {
                     Object o = questionMarks.get(i);
@@ -254,14 +238,9 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
                         "' Command: '" + buildSqlWithParams(sql, questionMarks, false) + "' Error: " + e.getMessage());
                 DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
             }
+
             return new SelectionResults(returnValue);
-        }).completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS).whenComplete(
-                (result, ex) -> {
-                    if (ex == null)
-                        DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).warning("Async executeSelect task of AsyncMariaDBManager " + getName() + " of Project " + projectName
-                                + " timed out after " + timeoutSeconds + " seconds.");
-                }
-        );
+        });
     }
     /**
      * Execute a Selection Query
@@ -271,11 +250,11 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
      * @return SelectionResult wich represents a list of rows in Map<column, value>
      */
     public CompletableFuture<SelectionResults> executeSelect(String sql, String tableName) {
-        List<Map<String, Object>> returnValue = new ArrayList<>();
-        long start = System.currentTimeMillis();
-
-        checkConnection();
         return CompletableFuture.supplyAsync(() -> {
+            List<Map<String, Object>> returnValue = new ArrayList<>();
+            long start = System.currentTimeMillis();
+
+            checkConnection();
             try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement(sql)) {
                 try (ResultSet rs = statement.executeQuery()) {
                     ResultSetMetaData metaData = rs.getMetaData();
@@ -312,14 +291,9 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
                         "' Command: '" + buildSqlWithParams(sql, List.of(), false) + "' Error: " + e.getMessage());
                 DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
             }
+
             return new SelectionResults(returnValue);
-        }).completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS).whenComplete(
-                (result, ex) -> {
-                    if (ex == null)
-                        DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).warning("Async executeSelect task of AsyncMariaDBManager " + getName() + " of Project " + projectName
-                                + " timed out after " + timeoutSeconds + " seconds.");
-                }
-        );
+        });
     }
 
     /**
@@ -336,11 +310,11 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
 
         return this.executeSql(sql, values.values().stream().toList(), tableName, "insert");
     }
-
+    
     public CompletableFuture<Integer> insertIgnore(String tableName, @NotNull Map<String, Object> values) {
         String columns = String.join(", ", values.keySet());
         String placeholders = String.join(", ", Collections.nCopies(values.size(), "?"));
-        String sql = "INSERT IGNORE INTO `" + tableName + "` (" + columns + ") VALUES (" + placeholders + ")";
+        String sql = "INSERT OR IGNORE INTO `" + tableName + "` (" + columns + ") VALUES (" + placeholders + ")";
 
         return this.executeSql(sql, values.values().stream().toList(), tableName, "insert_ignore");
     }
@@ -416,64 +390,59 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
     }
 
     public CompletableFuture<Boolean> columnExists(String tableName, String columnName) {
-        long start = System.currentTimeMillis();
-        checkConnection();
+        return CompletableFuture.supplyAsync(() -> {
+            long start = System.currentTimeMillis();
 
-        return CompletableFuture.supplyAsync(
-                () -> {
-                    try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement("SHOW COLUMNS FROM " + tableName + " LIKE ?")) {
-                        statement.setString(1, columnName);
+            checkConnection();
+            try (Connection conn = getConnection();
+                 PreparedStatement statement = conn.prepareStatement("PRAGMA table_info(´" + tableName + "´)");
+                 ResultSet rs = statement.executeQuery()) {
 
-                        boolean returnValue;
-                        try (ResultSet set = statement.executeQuery()) {
-                            returnValue = set.next();
-                        }
-                        DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Column '" + columnName + "' exists in '" + tableName + "'? -> " + returnValue + " - "
-                                + (System.currentTimeMillis() - start) + " ms");
-                        return returnValue;
-                    } catch (SQLException e) {
-                        DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while check if column '" + columnName + "' exists in '" + tableName + "' Error: " + e.getMessage());
-                        DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
-                        return false;
+                boolean returnValue = false;
+                while (rs.next()) {
+                    if (columnName.equals(rs.getObject("name"))) {
+                        returnValue = true;
+                        break;
                     }
                 }
-        ).completeOnTimeout(false, timeoutSeconds, TimeUnit.SECONDS).whenComplete(
-                (result, ex) -> {
-                    if (ex == null)
-                        DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).warning("Async columnExists task of AsyncMariaDBManager " + getName() + " of Project " + projectName
-                                + " timed out after " + timeoutSeconds + " seconds.");
-                }
-        );
+
+                DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Column '" + columnName + "' exists in '" + tableName + "'? -> " + returnValue + " - "
+                        + (System.currentTimeMillis() - start) + " ms");
+
+                return returnValue;
+            } catch (SQLException e) {
+                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while check if column '" + columnName + "' exists in '" + tableName + "' Error: " + e.getMessage());
+                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            }
+            return false;
+        });
     }
 
     public CompletableFuture<Boolean> indexExists(String tableName, String indexName) {
-        long start = System.currentTimeMillis();
-        checkConnection();
+        return CompletableFuture.supplyAsync(() -> {
+            long start = System.currentTimeMillis();
 
-        return CompletableFuture.supplyAsync(
-                () -> {
-                    try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement("SHOW INDEX FROM " + tableName + " WHERE Key_name = ?")) {
-                        statement.setString(1, indexName);
+            checkConnection();
+            try (Connection conn = getConnection();
+                 PreparedStatement statement = conn.prepareStatement("PRAGMA index_list(´" + tableName + "´)");
+                 ResultSet rs = statement.executeQuery()) {
 
-                        boolean returnValue;
-                        try (ResultSet set = statement.executeQuery()) {
-                            returnValue = set.next();
-                        }
-                        DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Index '" + indexName + "' exists in '" + tableName + "'? -> " + returnValue + " - " +
-                                (System.currentTimeMillis() - start) + " ms");
-                        return returnValue;
-                    } catch (SQLException e) {
-                        DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while check if index " + indexName + " exists in " + tableName + " Error: " + e.getMessage());
-                        DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
-                        return false;
+                boolean returnValue = false;
+                while (rs.next()) {
+                    if (indexName.equalsIgnoreCase(rs.getString("name"))) {
+                        returnValue = true;
+                        break;
                     }
                 }
-        ).completeOnTimeout(false, timeoutSeconds, TimeUnit.SECONDS).whenComplete(
-                (result, ex) -> {
-                    if (ex == null)
-                        DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).warning("Async indexExists task of AsyncMariaDBManager " + getName() + " of Project " + projectName
-                                + " timed out after " + timeoutSeconds + " seconds.");
-                }
-        );
+
+                DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Index '" + indexName + "' exists in '" + tableName + "'? -> " + returnValue + " - " +
+                        (System.currentTimeMillis() - start) + " ms");
+                return returnValue;
+            } catch (SQLException e) {
+                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while check if index " + indexName + " exists in " + tableName + " Error: " + e.getMessage());
+                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            }
+            return false;
+        });
     }
 }

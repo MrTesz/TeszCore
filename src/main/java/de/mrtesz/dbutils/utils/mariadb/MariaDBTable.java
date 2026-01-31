@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
-public class Table {
+public class MariaDBTable {
 
     @Getter
     private final String name;
@@ -20,20 +20,20 @@ public class Table {
      * Create a Table Object
      * @param name Name of the Table
      */
-    public Table(String name) {
+    public MariaDBTable(String name) {
         this.name = name;
     }
 
-    private Table addColumn(String columnName, String definition) {
+    private MariaDBTable addColumn(String columnName, String definition) {
         columns.put(columnName, definition);
         return this;
     }
 
     /**
-     * Set the Primary Keys of the Table like an uuid in playerInfos or itemId in auctionItems
+     * Set the Primary Keys of the Table
      * @param keys The keys, wich should be turned into Primarys
      */
-    public Table setPrimaryKeys(String... keys) {
+    public MariaDBTable setPrimaryKeys(String... keys) {
         primaryKeyColumns.clear();
         primaryKeyColumns.addAll(Arrays.stream(keys)
                 .filter(columns::containsKey)
@@ -42,69 +42,69 @@ public class Table {
         return this;
     }
 
-    public Table setUnique(String... unique) {
+    public MariaDBTable setUnique(String... unique) {
         this.unique = "UNIQUE(`" + String.join("`, `", unique) + "`)";
         return this;
     }
 
-    public Table addInt(String name) {
+    public MariaDBTable addInt(String name) {
         return addColumn(name, "INT");
     }
-    public Table addInt(String name, Integer def) {
+    public MariaDBTable addInt(String name, Integer def) {
         return addColumn(name, "INT DEFAULT " + (def == null ? "NULL" : def));
     }
 
-    public Table addLong(String name) {
+    public MariaDBTable addLong(String name) {
         return addBigInt(name);
     }
-    public Table addLong(String name, long def) {
+    public MariaDBTable addLong(String name, long def) {
         return addBigInt(name, def);
     }
 
-    public Table addBigInt(String name) {
+    public MariaDBTable addBigInt(String name) {
         return addColumn(name, "BIGINT");
     }
-    public Table addBigInt(String name, long def) {
+    public MariaDBTable addBigInt(String name, long def) {
         return addColumn(name, "BIGINT DEFAULT " + def);
     }
 
-    public Table addDouble(String name) {
+    public MariaDBTable addDouble(String name) {
         return addColumn(name, "DOUBLE");
     }
-    public Table addDouble(String name, double def) {
+    public MariaDBTable addDouble(String name, double def) {
         return addColumn(name, "DOUBLE DEFAULT " + def);
     }
 
-    public Table addBoolean(String name) {
+    public MariaDBTable addBoolean(String name) {
         return addColumn(name, "BOOLEAN");
     }
-    public Table addBoolean(String name, boolean def) {
+    public MariaDBTable addBoolean(String name, boolean def) {
         return addColumn(name, "BOOLEAN DEFAULT " + def);
     }
 
-    public Table addVarchar(String name, int length) {
+    public MariaDBTable addVarchar(String name, int length) {
         return addColumn(name, "VARCHAR(" + length + ")");
     }
 
-    public Table addDate(String name) {
+    public MariaDBTable addDate(String name) {
         return addColumn(name, "DATE");
     }
 
-    public Table addText(String name) {
+    public MariaDBTable addText(String name) {
         return addColumn(name, "TEXT");
     }
-    public Table addText(String name, String def) {
+    public MariaDBTable addText(String name, String def) {
         return addColumn(name, "TEXT DEFAULT " + def);
     }
 
-    public Table addFloat(String name) {
+    public MariaDBTable addFloat(String name) {
         return addColumn(name, "FLOAT");
     }
-    public Table addFloat(String name, float def) {
+    public MariaDBTable addFloat(String name, float def) {
         return addColumn(name, "FLOAT DEFAULT " + def);
     }
 
-    public Table addIndex(String indexName, String column) {
+    public MariaDBTable addIndex(String indexName, String column) {
         indexes.put(indexName, "INDEX " + indexName + " (`" + column + "`)");
         return this;
     }
