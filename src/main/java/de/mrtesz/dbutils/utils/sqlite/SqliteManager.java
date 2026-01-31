@@ -18,12 +18,12 @@ public class SqliteManager extends AbstractSqliteManager {
 
     public SqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path,
                          @NotNull String name, HikariDataSource dataSource, String projectName) {
-        super(infoWhenCredentialsAreNull, name, path, dataSource, projectName);
+        super(infoWhenCredentialsAreNull, path, name, dataSource, projectName);
         this.projectName = projectName;
     }
     public SqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path,
                          @NotNull String name, String projectName) {
-        super(infoWhenCredentialsAreNull, name, path, projectName);
+        super(infoWhenCredentialsAreNull, path, name, projectName);
         this.projectName = projectName;
     }
 

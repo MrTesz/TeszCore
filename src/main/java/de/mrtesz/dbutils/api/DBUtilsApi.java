@@ -5,6 +5,7 @@ import de.mrtesz.dbutils.utils.exceptions.DatabaseException;
 import de.mrtesz.dbutils.utils.logger.DBLogger;
 import de.mrtesz.dbutils.utils.logger.DebugLevel;
 import de.mrtesz.dbutils.utils.mariadb.MariaDBManager;
+import de.mrtesz.dbutils.utils.sqlite.SqliteManager;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,18 +54,30 @@ public class DBUtilsApi {
     }
 
     /**
-     * Creates a functional MariaDBManager for your Project
+     * Creates a MariaDBManager for your Project
      * @param projectName The name of the Project using the method
      * @param infoWhenCredentialsAreNull Should it be logged, when url, user or password is null?
-     * @param name Name of Database wich is used (Only important for /sqldebug), when null "Main"
+     * @param name Name of Database wich is used, when null "Main"
      * @param url Url for the Database
      * @param user User for the Database
      * @param password Password for the Database
      * @return A functional MariaDBManager
-     * @throws DatabaseException when the Project was not initialized before with initializeProject()
      */
     public MariaDBManager createMariaDBManager(@NotNull String projectName, boolean infoWhenCredentialsAreNull, @Nullable String name,
                                                @Nullable String url, @Nullable String user, @Nullable String password) throws DatabaseException {
         return new MariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, null, projectName);
+    }
+
+    /**
+     * Creates a SqliteManager for your Project
+     * @param projectName The name of the Project using the method
+     * @param infoWhenCredentialsAreNull Should it be logged, when url, user or password is null?
+     * @param path Path to the .db file
+     * @param name Name of Database and name of the .db file
+     * @return A functional MariaDBManager
+     */
+    public SqliteManager createSqliteManager(@NotNull String projectName, boolean infoWhenCredentialsAreNull, @Nullable String path,
+                                              @NotNull String name) throws DatabaseException {
+        return new SqliteManager(infoWhenCredentialsAreNull, path, name, null, projectName);
     }
 }

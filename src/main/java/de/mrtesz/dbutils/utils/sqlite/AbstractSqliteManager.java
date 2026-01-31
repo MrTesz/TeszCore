@@ -23,13 +23,13 @@ public abstract class AbstractSqliteManager {
     private final String url;
     private final String projectName;
 
-    protected AbstractSqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path, String name, String projectName) {
+    protected AbstractSqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path, @NotNull String name, String projectName) {
         this.infoWhenCredentialsAreNull = infoWhenCredentialsAreNull;
-        this.name = name == null ? "Main" : name;
+        this.name = name;
         this.url = "jdbc:sqlite:" + (path != null ? path + "/" : "") + name + ".db";
         this.projectName = projectName;
     }
-    protected AbstractSqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path, String name, HikariDataSource dataSource, String projectName) {
+    protected AbstractSqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path, @NotNull String name, HikariDataSource dataSource, String projectName) {
         this(infoWhenCredentialsAreNull, path, name, projectName);
         this.dataSource = dataSource;
     }
