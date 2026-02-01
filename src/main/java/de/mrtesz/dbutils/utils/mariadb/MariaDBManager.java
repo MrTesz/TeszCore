@@ -1,17 +1,15 @@
 package de.mrtesz.dbutils.utils.mariadb;
 
 import com.zaxxer.hikari.HikariDataSource;
-import de.mrtesz.dbutils.api.DBUtilsApi;
-import de.mrtesz.dbutils.utils.utilClasses.SelectionResults;
+import de.mrtesz.dbutils.api.DBUtils;
 import de.mrtesz.dbutils.utils.logger.DebugLevel;
+import de.mrtesz.dbutils.utils.utilClasses.SelectionResults;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Date;
 import java.sql.*;
 import java.util.*;
-
-import static de.mrtesz.dbutils.api.DBUtilsApi.logging;
 
 @SuppressWarnings("unused")
 public class MariaDBManager extends AbstractMariaDBManager {
@@ -41,16 +39,16 @@ public class MariaDBManager extends AbstractMariaDBManager {
         try (Connection conn = getConnection(); Statement statement = conn.createStatement()) {
             String createCmd = mariaDBTable.getCreateCommand();
             statement.executeUpdate(createCmd);
-            DBUtilsApi.logging(DebugLevel.LEVEL8, projectName).debug("Created table " + name + " if not exists in " + (System.currentTimeMillis() - start) + " ms");
+            DBUtils.logging(DebugLevel.LEVEL8, projectName).debug("Created table " + name + " if not exists in " + (System.currentTimeMillis() - start) + " ms");
 
             for (Map.Entry<String, String> entry : mariaDBTable.getAlterColumnsCommands().entrySet()) {
                 if (!columnExists(name, entry.getKey())) {
                     try {
                         statement.executeUpdate(entry.getValue());
-                        DBUtilsApi.logging(DebugLevel.LEVEL8, projectName).debug("Altered Table " + name + "'s column in " + (System.currentTimeMillis() - start) + " ms");
+                        DBUtils.logging(DebugLevel.LEVEL8, projectName).debug("Altered Table " + name + "'s column in " + (System.currentTimeMillis() - start) + " ms");
                     } catch (SQLException e) {
-                        DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while altering table '" + name + "' with '" + entry.getValue() + "': " + e.getMessage());
-                        DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+                        DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while altering table '" + name + "' with '" + entry.getValue() + "': " + e.getMessage());
+                        DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
                     }
                 }
             }
@@ -58,17 +56,17 @@ public class MariaDBManager extends AbstractMariaDBManager {
                 if (!indexExists(name, entry.getKey())) {
                     try {
                         statement.executeUpdate(entry.getValue());
-                        DBUtilsApi.logging(DebugLevel.LEVEL8, projectName).debug("Altered Table " + name + "'s index in " + (System.currentTimeMillis() - start) + " ms");
+                        DBUtils.logging(DebugLevel.LEVEL8, projectName).debug("Altered Table " + name + "'s index in " + (System.currentTimeMillis() - start) + " ms");
                     } catch (SQLException e) {
 
-                        DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while altering table '" + name + "' with '" + entry.getValue() + "': " + e.getMessage());
-                        DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+                        DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while altering table '" + name + "' with '" + entry.getValue() + "': " + e.getMessage());
+                        DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
                     }
                 }
             }
         } catch (SQLException e) {
-            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while create/alter table '" + name + "' with '" + mariaDBTable.getCreateCommand() + "': " + e.getMessage());
-            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while create/alter table '" + name + "' with '" + mariaDBTable.getCreateCommand() + "': " + e.getMessage());
+            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
         }
     }
 
@@ -99,13 +97,13 @@ public class MariaDBManager extends AbstractMariaDBManager {
                 }
             }
             int result = ps.executeUpdate();
-            DBUtilsApi.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, values, true) + " in "
+            DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, values, true) + " in "
                     + (System.currentTimeMillis() - start) + " ms Result: " + result);
             return result;
         } catch (SQLException e) {
-            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, values, false) + "' in '" + tableName +
+            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, values, false) + "' in '" + tableName +
                     "' Error: " + e.getMessage());
-            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
         }
 
         return 0;
@@ -124,14 +122,14 @@ public class MariaDBManager extends AbstractMariaDBManager {
         checkConnection();
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             int result = ps.executeUpdate();
-            DBUtilsApi.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, List.of(), true) + " in "
+            DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, List.of(), true) + " in "
                     + (System.currentTimeMillis() - start) + " ms Result: " + result);
             
             return result;
         } catch (SQLException e) {
-            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, List.of(), false) + "' in '" + tableName +
+            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, List.of(), false) + "' in '" + tableName +
                     "' Error: " + e.getMessage());
-            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
         }
 
         return 0;
@@ -178,26 +176,26 @@ public class MariaDBManager extends AbstractMariaDBManager {
                     returnValue.add(thisRow);
                 }
                 // kein rs.close wegen try
-                DBUtilsApi.logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
+                DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
                         "' Using: '" + buildSqlWithParams(sql, questionMarks, true) + "' in " + (System.currentTimeMillis() - start) + " ms");
                 if (!returnValue.isEmpty()) {
-                    DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Results:");
+                    DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results:");
                     for (Map<String, Object> map : returnValue) {
                         for (Map.Entry<String, Object> entry : map.entrySet()) {
-                            DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).
+                            DBUtils.logging(DebugLevel.LEVEL11, projectName).
                                     debug("Column: " + entry.getKey()
                                             + " Value-Type: " + (entry.getValue() != null ? entry.getValue().getClass().getName() : "null (Any errors?)")
                                             + " Value: " + (entry.getValue() != null ? entry.getValue() : "null (Any errors?)"));
                         }
                     }
                 } else
-                    DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Results: [empty]");
+                    DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results: [empty]");
             }
 
         } catch (SQLException e) {
-            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
+            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
                     "' Command: '" + buildSqlWithParams(sql, questionMarks, false) + "' Error: " + e.getMessage());
-            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
         }
 
         return new SelectionResults(returnValue);
@@ -229,26 +227,26 @@ public class MariaDBManager extends AbstractMariaDBManager {
                     returnValue.add(thisRow);
                 }
                 // kein rs.close wegen try
-                DBUtilsApi.logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
+                DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
                         "' Using: '" + buildSqlWithParams(sql, List.of(), true) + "' in " + (System.currentTimeMillis() - start) + " ms");
                 if (!returnValue.isEmpty()) {
-                    DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Results:");
+                    DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results:");
                     for (Map<String, Object> map : returnValue) {
                         for (Map.Entry<String, Object> entry : map.entrySet()) {
-                            DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).
+                            DBUtils.logging(DebugLevel.LEVEL11, projectName).
                                     debug("Column: " + entry.getKey()
                                             + " Value-Type: " + (entry.getValue() != null ? entry.getValue().getClass().getName() : "null (Any errors?)")
                                             + " Value: " + (entry.getValue() != null ? entry.getValue() : "null (Any errors?)"));
                         }
                     }
                 } else
-                    DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Results: [empty]");
+                    DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results: [empty]");
             }
 
         } catch (SQLException e) {
-            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
+            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
                     "' Command: '" + buildSqlWithParams(sql, List.of(), false) + "' Error: " + e.getMessage());
-            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
         }
 
         return new SelectionResults(returnValue);
@@ -359,13 +357,13 @@ public class MariaDBManager extends AbstractMariaDBManager {
                 returnValue = set.next();
             }
 
-            DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Column '" + columnName + "' exists in '" + tableName + "'? -> " + returnValue + " - "
+            DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Column '" + columnName + "' exists in '" + tableName + "'? -> " + returnValue + " - "
                     + (System.currentTimeMillis() - start) + " ms");
 
             return returnValue;
         } catch (SQLException e) {
-            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while check if column '" + columnName + "' exists in '" + tableName + "' Error: " + e.getMessage());
-            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while check if column '" + columnName + "' exists in '" + tableName + "' Error: " + e.getMessage());
+            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
         }
         return false;
     }
@@ -382,12 +380,12 @@ public class MariaDBManager extends AbstractMariaDBManager {
                 returnValue = set.next();
             }
 
-            DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Index '" + indexName + "' exists in '" + tableName + "'? -> " + returnValue + " - " +
+            DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Index '" + indexName + "' exists in '" + tableName + "'? -> " + returnValue + " - " +
                     (System.currentTimeMillis() - start) + " ms");
             return returnValue;
         } catch (SQLException e) {
-            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while check if index " + indexName + " exists in " + tableName + " Error: " + e.getMessage());
-            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while check if index " + indexName + " exists in " + tableName + " Error: " + e.getMessage());
+            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
         }
         return false;
     }

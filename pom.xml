@@ -62,7 +62,7 @@
         <dependency>
             <groupId>de.mrtesz.ansi</groupId>
             <artifactId>Ansi</artifactId>
-            <version>1.0</version>
+            <version>1.1</version>
         </dependency>
 
         <!-- Yaml -->
@@ -83,15 +83,8 @@
         <!-- Logger -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.21.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>2.25.3</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- HikariCP -->

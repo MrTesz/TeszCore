@@ -1,6 +1,5 @@
 package de.mrtesz.dbutils.utils;
 
-import de.mrtesz.ansi.Console;
 import de.mrtesz.dbutils.utils.logger.AnsiConsoleAppender;
 import de.mrtesz.dbutils.utils.logger.DBLogger;
 import de.mrtesz.dbutils.utils.logger.DebugLevel;
@@ -10,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.appender.ConsoleAppender;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.apache.logging.log4j.core.appender.rolling.CompositeTriggeringPolicy;
 import org.apache.logging.log4j.core.appender.rolling.DefaultRolloverStrategy;

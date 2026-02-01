@@ -11,21 +11,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
-public class DBUtilsApi {
+public class DBUtils {
 
     @Getter
-    private static DBUtilsApi instance;
+    private static DBUtils instance;
 
     private final Init init;
 
-    public DBUtilsApi() {
+    public DBUtils() {
         this.init = new Init();
 
         instance = this;
     }
     
     public static void initialize() {
-        new DBUtilsApi();
+        new DBUtils();
     }
 
     /** Logs an exception */

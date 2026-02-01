@@ -2,7 +2,7 @@ package de.mrtesz.dbutils.utils.sqlite;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import de.mrtesz.dbutils.api.DBUtilsApi;
+import de.mrtesz.dbutils.api.DBUtils;
 import de.mrtesz.dbutils.utils.logger.DebugLevel;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -83,11 +83,11 @@ public abstract class AbstractSqliteManager {
 
         if (url == null || url.isBlank()) {
             if(infoWhenCredentialsAreNull) {
-                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).warning(
+                DBUtils.logging(DebugLevel.LEVEL1, projectName).warning(
                         "url was null while connecting Sqlite for Project: " + projectName +
                                 " url=null: " + (url == null)
                 );
-                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(new NullPointerException(
+                DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(new NullPointerException(
                         "url was null while connecting Sqlite for Project: " + projectName +
                                 " url=null: " + (url == null)
                 ));
@@ -99,16 +99,16 @@ public abstract class AbstractSqliteManager {
         HikariConfig config = createHikariConfig();
         dataSource = new HikariDataSource(config);
 
-        DBUtilsApi.logging(DebugLevel.LEVEL3, projectName).info("Connected to '" + config.getJdbcUrl() + "' in " + (System.currentTimeMillis() - start) + " ms");
+        DBUtils.logging(DebugLevel.LEVEL3, projectName).info("Connected to '" + config.getJdbcUrl() + "' in " + (System.currentTimeMillis() - start) + " ms");
     }
     public void disconnect() {
         long start = System.currentTimeMillis();
         if(dataSource != null && !dataSource.isClosed()) {
             dataSource.close();
             dataSource = null;
-            DBUtilsApi.logging(DebugLevel.LEVEL3, projectName).info("Disconnected from '" + url + "' in " + (System.currentTimeMillis() - start) + " ms");
+            DBUtils.logging(DebugLevel.LEVEL3, projectName).info("Disconnected from '" + url + "' in " + (System.currentTimeMillis() - start) + " ms");
         } else
-            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).info("Couldn't disconnect from '" + url + "': Not connected");
+            DBUtils.logging(DebugLevel.LEVEL1, projectName).info("Couldn't disconnect from '" + url + "': Not connected");
     }
     public void checkConnection() {
         if (isClosed())
@@ -117,7 +117,7 @@ public abstract class AbstractSqliteManager {
         if (getDataSource() == null || getDataSource().isClosed()) {
             connect();
             if (getDataSource() == null || getDataSource().isClosed())
-                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error after trying to connect to database: Cant connect!");
+                DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error after trying to connect to database: Cant connect!");
         }
     }
 
@@ -130,8 +130,8 @@ public abstract class AbstractSqliteManager {
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {
-            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while getConnection: " + e.getMessage());
-            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while getConnection: " + e.getMessage());
+            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
             return null;
         }
     }

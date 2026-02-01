@@ -1,7 +1,7 @@
 package de.mrtesz.dbutils.utils.sqlite;
 
 import com.zaxxer.hikari.HikariDataSource;
-import de.mrtesz.dbutils.api.DBUtilsApi;
+import de.mrtesz.dbutils.api.DBUtils;
 import de.mrtesz.dbutils.utils.logger.DebugLevel;
 import de.mrtesz.dbutils.utils.utilClasses.SelectionResults;
 import org.jetbrains.annotations.NotNull;
@@ -52,10 +52,10 @@ public class AsyncSqliteManager extends AbstractSqliteManager {
             try (Connection conn = getConnection(); Statement statement = conn.createStatement()) {
                 String createCmd = sqliteTable.getCreateCommand();
                 statement.executeUpdate(createCmd);
-                DBUtilsApi.logging(DebugLevel.LEVEL8, projectName).debug("Created table " + tableName + " if not exists in " + (System.currentTimeMillis() - start) + " ms");
+                DBUtils.logging(DebugLevel.LEVEL8, projectName).debug("Created table " + tableName + " if not exists in " + (System.currentTimeMillis() - start) + " ms");
 
                 Set<String> existingColumns = new HashSet<>();
-                try (ResultSet rs = statement.executeQuery("PRAGMA table_info(´" + tableName + "´)")) {
+                try (ResultSet rs = statement.executeQuery("PRAGMA table_info(`" + tableName + "`)")) {
                     while (rs.next()) {
                         existingColumns.add(rs.getString("name"));
                     }
@@ -67,12 +67,12 @@ public class AsyncSqliteManager extends AbstractSqliteManager {
                     if (!existingColumns.contains(column)) {
                         try {
                             statement.executeUpdate(sql);
-                            DBUtilsApi.logging(DebugLevel.LEVEL8, projectName)
+                            DBUtils.logging(DebugLevel.LEVEL8, projectName)
                                     .debug("Added column '" + column + "' to table '" + tableName + "' in " + (System.currentTimeMillis() - start) + " ms");
                         } catch (SQLException e) {
-                            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName)
+                            DBUtils.logging(DebugLevel.LEVEL1, projectName)
                                     .error("Error while adding column '" + column + "' in table '" + tableName + "': " + e.getMessage());
-                            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+                            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
                         }
                     }
                 }
@@ -90,18 +90,18 @@ public class AsyncSqliteManager extends AbstractSqliteManager {
                     if (!existingIndexes.contains(indexName)) {
                         try {
                             statement.executeUpdate(sql);
-                            DBUtilsApi.logging(DebugLevel.LEVEL8, projectName)
+                            DBUtils.logging(DebugLevel.LEVEL8, projectName)
                                     .debug("Created index '" + indexName + "' on table '" + tableName + "' in " + (System.currentTimeMillis() - start) + " ms");
                         } catch (SQLException e) {
-                            DBUtilsApi.logging(DebugLevel.LEVEL1, projectName)
+                            DBUtils.logging(DebugLevel.LEVEL1, projectName)
                                     .error("Error while creating index '" + indexName + "' on table '" + tableName + "': " + e.getMessage());
-                            DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+                            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
                         }
                     }
                 }
             } catch (SQLException e) {
-                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while create/alter table '" + tableName + "' with '" + sqliteTable.getCreateCommand() + "': " + e.getMessage());
-                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+                DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while create/alter table '" + tableName + "' with '" + sqliteTable.getCreateCommand() + "': " + e.getMessage());
+                DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
             }
         });
     }
@@ -134,13 +134,13 @@ public class AsyncSqliteManager extends AbstractSqliteManager {
                     }
                 }
                 int result = ps.executeUpdate();
-                DBUtilsApi.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, values, true) + " in "
+                DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, values, true) + " in "
                         + (System.currentTimeMillis() - start) + " ms Result: " + result);
                 return result;
             } catch (SQLException e) {
-                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, values, false) + "' in '" + tableName +
+                DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, values, false) + "' in '" + tableName +
                         "' Error: " + e.getMessage());
-                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+                DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
             }
 
             return 0;
@@ -161,14 +161,14 @@ public class AsyncSqliteManager extends AbstractSqliteManager {
             checkConnection();
             try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
                 int result = ps.executeUpdate();
-                DBUtilsApi.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, List.of(), true) + " in "
+                DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, List.of(), true) + " in "
                         + (System.currentTimeMillis() - start) + " ms Result: " + result);
 
                 return result;
             } catch (SQLException e) {
-                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, List.of(), false) + "' in '" + tableName +
+                DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, List.of(), false) + "' in '" + tableName +
                         "' Error: " + e.getMessage());
-                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+                DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
             }
 
             return 0;
@@ -217,26 +217,26 @@ public class AsyncSqliteManager extends AbstractSqliteManager {
                         returnValue.add(thisRow);
                     }
                     // kein rs.close wegen try
-                    DBUtilsApi.logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
+                    DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
                             "' Using: '" + buildSqlWithParams(sql, questionMarks, true) + "' in " + (System.currentTimeMillis() - start) + " ms");
                     if (!returnValue.isEmpty()) {
-                        DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Results:");
+                        DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results:");
                         for (Map<String, Object> map : returnValue) {
                             for (Map.Entry<String, Object> entry : map.entrySet()) {
-                                DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).
+                                DBUtils.logging(DebugLevel.LEVEL11, projectName).
                                         debug("Column: " + entry.getKey()
                                                 + " Value-Type: " + (entry.getValue() != null ? entry.getValue().getClass().getName() : "null (Any errors?)")
                                                 + " Value: " + (entry.getValue() != null ? entry.getValue() : "null (Any errors?)"));
                             }
                         }
                     } else
-                        DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Results: [empty]");
+                        DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results: [empty]");
                 }
 
             } catch (SQLException e) {
-                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
+                DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
                         "' Command: '" + buildSqlWithParams(sql, questionMarks, false) + "' Error: " + e.getMessage());
-                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+                DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
             }
 
             return new SelectionResults(returnValue);
@@ -270,26 +270,26 @@ public class AsyncSqliteManager extends AbstractSqliteManager {
                         returnValue.add(thisRow);
                     }
                     // kein rs.close wegen try
-                    DBUtilsApi.logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
+                    DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
                             "' Using: '" + buildSqlWithParams(sql, List.of(), true) + "' in " + (System.currentTimeMillis() - start) + " ms");
                     if (!returnValue.isEmpty()) {
-                        DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Results:");
+                        DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results:");
                         for (Map<String, Object> map : returnValue) {
                             for (Map.Entry<String, Object> entry : map.entrySet()) {
-                                DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).
+                                DBUtils.logging(DebugLevel.LEVEL11, projectName).
                                         debug("Column: " + entry.getKey()
                                                 + " Value-Type: " + (entry.getValue() != null ? entry.getValue().getClass().getName() : "null (Any errors?)")
                                                 + " Value: " + (entry.getValue() != null ? entry.getValue() : "null (Any errors?)"));
                             }
                         }
                     } else
-                        DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Results: [empty]");
+                        DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results: [empty]");
                 }
 
             } catch (SQLException e) {
-                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
+                DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
                         "' Command: '" + buildSqlWithParams(sql, List.of(), false) + "' Error: " + e.getMessage());
-                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+                DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
             }
 
             return new SelectionResults(returnValue);
@@ -395,7 +395,7 @@ public class AsyncSqliteManager extends AbstractSqliteManager {
 
             checkConnection();
             try (Connection conn = getConnection();
-                 PreparedStatement statement = conn.prepareStatement("PRAGMA table_info(´" + tableName + "´)");
+                 PreparedStatement statement = conn.prepareStatement("PRAGMA table_info(`" + tableName + "`)");
                  ResultSet rs = statement.executeQuery()) {
 
                 boolean returnValue = false;
@@ -406,13 +406,13 @@ public class AsyncSqliteManager extends AbstractSqliteManager {
                     }
                 }
 
-                DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Column '" + columnName + "' exists in '" + tableName + "'? -> " + returnValue + " - "
+                DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Column '" + columnName + "' exists in '" + tableName + "'? -> " + returnValue + " - "
                         + (System.currentTimeMillis() - start) + " ms");
 
                 return returnValue;
             } catch (SQLException e) {
-                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while check if column '" + columnName + "' exists in '" + tableName + "' Error: " + e.getMessage());
-                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+                DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while check if column '" + columnName + "' exists in '" + tableName + "' Error: " + e.getMessage());
+                DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
             }
             return false;
         });
@@ -424,7 +424,7 @@ public class AsyncSqliteManager extends AbstractSqliteManager {
 
             checkConnection();
             try (Connection conn = getConnection();
-                 PreparedStatement statement = conn.prepareStatement("PRAGMA index_list(´" + tableName + "´)");
+                 PreparedStatement statement = conn.prepareStatement("PRAGMA index_list(`" + tableName + "`)");
                  ResultSet rs = statement.executeQuery()) {
 
                 boolean returnValue = false;
@@ -435,12 +435,12 @@ public class AsyncSqliteManager extends AbstractSqliteManager {
                     }
                 }
 
-                DBUtilsApi.logging(DebugLevel.LEVEL11, projectName).debug("Index '" + indexName + "' exists in '" + tableName + "'? -> " + returnValue + " - " +
+                DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Index '" + indexName + "' exists in '" + tableName + "'? -> " + returnValue + " - " +
                         (System.currentTimeMillis() - start) + " ms");
                 return returnValue;
             } catch (SQLException e) {
-                DBUtilsApi.logging(DebugLevel.LEVEL1, projectName).error("Error while check if index " + indexName + " exists in " + tableName + " Error: " + e.getMessage());
-                DBUtilsApi.logging(DebugLevel.LEVEL0, projectName).logException(e);
+                DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while check if index " + indexName + " exists in " + tableName + " Error: " + e.getMessage());
+                DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
             }
             return false;
         });
