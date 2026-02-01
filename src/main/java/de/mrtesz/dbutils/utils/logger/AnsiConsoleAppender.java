@@ -1,6 +1,6 @@
 package de.mrtesz.dbutils.utils.logger;
 
-import de.mrtesz.ansi.Console;
+import de.mrtesz.ansi.AnsiParser;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -20,7 +20,7 @@ public class AnsiConsoleAppender extends AbstractAppender {
         try {
             String msg = event.getMessage().getFormattedMessage();
 
-            msg = Console.replaceParagraphs(msg);
+            msg = AnsiParser.replaceParagraphAnsi(msg);
 
             System.out.println(msg);
         } catch (Exception ex) {

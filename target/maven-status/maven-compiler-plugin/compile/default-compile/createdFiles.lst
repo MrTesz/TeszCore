@@ -2,14 +2,15 @@ de/mrtesz/dbutils/utils/logger/DBLogger.class
 de/mrtesz/dbutils/utils/logger/DBLogger$1.class
 de/mrtesz/dbutils/utils/mariadb/MariaDBManager.class
 de/mrtesz/dbutils/utils/exceptions/DatabaseException.class
+de/mrtesz/dbutils/utils/abstracts/AbstractDBManager.class
 de/mrtesz/dbutils/utils/sqlite/AbstractSqliteManager.class
 de/mrtesz/dbutils/utils/utilClasses/SelectionResults.class
 de/mrtesz/dbutils/utils/Init.class
 de/mrtesz/dbutils/utils/mariadb/AbstractMariaDBManager.class
 de/mrtesz/dbutils/utils/logger/DebugLevel.class
-de/mrtesz/dbutils/api/DBUtilsApi.class
 de/mrtesz/dbutils/utils/mariadb/AsyncMariaDBManager.class
 de/mrtesz/dbutils/utils/utilClasses/SelectionResult.class
+de/mrtesz/dbutils/api/DBUtils.class
 de/mrtesz/dbutils/utils/sqlite/SqliteTable.class
 de/mrtesz/dbutils/utils/sqlite/SqliteManager.class
 de/mrtesz/dbutils/Main.class

@@ -3,6 +3,7 @@ package de.mrtesz.dbutils.utils.sqlite;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import de.mrtesz.dbutils.api.DBUtils;
+import de.mrtesz.dbutils.utils.abstracts.AbstractDBManager;
 import de.mrtesz.dbutils.utils.logger.DebugLevel;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -14,9 +15,8 @@ import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings("unused")
-public abstract class AbstractSqliteManager {
+public abstract class AbstractSqliteManager extends AbstractDBManager {
 
-    @Getter private boolean closed = false;
     @Getter private HikariDataSource dataSource;
     private final boolean infoWhenCredentialsAreNull;
     @Getter private final String name;
@@ -78,7 +78,7 @@ public abstract class AbstractSqliteManager {
         return config;
     }
     public void connect() {
-        if(closed)
+        if(isClosed())
             throw new IllegalStateException(projectName + " executed after disable! Manager already closed");
 
         if (url == null || url.isBlank()) {
@@ -119,10 +119,6 @@ public abstract class AbstractSqliteManager {
             if (getDataSource() == null || getDataSource().isClosed())
                 DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error after trying to connect to database: Cant connect!");
         }
-    }
-
-    public void close() {
-        this.closed = true;
     }
 
     public Connection getConnection() {

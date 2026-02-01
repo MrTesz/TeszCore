@@ -1,6 +1,7 @@
 /home/joprivat/Schreibtisch/Coding/workspace/Dbutils/src/main/java/de/mrtesz/dbutils/Main.java
-/home/joprivat/Schreibtisch/Coding/workspace/Dbutils/src/main/java/de/mrtesz/dbutils/api/DBUtilsApi.java
+/home/joprivat/Schreibtisch/Coding/workspace/Dbutils/src/main/java/de/mrtesz/dbutils/api/DBUtils.java
 /home/joprivat/Schreibtisch/Coding/workspace/Dbutils/src/main/java/de/mrtesz/dbutils/utils/Init.java
+/home/joprivat/Schreibtisch/Coding/workspace/Dbutils/src/main/java/de/mrtesz/dbutils/utils/abstracts/AbstractDBManager.java
 /home/joprivat/Schreibtisch/Coding/workspace/Dbutils/src/main/java/de/mrtesz/dbutils/utils/config/YamlConfig.java
 /home/joprivat/Schreibtisch/Coding/workspace/Dbutils/src/main/java/de/mrtesz/dbutils/utils/exceptions/DatabaseException.java
 /home/joprivat/Schreibtisch/Coding/workspace/Dbutils/src/main/java/de/mrtesz/dbutils/utils/logger/AnsiConsoleAppender.java

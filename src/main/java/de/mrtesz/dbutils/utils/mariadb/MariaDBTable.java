@@ -68,11 +68,22 @@ public class MariaDBTable {
         return addColumn(name, "BIGINT DEFAULT " + def);
     }
 
+    public MariaDBTable addDate(String name) {
+        return addColumn(name, "DATE");
+    }
+
     public MariaDBTable addDouble(String name) {
         return addColumn(name, "DOUBLE");
     }
     public MariaDBTable addDouble(String name, double def) {
         return addColumn(name, "DOUBLE DEFAULT " + def);
+    }
+
+    public MariaDBTable addFloat(String name) {
+        return addColumn(name, "FLOAT");
+    }
+    public MariaDBTable addFloat(String name, float def) {
+        return addColumn(name, "FLOAT DEFAULT " + def);
     }
 
     public MariaDBTable addBoolean(String name) {
@@ -86,10 +97,6 @@ public class MariaDBTable {
         return addColumn(name, "VARCHAR(" + length + ")");
     }
 
-    public MariaDBTable addDate(String name) {
-        return addColumn(name, "DATE");
-    }
-
     public MariaDBTable addText(String name) {
         return addColumn(name, "TEXT");
     }
@@ -97,11 +104,18 @@ public class MariaDBTable {
         return addColumn(name, "TEXT DEFAULT " + def);
     }
 
-    public MariaDBTable addFloat(String name) {
-        return addColumn(name, "FLOAT");
+    public MariaDBTable addMediumText(String name) {
+        return addColumn(name, "MEDIUMTEXT");
     }
-    public MariaDBTable addFloat(String name, float def) {
-        return addColumn(name, "FLOAT DEFAULT " + def);
+    public MariaDBTable addMediumText(String name, String def) {
+        return addColumn(name, "MEDIUMTEXT DEFAULT " + def);
+    }
+
+    public MariaDBTable addLongText(String name) {
+        return addColumn(name, "LONGTEXT");
+    }
+    public MariaDBTable addLongText(String name, String def) {
+        return addColumn(name, "LONGTEXT DEFAULT " + def);
     }
 
     public MariaDBTable addIndex(String indexName, String column) {
@@ -109,7 +123,7 @@ public class MariaDBTable {
         return this;
     }
 
-    protected String getCreateCommand() {
+    public String getCreateCommand() {
         StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS `").append(name).append("` (");
         boolean first = true;
         for (Map.Entry<String, String> entry : columns.entrySet()) {
@@ -135,7 +149,7 @@ public class MariaDBTable {
         return sb.toString();
     }
 
-    protected Map<String, String> getAlterColumnsCommands() {
+    public Map<String, String> getAlterColumnsCommands() {
         Map<String, String> commands = new HashMap<>();
         for (Map.Entry<String, String> entry : columns.entrySet()) {
             commands.put(entry.getKey(), "ALTER TABLE `" + name + "` ADD COLUMN `" +

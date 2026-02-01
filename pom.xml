@@ -50,19 +50,12 @@
         </resources>
     </build>
 
-    <repositories>
-        <repository>
-            <id>papermc-repo</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <!-- Ansi -->
         <dependency>
             <groupId>de.mrtesz.ansi</groupId>
-            <artifactId>Ansi</artifactId>
-            <version>1.1</version>
+            <artifactId>ansi-impl</artifactId>
+            <version>1.0</version>
         </dependency>
 
         <!-- Yaml -->
