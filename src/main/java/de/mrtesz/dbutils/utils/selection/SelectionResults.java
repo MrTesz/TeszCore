@@ -1,4 +1,4 @@
-package de.mrtesz.dbutils.utils.utilClasses;
+package de.mrtesz.dbutils.utils.selection;
 
 import de.mrtesz.dbutils.utils.exceptions.DatabaseException;
 

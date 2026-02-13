@@ -1,8 +1,8 @@
-package de.mrtesz.dbutils.utils;
+package de.mrtesz.dbutils.utils.init;
 
 import de.mrtesz.dbutils.utils.logger.AnsiConsoleAppender;
-import de.mrtesz.dbutils.utils.logger.DBLogger;
-import de.mrtesz.dbutils.utils.logger.DebugLevel;
+import de.mrtesz.dbutils.utils.logger.api.DBLogger;
+import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
 import lombok.Getter;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -18,13 +18,16 @@ import org.apache.logging.log4j.core.config.AppenderRef;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 public class Init {
 
     private final Logger logger;
+    private final @Nullable java.util.logging.Logger javaLogger;
 
-    public Init() {
+    public Init(@Nullable java.util.logging.Logger javaLogger) {
+        this.javaLogger = javaLogger;
         logger = setupLogger("DBLogger", "logs/", "DBUtils");
 
         setDefaultUncaughtExceptionHandler();
@@ -62,7 +65,7 @@ public class Init {
                 .withPattern("%msg%n")
                 .withConfiguration(config)
                 .build();
-        AbstractAppender consoleAppender = new AnsiConsoleAppender(name + "Console", consoleLayout, null);
+        AbstractAppender consoleAppender = new AnsiConsoleAppender(name + "Console", consoleLayout, null, javaLogger);
         consoleAppender.start();
         config.addAppender(consoleAppender);
 

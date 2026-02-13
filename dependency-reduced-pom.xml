@@ -4,7 +4,7 @@
   <groupId>de.mrtesz</groupId>
   <artifactId>dbutils</artifactId>
   <name>dbutils</name>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <build>
     <defaultGoal>clean package</defaultGoal>
     <resources>
@@ -20,6 +20,13 @@
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>1.18.36</version>
+            </path>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
       <plugin>

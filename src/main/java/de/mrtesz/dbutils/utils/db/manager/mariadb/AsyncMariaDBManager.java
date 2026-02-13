@@ -1,9 +1,11 @@
-package de.mrtesz.dbutils.utils.mariadb;
+package de.mrtesz.dbutils.utils.db.manager.mariadb;
 
 import com.zaxxer.hikari.HikariDataSource;
 import de.mrtesz.dbutils.api.DBUtils;
-import de.mrtesz.dbutils.utils.logger.DebugLevel;
-import de.mrtesz.dbutils.utils.utilClasses.SelectionResults;
+import de.mrtesz.dbutils.api.db.manager.AsyncDBManager;
+import de.mrtesz.dbutils.api.db.table.DBTable;
+import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
+import de.mrtesz.dbutils.utils.selection.SelectionResults;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,42 +15,27 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings("unused")
-public class AsyncMariaDBManager extends AbstractMariaDBManager {
+public class AsyncMariaDBManager extends AbstractMariaDBManager implements AsyncDBManager {
 
     private final String projectName;
-    private final int timeoutSeconds;
+    protected final int timeoutSeconds;
 
-    public AsyncMariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
-                               @Nullable String url, @Nullable String user, @Nullable String password, HikariDataSource dataSource, String projectName) {
-        super(infoWhenCredentialsAreNull, name, url, user, password, dataSource, projectName);
-        this.timeoutSeconds = 2;
-        this.projectName = projectName;
-    }
-    public AsyncMariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
-                               @Nullable String url, @Nullable String user, @Nullable String password, String projectName) {
-        super(infoWhenCredentialsAreNull, name, url, user, password, projectName);
-        this.timeoutSeconds = 2;
-        this.projectName = projectName;
-    }
-    public AsyncMariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
-                               @Nullable String url, @Nullable String user, @Nullable String password, HikariDataSource dataSource, String projectName, int timeoutSeconds) {
-        super(infoWhenCredentialsAreNull, name, url, user, password, dataSource, projectName);
-        this.timeoutSeconds = timeoutSeconds;
-        this.projectName = projectName;
-    }
-    public AsyncMariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
-                               @Nullable String url, @Nullable String user, @Nullable String password, String projectName, int timeoutSeconds) {
-        super(infoWhenCredentialsAreNull, name, url, user, password, projectName);
+    protected AsyncMariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name, @Nullable String url, @Nullable String user, @Nullable String password,
+                                  @Nullable HikariDataSource dataSource, @Nullable String projectName, int timeoutSeconds) {
+        super(infoWhenCredentialsAreNull, (name == null ? "Main" : name), url, user, password, dataSource, projectName);
         this.timeoutSeconds = timeoutSeconds;
         this.projectName = projectName;
     }
 
     /**
-     * Create a MariaDB Table using a Table object
-     * @param mariaDBTable The Table that has to be created or altered
+     * Create a MariaDB Table using a {@link MariaDBTable} object
+     * @param dbTable The Table that is created or altered
+     * @throws IllegalArgumentException when the {@code dbTable} param is not a {@link MariaDBTable}
      */
-    public CompletableFuture<Void> createOrAlter(@NotNull MariaDBTable mariaDBTable) {
+    @Override
+    public CompletableFuture<Void> createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException {
+        if (!(dbTable instanceof MariaDBTable mariaDBTable)) throw new IllegalArgumentException("DBTable object was not " + MariaDBTable.class.getName() + " but " + dbTable.getClass().getName() + ".");
+
         String name = mariaDBTable.getName();
         long start = System.currentTimeMillis();
 
@@ -103,23 +90,15 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
                 );
     }
 
-    /**
-     * Execute a SQL Query <br>
-     * e.g.: <code>executeSql("UPDATE playerInfos SET name = ? WHERE uuid = ?", List.of(player.getName(), player.getUniqueId()), "playerInfos", "update player name")</code>
-     * @param sql The query that should be executed
-     * @param values The values replacing the ?'s in the param sql
-     * @param tableName The Name of the Table that is worked with
-     * @param type The Type of the execution
-     * @return the return value of PreparedStatement.executeUpdate
-     */
-    public CompletableFuture<Integer> executeSql(String sql, @NotNull List<Object> values, String tableName, String type) {
+    @Override
+    public CompletableFuture<Integer> executeSql(@NotNull String sql, @NotNull List<Object> sqlParams, @NotNull String tableName, @Nullable String type) {
         long start = System.currentTimeMillis();
 
         checkConnection();
         return CompletableFuture.supplyAsync(() -> {
                     try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
                         int i = 1;
-                        for (Object o : values) {
+                        for (Object o : sqlParams) {
                             switch (o) {
                                 case null -> ps.setObject(i++, null);
                                 case String s -> ps.setString(i++, s);
@@ -131,48 +110,11 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
                             }
                         }
                         int result = ps.executeUpdate();
-                        DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, values, true) + " in "
+                        DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + (type == null ? "unspecified" : type) + " in " + tableName + " Using: " + buildSqlWithParams(sql, sqlParams, true) + " in "
                                 + (System.currentTimeMillis() - start) + " ms Result: " + result);
                         return result;
                     } catch (SQLException e) {
-                        DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, values, false) + "' in '" + tableName +
-                                "' Error: " + e.getMessage());
-                        DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
-                    }
-
-                    return 0;
-                })
-                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
-                .whenComplete(
-                        (result, ex) -> {
-                            if (result == null && ex == null)
-                                DBUtils.logging(DebugLevel.LEVEL0, projectName).warning("Async executeSql task of AsyncMariaDBManager " + getName() + " of Project " + projectName
-                                        + " timed out after " + timeoutSeconds + " seconds.");
-                            if (ex != null)
-                                DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(ex);
-                        }
-                );
-    }
-    /**
-     * Execute a SQL Query <br>
-     * e.g.: <code>executeSql("UPDATE playerInfos SET name = " + player.getName() + " WHERE uuid = " + player.getUniqueId(), "playerInfos", "update player name")</code>
-     * @param sql The query that should be executed
-     * @param tableName The Name of the Table that is worked with
-     * @param type The Type of the execution
-     * @return the return value of PreparedStatement.executeUpdate
-     */
-    public CompletableFuture<Integer> executeSql(String sql, String tableName, String type) {
-        long start = System.currentTimeMillis();
-
-        checkConnection();
-        return CompletableFuture.supplyAsync(() -> {
-                    try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-                        int result = ps.executeUpdate();
-                        DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, List.of(), true) + " in "
-                                + (System.currentTimeMillis() - start) + " ms Result: " + result);
-                        return result;
-                    } catch (SQLException e) {
-                        DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, List.of(), false) + "' in '" + tableName +
+                        DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + (type == null ? "unspecified" : type) + " '" + buildSqlWithParams(sql, sqlParams, false) + "' in '" + tableName +
                                 "' Error: " + e.getMessage());
                         DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
                     }
@@ -191,23 +133,21 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
                 );
     }
 
-    /**
-     * Execute a Selection Query
-     * e.g. <code>executeSelect("SELECT email, number FROM users WHERE username = ?", List.of("Mr_Tesz"), "users")</code>
-     * @param sql Sql Query
-     * @param questionMarks List of ?'s in the sql
-     * @param tableName Name of selected Table for logging
-     * @return SelectionResult wich represents a list of rows in Map<column, value>
-     */
-    public CompletableFuture<SelectionResults> executeSelect(String sql, @NotNull List<Object> questionMarks, String tableName) {
+    @Override
+    public CompletableFuture<Integer> executeSql(@NotNull String sql, @NotNull String tableName, @Nullable String type) {
+        return executeSql(sql, List.of(), tableName, type);
+    }
+
+    @Override
+    public CompletableFuture<SelectionResults> executeSelect(@NotNull String sql, @NotNull List<Object> sqlParams, @NotNull String tableName) {
         List<Map<String, Object>> returnValue = new ArrayList<>();
         long start = System.currentTimeMillis();
 
         checkConnection();
         return CompletableFuture.supplyAsync(() -> {
             try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement(sql)) {
-                for (int i = 0; i < questionMarks.size(); i++) {
-                    Object o = questionMarks.get(i);
+                for (int i = 0; i < sqlParams.size(); i++) {
+                    Object o = sqlParams.get(i);
 
                     switch (o) {
                         case null -> statement.setObject(i + 1, null);
@@ -234,7 +174,7 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
                     }
                     // kein rs.close wegen try
                     DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
-                            "' Using: '" + buildSqlWithParams(sql, questionMarks, true) + "' in " + (System.currentTimeMillis() - start) + " ms");
+                            "' Using: '" + buildSqlWithParams(sql, sqlParams, true) + "' in " + (System.currentTimeMillis() - start) + " ms");
                     if (!returnValue.isEmpty()) {
                         DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results:");
                         for (Map<String, Object> map : returnValue) {
@@ -251,65 +191,7 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
 
             } catch (SQLException e) {
                 DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
-                        "' Command: '" + buildSqlWithParams(sql, questionMarks, false) + "' Error: " + e.getMessage());
-                DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
-            }
-            return new SelectionResults(returnValue);
-        }).completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS).whenComplete(
-                (result, ex) -> {
-                    if (ex == null)
-                        DBUtils.logging(DebugLevel.LEVEL0, projectName).warning("Async executeSelect task of AsyncMariaDBManager " + getName() + " of Project " + projectName
-                                + " timed out after " + timeoutSeconds + " seconds.");
-                }
-        );
-    }
-    /**
-     * Execute a Selection Query
-     * e.g. <code>executeSelect("SELECT email, number FROM users WHERE username = Mr_Tesz", "users")</code>
-     * @param sql Sql Query
-     * @param tableName Name of selected Table for logging
-     * @return SelectionResult wich represents a list of rows in Map<column, value>
-     */
-    public CompletableFuture<SelectionResults> executeSelect(String sql, String tableName) {
-        List<Map<String, Object>> returnValue = new ArrayList<>();
-        long start = System.currentTimeMillis();
-
-        checkConnection();
-        return CompletableFuture.supplyAsync(() -> {
-            try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement(sql)) {
-                try (ResultSet rs = statement.executeQuery()) {
-                    ResultSetMetaData metaData = rs.getMetaData();
-                    int columnCount = metaData.getColumnCount();
-
-                    while (rs.next()) {
-                        Map<String, Object> thisRow = new HashMap<>();
-                        for (int i = 1; i <= columnCount; i++) {
-                            String columnName = metaData.getColumnLabel(i);
-                            Object value = rs.getObject(i);
-                            thisRow.put(columnName, value);
-                        }
-                        returnValue.add(thisRow);
-                    }
-                    // kein rs.close wegen try
-                    DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
-                            "' Using: '" + buildSqlWithParams(sql, List.of(), true) + "' in " + (System.currentTimeMillis() - start) + " ms");
-                    if (!returnValue.isEmpty()) {
-                        DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results:");
-                        for (Map<String, Object> map : returnValue) {
-                            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                                DBUtils.logging(DebugLevel.LEVEL11, projectName).
-                                        debug("Column: " + entry.getKey()
-                                                + " Value-Type: " + (entry.getValue() != null ? entry.getValue().getClass().getName() : "null (Any errors?)")
-                                                + " Value: " + (entry.getValue() != null ? entry.getValue() : "null (Any errors?)"));
-                            }
-                        }
-                    } else
-                        DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results: [empty]");
-                }
-
-            } catch (SQLException e) {
-                DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
-                        "' Command: '" + buildSqlWithParams(sql, List.of(), false) + "' Error: " + e.getMessage());
+                        "' Command: '" + buildSqlWithParams(sql, sqlParams, false) + "' Error: " + e.getMessage());
                 DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
             }
             return new SelectionResults(returnValue);
@@ -322,14 +204,13 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
         );
     }
 
-    /**
-     * Insert something into a Table<br>
-     * e.g.: <code>Map[String, Object] values = new HashMap<>()<br>values.put("uuid", player.getUniqueId())<br>
-     * values.put("name", player.getName())<br>mariaDBManager.insertInto("playerInfos", values)</code>
-     * @param tableName Name of the table, wich should be inserted in
-     * @param values The values, that should be inserted
-     */
-    public CompletableFuture<Integer> insertInto(String tableName, @NotNull Map<String, Object> values) {
+    @Override
+    public CompletableFuture<SelectionResults> executeSelect(@NotNull String sql, @NotNull String tableName) {
+        return executeSelect(sql, List.of(), tableName);
+    }
+
+    @Override
+    public CompletableFuture<Integer> insertInto(@NotNull String tableName, @NotNull Map<String, Object> values) {
         String columns = String.join(", ", values.keySet());
         String placeholders = String.join(", ", Collections.nCopies(values.size(), "?"));
         String sql = "INSERT INTO `" + tableName + "` (" + columns + ") VALUES (" + placeholders + ")";
@@ -337,7 +218,8 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
         return this.executeSql(sql, values.values().stream().toList(), tableName, "insert");
     }
 
-    public CompletableFuture<Integer> insertIgnore(String tableName, @NotNull Map<String, Object> values) {
+    @Override
+    public CompletableFuture<Integer> insertIgnore(@NotNull String tableName, @NotNull Map<String, Object> values) {
         String columns = String.join(", ", values.keySet());
         String placeholders = String.join(", ", Collections.nCopies(values.size(), "?"));
         String sql = "INSERT IGNORE INTO `" + tableName + "` (" + columns + ") VALUES (" + placeholders + ")";
@@ -345,44 +227,23 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
         return this.executeSql(sql, values.values().stream().toList(), tableName, "insert_ignore");
     }
 
-    /**
-     * Delete an entry
-     * @param tableName Name of the table, wich should be deleted from
-     * @param whereClause Clause, narrowing the targeted columns
-     * @param params The parameter for the ?'s in the whereClause
-     */
-    public CompletableFuture<Integer> deleteFrom(String tableName, String whereClause, List<Object> params) {
-        String sql = "DELETE FROM `" + tableName + "` WHERE " + whereClause;
+    @Override
+    public CompletableFuture<Integer> deleteFrom(@NotNull String tableName, @Nullable String whereClause, @NotNull List<Object> whereParams) {
+        String sql = "DELETE FROM `" + tableName + "`" + (whereClause != null ? " WHERE " + whereClause.replaceFirst("WHERE", "") : "");
 
-        return this.executeSql(sql, params, tableName, "delete");
-    }
-    /**
-     * Delete an entry
-     * @param tableName Name of the table, wich should be deleted from
-     * @param whereClause Clause, narrowing the targeted columns
-     */
-    public CompletableFuture<Integer> deleteFrom(String tableName, String whereClause) {
-        String sql = "DELETE FROM `" + tableName + "` WHERE " + whereClause;
-
-        return this.executeSql(sql, tableName, "delete");
+        return this.executeSql(sql, whereParams, tableName, "delete");
     }
 
-    /**
-     * Update a Table <br>
-     * e.g.: <code>
-     * Map[String, Object] values = new HashMap<>()<br>
-     * values.put("name", player.getName())<br>
-     * update("playerInfos", values, "uuid = ?", List.of(player.getUniqueId())
-     * </code>
-     * @param tableName Name of the table, wich should be updated
-     * @param values Values that should be updated
-     * @param whereClause Clause, narrowing the targeted columns
-     * @param whereParams The parameter for the ?'s in the whereClause
-     */
-    public CompletableFuture<Integer> update(String tableName, @NotNull Map<String, Object> values, @Nullable String whereClause, List<Object> whereParams) {
+    @Override
+    public CompletableFuture<Integer> deleteFrom(@NotNull String tableName, @Nullable String whereClause) {
+        return deleteFrom(tableName, whereClause, List.of());
+    }
+
+    @Override
+    public CompletableFuture<Integer> update(@NotNull String tableName, @NotNull Map<String, Object> values, @Nullable String whereClause, @NotNull List<Object> whereParams) {
         String setClause = String.join(", ", values.keySet().stream().map(k -> "`" + k + "` = ?").toList());
         String sql = "UPDATE `" + tableName + "` SET " + setClause +
-                (whereClause == null ? "" :  " WHERE " + whereClause.replace("WHERE", "").replace("  ", " "));
+                (whereClause == null ? "" :  " WHERE " + whereClause.replaceFirst("WHERE", ""));
 
         List<Object> sqlValues = new ArrayList<>();
         sqlValues.addAll(values.values());
@@ -390,32 +251,19 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
 
         return this.executeSql(sql, sqlValues, tableName, "update");
     }
-    /**
-     * Update a Table <br>
-     * e.g.: <code>
-     * Map[String, Object] values = new HashMap<>()<br>
-     * values.put("name", player.getName())<br>
-     * update("playerInfos", values, "uuid = " + player.getUniqueId())
-     * </code>
-     * @param tableName Name of the table, wich should be updated
-     * @param values Values that should be updated
-     * @param whereClause Clause, narrowing the targeted columns
-     */
-    public CompletableFuture<Integer> update(String tableName, @NotNull Map<String, Object> values, @Nullable String whereClause) {
-        String setClause = String.join(", ", values.keySet().stream().map(k -> "`" + k + "` = ?").toList());
-        String sql = "UPDATE `" + tableName + "` SET " + setClause +
-                (whereClause == null ? "" :  " WHERE " + whereClause.replace("WHERE", "").replace("  ", " "));
 
-        List<Object> sqlValues = new ArrayList<>(values.values());
-
-        return this.executeSql(sql, sqlValues, tableName, "update");
+    @Override
+    public CompletableFuture<Integer> update(@NotNull String tableName, @NotNull Map<String, Object> values, @Nullable String whereClause) {
+        return update(tableName, values, whereClause, List.of());
     }
 
-    public CompletableFuture<Integer> dropTable(String tableName) {
+    @Override
+    public CompletableFuture<Integer> dropTable(@NotNull String tableName) {
         return this.executeSql("DROP TABLE IF EXISTS " + tableName, List.of(), tableName, "drop table");
     }
 
-    public CompletableFuture<Boolean> columnExists(String tableName, String columnName) {
+    @Override
+    public CompletableFuture<Boolean> columnExists(@NotNull String tableName, @NotNull String columnName) {
         long start = System.currentTimeMillis();
         checkConnection();
 
@@ -446,7 +294,8 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager {
         );
     }
 
-    public CompletableFuture<Boolean> indexExists(String tableName, String indexName) {
+    @Override
+    public CompletableFuture<Boolean> indexExists(@NotNull String tableName, @NotNull String indexName) {
         long start = System.currentTimeMillis();
         checkConnection();
 

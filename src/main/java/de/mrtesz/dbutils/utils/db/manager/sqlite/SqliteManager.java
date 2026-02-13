@@ -1,9 +1,12 @@
-package de.mrtesz.dbutils.utils.sqlite;
+package de.mrtesz.dbutils.utils.db.manager.sqlite;
 
 import com.zaxxer.hikari.HikariDataSource;
 import de.mrtesz.dbutils.api.DBUtils;
-import de.mrtesz.dbutils.utils.logger.DebugLevel;
-import de.mrtesz.dbutils.utils.utilClasses.SelectionResults;
+import de.mrtesz.dbutils.api.db.manager.SyncDBManager;
+import de.mrtesz.dbutils.api.db.table.DBTable;
+import de.mrtesz.dbutils.utils.db.manager.mariadb.MariaDBTable;
+import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
+import de.mrtesz.dbutils.utils.selection.SelectionResults;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,34 +14,31 @@ import java.sql.Date;
 import java.sql.*;
 import java.util.*;
 
-@SuppressWarnings("unused")
-public class SqliteManager extends AbstractSqliteManager {
+public class SqliteManager extends AbstractSqliteManager implements SyncDBManager {
 
     private final String projectName;
 
-    public SqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path,
-                         @NotNull String name, HikariDataSource dataSource, String projectName) {
-        super(infoWhenCredentialsAreNull, path, name, dataSource, projectName);
-        this.projectName = projectName;
-    }
-    public SqliteManager(boolean infoWhenCredentialsAreNull, @Nullable String path,
-                         @NotNull String name, String projectName) {
-        super(infoWhenCredentialsAreNull, path, name, projectName);
+    public SqliteManager(@Nullable String path, @NotNull String name, @Nullable HikariDataSource dataSource, @Nullable String projectName) {
+        super(path, name, dataSource, projectName);
         this.projectName = projectName;
     }
 
     /**
-     * Create a Sqlite Table using a Table object
-     * @param sqliteTable The Table that has to be created or altered
+     * Create a Sqlite table using a {@link SqliteTable} object
+     * @param dbTable The Table that is created or altered
+     * @throws IllegalArgumentException when the {@code dbTable} param is not a {@link SqliteTable}
      */
-    public void createOrAlter(@NotNull SqliteTable sqliteTable) {
-        String tableName = sqliteTable.getName();
+    public void createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException {
+        if(!(dbTable instanceof de.mrtesz.dbutils.utils.db.manager.sqlite.SqliteTable sqliteTable)) throw new IllegalArgumentException("DBTable object was not " + MariaDBTable.class.getName() + " but " + dbTable.getClass().getName() + ".");
+
+        @NotNull String tableName = sqliteTable.getName();
         long start = System.currentTimeMillis();
 
         checkConnection();
         try (Connection conn = getConnection(); Statement statement = conn.createStatement()) {
             String createCmd = sqliteTable.getCreateCommand();
             statement.executeUpdate(createCmd);
+
             DBUtils.logging(DebugLevel.LEVEL8, projectName).debug("Created table " + tableName + " if not exists in " + (System.currentTimeMillis() - start) + " ms");
 
             Set<String> existingColumns = new HashSet<>();
@@ -92,64 +92,29 @@ public class SqliteManager extends AbstractSqliteManager {
         }
     }
 
-    /**
-     * Execute a SQL Query <br>
-     * e.g.: <code>executeSql("UPDATE playerInfos SET name = ? WHERE uuid = ?", List.of(player.getName(), player.getUniqueId()), "playerInfos", "update player name")</code>
-     * @param sql The query that should be executed
-     * @param values The values replacing the ?'s in the param sql
-     * @param tableName The Name of the Table that is worked with
-     * @param type The Type of the execution
-     * @return the return value of PreparedStatement.executeUpdate
-     */
-    public int executeSql(String sql, @NotNull List<Object> values, String tableName, String type) {
+    @Override
+    public int executeSql(@NotNull String sql, @NotNull List<Object> sqlParams, @NotNull String tableName, @Nullable String type) {
         long start = System.currentTimeMillis();
 
         checkConnection();
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             int i = 1;
-            for (Object o : values) {
+            for (Object o : sqlParams) {
                 switch (o) {
                     case null -> ps.setObject(i++, null);
                     case String s -> ps.setString(i++, s);
                     case Integer n -> ps.setInt(i++, n);
                     case Long l -> ps.setLong(i++, l);
-                    case Boolean b -> ps.setBoolean(i++, b);
                     case Date d -> ps.setDate(i++, d);
                     default -> ps.setObject(i++, o);
                 }
             }
             int result = ps.executeUpdate();
-            DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, values, true) + " in "
+            DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + (type == null ? "unspecified" : type) + " in " + tableName + " Using: " + buildSqlWithParams(sql, sqlParams, true) + " in "
                     + (System.currentTimeMillis() - start) + " ms Result: " + result);
             return result;
         } catch (SQLException e) {
-            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, values, false) + "' in '" + tableName +
-                    "' Error: " + e.getMessage());
-            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
-        }
-
-        return 0;
-    }
-    /**
-     * Execute a SQL Query <br>
-     * e.g.: <code>executeSql("UPDATE playerInfos SET name = " + player.getName() + " WHERE uuid = " + player.getUniqueId(), "playerInfos", "update player name")</code>
-     * @param sql The query that should be executed
-     * @param tableName The Name of the Table that is worked with
-     * @param type The Type of the execution
-     * @return the return value of PreparedStatement.executeUpdate
-     */
-    public int executeSql(String sql, String tableName, String type) {
-        long start = System.currentTimeMillis();
-
-        checkConnection();
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            int result = ps.executeUpdate();
-            DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Executed " + type + " in " + tableName + " Using: " + buildSqlWithParams(sql, List.of(), true) + " in "
-                    + (System.currentTimeMillis() - start) + " ms Result: " + result);
-            
-            return result;
-        } catch (SQLException e) {
-            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + type + " '" + buildSqlWithParams(sql, List.of(), false) + "' in '" + tableName +
+            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while executing " + (type == null ? "unspecified" : type) + " '" + buildSqlWithParams(sql, sqlParams, false) + "' in '" + tableName +
                     "' Error: " + e.getMessage());
             DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
         }
@@ -157,22 +122,20 @@ public class SqliteManager extends AbstractSqliteManager {
         return 0;
     }
 
-    /**
-     * Execute a Selection Query
-     * e.g. <code>executeSelect("SELECT email, number FROM users WHERE username = ?", List.of("Mr_Tesz"), "users")</code>
-     * @param sql Sql Query
-     * @param questionMarks List of ?'s in the sql
-     * @param tableName Name of selected Table for logging
-     * @return SelectionResult wich represents a list of rows in Map<column, value>
-     */
-    public SelectionResults executeSelect(String sql, @NotNull List<Object> questionMarks, String tableName) {
+    @Override
+    public int executeSql(@NotNull String sql, @NotNull String tableName, @Nullable String type) {
+        return executeSql(sql, List.of(), tableName, type);
+    }
+
+    @Override
+    public SelectionResults executeSelect(@NotNull String sql, @NotNull List<Object> sqlParams, @NotNull String tableName) {
         List<Map<String, Object>> returnValue = new ArrayList<>();
         long start = System.currentTimeMillis();
 
         checkConnection();
         try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement(sql)) {
-            for (int i = 0; i < questionMarks.size(); i++) {
-                Object o = questionMarks.get(i);
+            for (int i = 0; i < sqlParams.size(); i++) {
+                Object o = sqlParams.get(i);
 
                 switch (o) {
                     case null -> statement.setObject(i + 1, null);
@@ -199,7 +162,7 @@ public class SqliteManager extends AbstractSqliteManager {
                 }
                 // kein rs.close wegen try
                 DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
-                        "' Using: '" + buildSqlWithParams(sql, questionMarks, true) + "' in " + (System.currentTimeMillis() - start) + " ms");
+                        "' Using: '" + buildSqlWithParams(sql, sqlParams, true) + "' in " + (System.currentTimeMillis() - start) + " ms");
                 if (!returnValue.isEmpty()) {
                     DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results:");
                     for (Map<String, Object> map : returnValue) {
@@ -216,72 +179,20 @@ public class SqliteManager extends AbstractSqliteManager {
 
         } catch (SQLException e) {
             DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
-                    "' Command: '" + buildSqlWithParams(sql, questionMarks, false) + "' Error: " + e.getMessage());
-            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
-        }
-
-        return new SelectionResults(returnValue);
-    }
-    /**
-     * Execute a Selection Query
-     * e.g. <code>executeSelect("SELECT email, number FROM users WHERE username = Mr_Tesz", "users")</code>
-     * @param sql Sql Query
-     * @param tableName Name of selected Table for logging
-     * @return SelectionResult wich represents a list of rows in Map<column, value>
-     */
-    public SelectionResults executeSelect(String sql, String tableName) {
-        List<Map<String, Object>> returnValue = new ArrayList<>();
-        long start = System.currentTimeMillis();
-
-        checkConnection();
-        try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement(sql)) {
-            try (ResultSet rs = statement.executeQuery()) {
-                ResultSetMetaData metaData = rs.getMetaData();
-                int columnCount = metaData.getColumnCount();
-
-                while (rs.next()) {
-                    Map<String, Object> thisRow = new HashMap<>();
-                    for (int i = 1; i <= columnCount; i++) {
-                        String columnName = metaData.getColumnLabel(i);
-                        Object value = rs.getObject(i);
-                        thisRow.put(columnName, value);
-                    }
-                    returnValue.add(thisRow);
-                }
-                // kein rs.close wegen try
-                DBUtils.logging(DebugLevel.LEVEL10, projectName).debug("Selected from '" + tableName +
-                        "' Using: '" + buildSqlWithParams(sql, List.of(), true) + "' in " + (System.currentTimeMillis() - start) + " ms");
-                if (!returnValue.isEmpty()) {
-                    DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results:");
-                    for (Map<String, Object> map : returnValue) {
-                        for (Map.Entry<String, Object> entry : map.entrySet()) {
-                            DBUtils.logging(DebugLevel.LEVEL11, projectName).
-                                    debug("Column: " + entry.getKey()
-                                            + " Value-Type: " + (entry.getValue() != null ? entry.getValue().getClass().getName() : "null (Any errors?)")
-                                            + " Value: " + (entry.getValue() != null ? entry.getValue() : "null (Any errors?)"));
-                        }
-                    }
-                } else
-                    DBUtils.logging(DebugLevel.LEVEL11, projectName).debug("Results: [empty]");
-            }
-
-        } catch (SQLException e) {
-            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
-                    "' Command: '" + buildSqlWithParams(sql, List.of(), false) + "' Error: " + e.getMessage());
+                    "' Command: '" + buildSqlWithParams(sql, sqlParams, false) + "' Error: " + e.getMessage());
             DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
         }
 
         return new SelectionResults(returnValue);
     }
 
-    /**
-     * Insert something into a Table<br>
-     * e.g.: <code>Map[String, Object] values = new HashMap<>()<br>values.put("uuid", player.getUniqueId())<br>
-     * values.put("name", player.getName())<br>mariaDBManager.insertInto("playerInfos", values)</code>
-     * @param tableName Name of the table, wich should be inserted in
-     * @param values The values, that should be inserted
-     */
-    public int insertInto(String tableName, @NotNull Map<String, Object> values) {
+    @Override
+    public SelectionResults executeSelect(@NotNull String sql, @NotNull String tableName) {
+        return executeSelect(sql, List.of(), tableName);
+    }
+
+    @Override
+    public int insertInto(@NotNull String tableName, @NotNull Map<String, Object> values) {
         String columns = String.join(", ", values.keySet());
         String placeholders = String.join(", ", Collections.nCopies(values.size(), "?"));
         String sql = "INSERT INTO `" + tableName + "` (" + columns + ") VALUES (" + placeholders + ")";
@@ -289,7 +200,8 @@ public class SqliteManager extends AbstractSqliteManager {
         return this.executeSql(sql, values.values().stream().toList(), tableName, "insert");
     }
 
-    public int insertIgnore(String tableName, @NotNull Map<String, Object> values) {
+    @Override
+    public int insertIgnore(@NotNull String tableName, @NotNull Map<String, Object> values) {
         String columns = String.join(", ", values.keySet());
         String placeholders = String.join(", ", Collections.nCopies(values.size(), "?"));
         String sql = "INSERT OR IGNORE INTO `" + tableName + "` (" + columns + ") VALUES (" + placeholders + ")";
@@ -297,44 +209,23 @@ public class SqliteManager extends AbstractSqliteManager {
         return this.executeSql(sql, values.values().stream().toList(), tableName, "insert_ignore");
     }
 
-    /**
-     * Delete an entry
-     * @param tableName Name of the table, wich should be deleted from
-     * @param whereClause Clause, narrowing the targeted columns
-     * @param params The parameter for the ?'s in the whereClause
-     */
-    public int deleteFrom(String tableName, String whereClause, List<Object> params) {
-        String sql = "DELETE FROM `" + tableName + "` WHERE " + whereClause;
+    @Override
+    public int deleteFrom(@NotNull String tableName, @Nullable String whereClause, @NotNull List<Object> whereParams) {
+        String sql = "DELETE FROM `" + tableName + "`" + (whereClause != null ? "WHERE " + whereClause.replaceFirst("WHERE", "") : "");
 
-        return this.executeSql(sql, params, tableName, "delete");
-    }
-    /**
-     * Delete an entry
-     * @param tableName Name of the table, wich should be deleted from
-     * @param whereClause Clause, narrowing the targeted columns
-     */
-    public int deleteFrom(String tableName, String whereClause) {
-        String sql = "DELETE FROM `" + tableName + "` WHERE " + whereClause;
-
-        return this.executeSql(sql, tableName, "delete");
+        return this.executeSql(sql, whereParams, tableName, "delete");
     }
 
-    /**
-     * Update a Table <br>
-     * e.g.: <code>
-     * Map[String, Object] values = new HashMap<>()<br>
-     * values.put("name", player.getName())<br>
-     * update("playerInfos", values, "uuid = ?", List.of(player.getUniqueId())
-     * </code>
-     * @param tableName Name of the table, wich should be updated
-     * @param values Values that should be updated
-     * @param whereClause Clause, narrowing the targeted columns
-     * @param whereParams The parameter for the ?'s in the whereClause
-     */
-    public int update(String tableName, @NotNull Map<String, Object> values, @Nullable String whereClause, List<Object> whereParams) {
+    @Override
+    public int deleteFrom(@NotNull String tableName, String whereClause) {
+        return deleteFrom(tableName, whereClause, List.of());
+    }
+
+    @Override
+    public int update(@NotNull String tableName, @NotNull Map<String, Object> values, @Nullable String whereClause, @NotNull List<Object> whereParams) {
         String setClause = String.join(", ", values.keySet().stream().map(k -> "`" + k + "` = ?").toList());
         String sql = "UPDATE `" + tableName + "` SET " + setClause +
-                (whereClause == null ? "" :  " WHERE " + whereClause.replace("WHERE", "").replace("  ", " "));
+                (whereClause == null ? "" :  " WHERE " + whereClause.replaceFirst("WHERE", ""));
 
         List<Object> sqlValues = new ArrayList<>();
         sqlValues.addAll(values.values());
@@ -342,32 +233,19 @@ public class SqliteManager extends AbstractSqliteManager {
 
         return this.executeSql(sql, sqlValues, tableName, "update");
     }
-    /**
-     * Update a Table <br>
-     * e.g.: <code>
-     * Map[String, Object] values = new HashMap<>()<br>
-     * values.put("name", player.getName())<br>
-     * update("playerInfos", values, "uuid = " + player.getUniqueId())
-     * </code>
-     * @param tableName Name of the table, wich should be updated
-     * @param values Values that should be updated
-     * @param whereClause Clause, narrowing the targeted columns
-     */
-    public int update(String tableName, @NotNull Map<String, Object> values, @Nullable String whereClause) {
-        String setClause = String.join(", ", values.keySet().stream().map(k -> "`" + k + "` = ?").toList());
-        String sql = "UPDATE `" + tableName + "` SET " + setClause +
-                (whereClause == null ? "" :  " WHERE " + whereClause.replace("WHERE", "").replace("  ", " "));
 
-        List<Object> sqlValues = new ArrayList<>(values.values());
-
-        return this.executeSql(sql, sqlValues, tableName, "update");
+    @Override
+    public int update(@NotNull String tableName, @NotNull Map<String, Object> values, @Nullable String whereClause) {
+        return update(tableName, values, whereClause, List.of());
     }
 
-    public int dropTable(String tableName) {
+    @Override
+    public int dropTable(@NotNull String tableName) {
         return this.executeSql("DROP TABLE IF EXISTS " + tableName, List.of(), tableName, "drop table");
     }
 
-    public boolean columnExists(String tableName, String columnName) {
+    @Override
+    public boolean columnExists(@NotNull String tableName, @NotNull String columnName) {
         long start = System.currentTimeMillis();
 
         checkConnection();
@@ -394,7 +272,8 @@ public class SqliteManager extends AbstractSqliteManager {
         return false;
     }
 
-    public boolean indexExists(String tableName, String indexName) {
+    @Override
+    public boolean indexExists(@NotNull String tableName, @NotNull String indexName) {
         long start = System.currentTimeMillis();
 
         checkConnection();

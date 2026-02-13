@@ -1,18 +1,23 @@
 package de.mrtesz.dbutils.utils.logger;
 
-import de.mrtesz.ansi.AnsiParser;
+import de.mrtesz.ansi_impl.AnsiParser;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.appender.AppenderLoggingException;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 public class AnsiConsoleAppender extends AbstractAppender {
 
-    public AnsiConsoleAppender(String name, Layout<? extends Serializable> layout, Filter filter) {
+    private final Logger javaLogger;
+
+    public AnsiConsoleAppender(String name, Layout<? extends Serializable> layout, Filter filter, @Nullable Logger javaLogger) {
         super(name, filter, layout);
+        this.javaLogger = javaLogger;
     }
 
     @Override
@@ -22,7 +27,10 @@ public class AnsiConsoleAppender extends AbstractAppender {
 
             msg = AnsiParser.replaceParagraphAnsi(msg);
 
-            System.out.println(msg);
+            if (javaLogger != null)
+                javaLogger.info(msg);
+            else
+                System.out.println(msg);
         } catch (Exception ex) {
             throw new AppenderLoggingException(ex);
         }

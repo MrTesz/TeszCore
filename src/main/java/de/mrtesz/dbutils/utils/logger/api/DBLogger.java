@@ -1,5 +1,6 @@
-package de.mrtesz.dbutils.utils.logger;
+package de.mrtesz.dbutils.utils.logger.api;
 
+import de.mrtesz.dbutils.utils.logger.LoggerLevel;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -45,10 +46,10 @@ public class DBLogger {
      */
     public void log(String msg) {
         switch (level.getLoggerLevel()) {
-            case INFO -> info(msg);
-            case DEBUG -> debug(msg);
-            case WARNING -> warning(msg);
-            case ERROR -> error(msg);
+            case LoggerLevel.INFO -> info(msg);
+            case LoggerLevel.DEBUG -> debug(msg);
+            case LoggerLevel.WARNING -> warning(msg);
+            case LoggerLevel.ERROR -> error(msg);
         }
     }
 

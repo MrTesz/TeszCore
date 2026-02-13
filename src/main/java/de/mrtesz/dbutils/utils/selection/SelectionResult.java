@@ -1,18 +1,16 @@
-package de.mrtesz.dbutils.utils.utilClasses;
+package de.mrtesz.dbutils.utils.selection;
 
 import de.mrtesz.dbutils.utils.exceptions.DatabaseException;
+import lombok.AllArgsConstructor;
 
 import java.sql.Date;
 import java.util.Map;
 import java.util.Set;
 
+@AllArgsConstructor
 public class SelectionResult {
 
     private final Map<String, Object> result;
-
-    public SelectionResult(Map<String, Object> result) {
-        this.result = result;
-    }
 
     public Object get(String s) {
         return result.get(s);

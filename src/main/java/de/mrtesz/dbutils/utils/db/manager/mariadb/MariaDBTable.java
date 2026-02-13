@@ -1,5 +1,6 @@
-package de.mrtesz.dbutils.utils.mariadb;
+package de.mrtesz.dbutils.utils.db.manager.mariadb;
 
+import de.mrtesz.dbutils.api.db.table.DBTable;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
@@ -7,7 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
-public class MariaDBTable {
+public class MariaDBTable implements DBTable {
 
     @Getter
     private final String name;
@@ -17,22 +18,20 @@ public class MariaDBTable {
     private @Nullable String unique = null;
 
     /**
-     * Create a Table Object
+     * Create a {@link MariaDBTable} Object
      * @param name Name of the Table
      */
     public MariaDBTable(String name) {
         this.name = name;
     }
 
-    private MariaDBTable addColumn(String columnName, String definition) {
+    @Override
+    public MariaDBTable addColumn(String columnName, String definition) {
         columns.put(columnName, definition);
         return this;
     }
 
-    /**
-     * Set the Primary Keys of the Table
-     * @param keys The keys, wich should be turned into Primarys
-     */
+    @Override
     public MariaDBTable setPrimaryKeys(String... keys) {
         primaryKeyColumns.clear();
         primaryKeyColumns.addAll(Arrays.stream(keys)
@@ -42,28 +41,35 @@ public class MariaDBTable {
         return this;
     }
 
+    @Override
     public MariaDBTable setUnique(String... unique) {
         this.unique = "UNIQUE(`" + String.join("`, `", unique) + "`)";
         return this;
     }
 
+    @Override
     public MariaDBTable addInt(String name) {
         return addColumn(name, "INT");
     }
+    @Override
     public MariaDBTable addInt(String name, Integer def) {
         return addColumn(name, "INT DEFAULT " + (def == null ? "NULL" : def));
     }
 
+    @Override
     public MariaDBTable addLong(String name) {
         return addBigInt(name);
     }
+    @Override
     public MariaDBTable addLong(String name, long def) {
         return addBigInt(name, def);
     }
 
+    @Override
     public MariaDBTable addBigInt(String name) {
         return addColumn(name, "BIGINT");
     }
+    @Override
     public MariaDBTable addBigInt(String name, long def) {
         return addColumn(name, "BIGINT DEFAULT " + def);
     }
@@ -72,16 +78,20 @@ public class MariaDBTable {
         return addColumn(name, "DATE");
     }
 
+    @Override
     public MariaDBTable addDouble(String name) {
         return addColumn(name, "DOUBLE");
     }
+    @Override
     public MariaDBTable addDouble(String name, double def) {
         return addColumn(name, "DOUBLE DEFAULT " + def);
     }
 
+    @Override
     public MariaDBTable addFloat(String name) {
         return addColumn(name, "FLOAT");
     }
+    @Override
     public MariaDBTable addFloat(String name, float def) {
         return addColumn(name, "FLOAT DEFAULT " + def);
     }
@@ -93,15 +103,17 @@ public class MariaDBTable {
         return addColumn(name, "BOOLEAN DEFAULT " + def);
     }
 
-    public MariaDBTable addVarchar(String name, int length) {
-        return addColumn(name, "VARCHAR(" + length + ")");
-    }
-
+    @Override
     public MariaDBTable addText(String name) {
         return addColumn(name, "TEXT");
     }
+    @Override
     public MariaDBTable addText(String name, String def) {
         return addColumn(name, "TEXT DEFAULT " + def);
+    }
+
+    public MariaDBTable addVarchar(String name, int length) {
+        return addColumn(name, "VARCHAR(" + length + ")");
     }
 
     public MariaDBTable addMediumText(String name) {

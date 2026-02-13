@@ -1,9 +1,12 @@
 package de.mrtesz.dbutils.utils.config;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.serializer.AnchorGenerator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,27 +17,138 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+@SuppressWarnings("unused")
 public class YamlConfig {
 
     private final Path filePath;
     private final Yaml yaml;
     private Map<String, Object> data;
 
-    public YamlConfig(@NotNull String name) {
-        this(null, name);
-    }
-    public YamlConfig(@Nullable String path, @NotNull String name) {
-        this.filePath = path == null
-                ? Paths.get(name + ".yml")
-                : Paths.get(path, name + ".yml");
+    private YamlConfig(@NotNull Path filePath, @NotNull Yaml yaml) {
+        this.filePath = filePath;
+        this.yaml = yaml;
 
-        DumperOptions options = new DumperOptions();
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        options.setIndent(2);
-        options.setPrettyFlow(true);
-
-        yaml = new Yaml(options);
         load();
+    }
+
+    public static class Builder {
+
+        @Getter @Accessors(fluent = true)
+        private @NotNull DumperOptions dumperOptions = new DumperOptions();
+
+        private @Nullable String filePath;
+
+        private String fileName;
+
+        public YamlConfig build() {
+            Objects.requireNonNull(fileName);
+
+            Path path = filePath == null
+                    ? Paths.get(fileName + ".yml")
+                    : Paths.get(filePath, fileName + ".yml");
+
+            Yaml yaml = new Yaml(dumperOptions);
+
+            return new YamlConfig(path, yaml);
+        }
+
+        public Builder setFilePath(@Nullable String filePath) {
+            this.filePath = filePath;
+            return this;
+        }
+        public Builder setFileName(@NotNull String fileName) {
+            this.fileName = fileName;
+            return this;
+        }
+        public Builder setDumperOptions(DumperOptions dumperOptions) {
+            this.dumperOptions = dumperOptions;
+            return this;
+        }
+
+        public Builder setDefaultScalarStyle(DumperOptions.ScalarStyle defaultStyle) {
+            dumperOptions.setDefaultScalarStyle(defaultStyle);
+            return this;
+        }
+        public Builder setDefaultFlowStyle(DumperOptions.FlowStyle defaultFlowStyle) {
+            dumperOptions.setDefaultFlowStyle(defaultFlowStyle);
+            return this;
+        }
+        public Builder setCanonical(boolean canonical) {
+            dumperOptions.setCanonical(canonical);
+            return this;
+        }
+        public Builder setAllowUnicode(boolean allowUnicode) {
+            dumperOptions.setAllowUnicode(allowUnicode);
+            return this;
+        }
+        public Builder setAllowReadOnlyProperties(boolean allowReadOnlyProperties) {
+            dumperOptions.setAllowReadOnlyProperties(allowReadOnlyProperties);
+            return this;
+        }
+        public Builder setIndent(int indent) {
+            dumperOptions.setIndent(indent);
+            return this;
+        }
+        public Builder setIndicatorIndent(int indicatorIndent) {
+            dumperOptions.setIndicatorIndent(indicatorIndent);
+            return this;
+        }
+        public Builder setIndentWithIndicator(boolean indentWithIndicator) {
+            dumperOptions.setIndentWithIndicator(indentWithIndicator);
+            return this;
+        }
+        public Builder setWith(int bestWidth) {
+            dumperOptions.setWidth(bestWidth);
+            return this;
+        }
+        public Builder setSplitLines(boolean splitLines) {
+            dumperOptions.setSplitLines(splitLines);
+            return this;
+        }
+        public Builder setLineBreak(DumperOptions.LineBreak lineBreak) {
+            dumperOptions.setLineBreak(lineBreak);
+            return this;
+        }
+        public Builder setExplicitStart(boolean explicitStart) {
+            dumperOptions.setExplicitStart(explicitStart);
+            return this;
+        }
+        public Builder setExplicitEnd(boolean explicitEnd) {
+            dumperOptions.setExplicitEnd(explicitEnd);
+            return this;
+        }
+        public Builder setTimeZone(TimeZone timeZone) {
+            dumperOptions.setTimeZone(timeZone);
+            return this;
+        }
+        public Builder setMaxSimpleKeyLength(int maxSimpleKeyLength) {
+            dumperOptions.setMaxSimpleKeyLength(maxSimpleKeyLength);
+            return this;
+        }
+        public Builder setProcessComments(boolean processComments) {
+            dumperOptions.setProcessComments(processComments);
+            return this;
+        }
+        public Builder setNonPrintableStyle(DumperOptions.NonPrintableStyle nonPrintableStyle) {
+            dumperOptions.setNonPrintableStyle(nonPrintableStyle);
+            return this;
+        }
+        public Builder setVersion(DumperOptions.Version version) {
+            dumperOptions.setVersion(version);
+            return this;
+        }
+        public Builder setTags(Map<String, String> tags) {
+            dumperOptions.setTags(tags);
+            return this;
+        }
+        public Builder setPrettyFlow(Boolean prettyFlow) {
+            dumperOptions.setPrettyFlow(prettyFlow);
+            return this;
+        }
+        public Builder setAnchorGenerator(AnchorGenerator anchorGenerator) {
+            dumperOptions.setAnchorGenerator(anchorGenerator);
+            return this;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -99,12 +213,15 @@ public class YamlConfig {
     }
 
     public int getInt(String path) {
-        Object val = get(path);
-        return val instanceof Number ? ((Number) val).intValue() : 0;
+        return getInt(path, 0);
     }
     public int getInt(String path, int def) {
         Object val = get(path);
-        return val instanceof Number ? ((Number) val).intValue() : def;
+        return val instanceof Number n ? n.intValue() : def;
+    }
+    public Integer getIntOrElse(String path, Integer def) {
+        Object val = get(path);
+        return val instanceof Number n ? n.intValue() : def;
     }
 
     public long getLong(String path) {
@@ -112,7 +229,11 @@ public class YamlConfig {
     }
     public long getLong(String path, long def) {
         Object val = get(path);
-        return val instanceof Number ? ((Number) val).longValue() : def;
+        return val instanceof Number n ? n.longValue() : def;
+    }
+    public Long getLongOrElse(String path, Long def) {
+        Object val = get(path);
+        return val instanceof Number n ? n.longValue() : def;
     }
 
     public float getFloat(String path) {
@@ -120,7 +241,11 @@ public class YamlConfig {
     }
     public float getFloat(String path, float def) {
         Object val = get(path);
-        return val instanceof Number ? ((Number) val).floatValue() : def;
+        return val instanceof Number n ? n.floatValue() : def;
+    }
+    public Float getFloatOrElse(String path, Float def) {
+        Object val = get(path);
+        return val instanceof Number n ? n.floatValue() : def;
     }
 
     public short getShort(String path) {
@@ -128,7 +253,11 @@ public class YamlConfig {
     }
     public short getShort(String path, short def) {
         Object val = get(path);
-        return val instanceof Number ? ((Number) val).shortValue() : def;
+        return val instanceof Number n ? n.shortValue() : def;
+    }
+    public Short getShortOrElse(String path, Short def) {
+        Object val = get(path);
+        return val instanceof Number n ? n.shortValue() : def;
     }
 
     public double getDouble(String path) {
@@ -136,7 +265,11 @@ public class YamlConfig {
     }
     public double getDouble(String path, double def) {
         Object val = get(path);
-        return val instanceof Number ? ((Number) val).doubleValue() : def;
+        return val instanceof Number n ? n.doubleValue() : def;
+    }
+    public Double getDoubleOrElse(String path, Double def) {
+        Object val = get(path);
+        return val instanceof Number n ? n.doubleValue() : def;
     }
 
     public boolean getBoolean(String path) {
@@ -145,7 +278,11 @@ public class YamlConfig {
     }
     public boolean getBoolean(String path, boolean def) {
         Object val = get(path);
-        return val instanceof Boolean ? (Boolean) val : def;
+        return val instanceof Boolean b ? b : def;
+    }
+    public Boolean getBooleanOrElse(String path, Boolean def) {
+        Object val = get(path);
+        return val instanceof Boolean b ? b : def;
     }
 
     public List<String> getStringList(String path) {
@@ -193,5 +330,9 @@ public class YamlConfig {
 
     public Map<String, Object> getRaw() {
         return data;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 }
