@@ -45,21 +45,26 @@ public class DBUtils {
         private @Nullable Logger javaLogger;
 
         /** Lowest {@link Level} of messages, logged in the console. Default: {@link Level#INFO} */
+        @Builder.Default
         private Level consoleLoggerLevel = Level.INFO;
 
         /** The name of the Logger. Represents the {@link AbstractAppender.Builder#getName()} */
+        @Builder.Default
         private @NonNull @NotNull String loggerName = "DBUtilsLogger";
 
         /** If the logs should be written in a .log file. Default: true */
+        @Builder.Default
         private boolean loggerFileEnabled = true;
 
         /** Optional: Path of the logger file. Ignored if {@link #loggerFileEnabled} is false. Default: null*/
         private @Nullable String loggerFilePath;
 
         /** Max amount of old logger files to keep, older files will be deleted. Ignored if {@link #loggerFileEnabled} is false. Default: "10" */
+        @Builder.Default
         private @NonNull @NotNull String maxLoggerFilesToKeep = "10";
 
         /** The name of the logger file. Ignored if {@link #loggerFileEnabled} is false. Default: "DBUtils" */
+        @Builder.Default
         private @NonNull @NotNull String loggerFileName = "DBUtils";
     }
 
