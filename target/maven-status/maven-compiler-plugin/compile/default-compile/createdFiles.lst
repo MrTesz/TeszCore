@@ -1,9 +1,12 @@
 de/mrtesz/dbutils/utils/db/manager/mariadb/AbstractMariaDBManager.class
 de/mrtesz/dbutils/utils/db/manager/sqlite/SqliteManager.class
+de/mrtesz/dbutils/api/DBUtils$DBUtilsInitializer$DBUtilsInitializerBuilder.class
+de/mrtesz/dbutils/utils/exceptions/DBUtilsException.class
 de/mrtesz/dbutils/utils/db/manager/sqlite/AbstractSqliteManager.class
 de/mrtesz/dbutils/utils/logger/api/DebugLevel.class
 de/mrtesz/dbutils/utils/init/Init.class
 de/mrtesz/dbutils/api/DBUtils.class
+de/mrtesz/dbutils/api/DBUtils$DBUtilsInitializer.class
 de/mrtesz/dbutils/utils/db/selection/SelectionResult.class
 de/mrtesz/dbutils/utils/db/manager/mariadb/MariaDBManager.class
 de/mrtesz/dbutils/utils/logger/LoggerLevel.class
@@ -24,4 +27,5 @@ de/mrtesz/dbutils/Main.class
 de/mrtesz/dbutils/utils/config/YamlConfig$Builder.class
 de/mrtesz/dbutils/api/db/table/DBTable.class
 de/mrtesz/dbutils/utils/config/YamlConfig.class
+de/mrtesz/dbutils/utils/exceptions/DuplicateInitializationException.class
 de/mrtesz/dbutils/api/db/manager/SyncDBManager.class

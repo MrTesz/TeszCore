@@ -70,9 +70,9 @@ public class DBUtils {
      * @throws DuplicateInitializationException when a {@link DBUtils} instance was already initialized by other projects (can be bypassed with {@link #initializeOverwrite(DBUtilsInitializer)}
      * @throws IllegalArgumentException when the {@link DBUtilsInitializer#loggerFilePath} is not null and doesn't end with a '/'
      */
-    public DBUtils initialize(DBUtilsInitializer dbUtilsInitializer) throws DuplicateInitializationException, IllegalArgumentException {
+    public static DBUtils initialize(DBUtilsInitializer dbUtilsInitializer) throws DuplicateInitializationException, IllegalArgumentException {
         DBUtils currentInstance = getInstance();
-        if (currentInstance != null) throw new DuplicateInitializationException("Failed to initialize DBUtils.java: An instance of DBUtils is already initialized. Previous Installation: " + initializedWith);
+        if (currentInstance != null) throw new DuplicateInitializationException("Failed to initialize DBUtils.java: An instance of DBUtils is already initialized. Previous Installation: " + currentInstance.getInitializedWith());
         if (dbUtilsInitializer.loggerFilePath != null && !dbUtilsInitializer.loggerFilePath.endsWith("/")) throw new IllegalArgumentException("path in DBUtils#<init> doesn't end with '/'!");
 
         return new DBUtils(dbUtilsInitializer, dbUtilsInitializer.javaLogger, dbUtilsInitializer.consoleLoggerLevel, dbUtilsInitializer.loggerFileEnabled,
@@ -84,7 +84,7 @@ public class DBUtils {
      * @return The created {@link DBUtils} instance (can also be obtained with {@link DBUtils#getInstance()}
      * @throws IllegalArgumentException when the {@link DBUtilsInitializer#loggerFilePath} is not null and doesn't end with a '/'
      */
-    public DBUtils initializeOverwrite(DBUtilsInitializer dbUtilsInitializer) throws IllegalArgumentException {
+    public static DBUtils initializeOverwrite(DBUtilsInitializer dbUtilsInitializer) throws IllegalArgumentException {
         DBUtils currentInstance = getInstance();
         if (dbUtilsInitializer.loggerFilePath != null && !dbUtilsInitializer.loggerFilePath.endsWith("/")) throw new IllegalArgumentException("path in DBUtils#<init> doesn't end with '/'!");
 
@@ -136,5 +136,9 @@ public class DBUtils {
     public SyncDBManager createSqliteManager(@NotNull String projectName, @Nullable String path,
                                              @NotNull String name) throws DatabaseException {
         return new SqliteManager(path, name, null, projectName);
+    }
+
+    private DBUtilsInitializer getInitializedWith() {
+        return initializedWith;
     }
 }

@@ -16,7 +16,9 @@
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/db/manager/sqlite/SqliteTable.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/db/selection/SelectionResult.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/db/selection/SelectionResults.java
+/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/exceptions/DBUtilsException.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/exceptions/DatabaseException.java
+/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/exceptions/DuplicateInitializationException.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/init/Init.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/initializer/Initializer.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/logger/AnsiConsoleAppender.java
