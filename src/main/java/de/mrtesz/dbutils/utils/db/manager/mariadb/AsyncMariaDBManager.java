@@ -5,7 +5,7 @@ import de.mrtesz.dbutils.api.DBUtils;
 import de.mrtesz.dbutils.api.db.manager.AsyncDBManager;
 import de.mrtesz.dbutils.api.db.table.DBTable;
 import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
-import de.mrtesz.dbutils.utils.selection.SelectionResults;
+import de.mrtesz.dbutils.utils.db.selection.SelectionResults;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

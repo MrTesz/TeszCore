@@ -1,7 +1,7 @@
 package de.mrtesz.dbutils.api.db.manager;
 
 import de.mrtesz.dbutils.api.db.table.DBTable;
-import de.mrtesz.dbutils.utils.selection.SelectionResults;
+import de.mrtesz.dbutils.utils.db.selection.SelectionResults;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
