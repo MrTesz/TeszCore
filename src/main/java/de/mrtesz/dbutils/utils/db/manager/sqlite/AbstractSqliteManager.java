@@ -58,7 +58,7 @@ public abstract class AbstractSqliteManager extends AbstractDBManager {
         HikariConfig config = createHikariConfig();
         dataSource = new HikariDataSource(config);
 
-        DBUtils.logging(DebugLevel.LEVEL3, projectName).info("Connected to '" + config.getJdbcUrl() + "' in " + (System.currentTimeMillis() - start) + " ms");
+        DBUtils.getInstance().getLogger(DebugLevel.LEVEL3, projectName).info("Connected to '" + config.getJdbcUrl() + "' in " + (System.currentTimeMillis() - start) + " ms");
     }
 
     @Override
@@ -68,9 +68,9 @@ public abstract class AbstractSqliteManager extends AbstractDBManager {
         if(dataSource != null && !dataSource.isClosed()) {
             dataSource.close();
             dataSource = null;
-            DBUtils.logging(DebugLevel.LEVEL3, projectName).info("Disconnected from '" + url + "' in " + (System.currentTimeMillis() - start) + " ms");
+            DBUtils.getInstance().getLogger(DebugLevel.LEVEL3, projectName).info("Disconnected from '" + url + "' in " + (System.currentTimeMillis() - start) + " ms");
         } else
-            DBUtils.logging(DebugLevel.LEVEL1, projectName).info("Couldn't disconnect from '" + url + "': Not connected");
+            DBUtils.getInstance().getLogger(DebugLevel.LEVEL1, projectName).info("Couldn't disconnect from '" + url + "': Not connected");
     }
 
     @Override
@@ -81,7 +81,7 @@ public abstract class AbstractSqliteManager extends AbstractDBManager {
         if (getDataSource() == null || getDataSource().isClosed()) {
             connect();
             if (getDataSource() == null || getDataSource().isClosed())
-                DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error after trying to connect to database: Cant connect!");
+                DBUtils.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error after trying to connect to database: Cant connect!");
         }
     }
 
@@ -91,8 +91,8 @@ public abstract class AbstractSqliteManager extends AbstractDBManager {
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {
-            DBUtils.logging(DebugLevel.LEVEL1, projectName).error("Error while getConnection: " + e.getMessage());
-            DBUtils.logging(DebugLevel.LEVEL0, projectName).logException(e);
+            DBUtils.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while getConnection: " + e.getMessage());
+            DBUtils.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
             return null;
         }
     }
