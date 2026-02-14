@@ -8,6 +8,8 @@ import java.util.UUID;
 
 public interface DBManager {
 
+    String getName();
+
     boolean isClosed();
     void close();
 
@@ -53,6 +55,4 @@ public interface DBManager {
                 .replace("FROM", "FR")
                 .replace("WHERE", "WRE");
     }
-
-
 }
