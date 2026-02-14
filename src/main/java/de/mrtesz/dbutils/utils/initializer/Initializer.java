@@ -8,6 +8,9 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.function.Supplier;
 
+/**
+ * Utility class for initialising classes with wrapping logging
+ */
 @AllArgsConstructor
 public class Initializer {
 
