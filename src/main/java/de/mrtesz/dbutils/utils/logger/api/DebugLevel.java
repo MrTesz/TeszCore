@@ -11,7 +11,7 @@ public enum DebugLevel {
 
     LEVEL11(11, LoggerLevel.DEBUG, "column exists", "index exists"),
     LEVEL10(10, LoggerLevel.DEBUG, "insert", "update", "select", "remove"),
-    LEVEL9(9, LoggerLevel.DEBUG),
+    LEVEL9(9, LoggerLevel.DEBUG, "Plugin Messages"),
     LEVEL8(8, LoggerLevel.DEBUG, "create", "alter"),
     LEVEL5(5, LoggerLevel.INFO, "create/close MariaDBManagers", "Initializing projects", "Initializing classes"),
     LEVEL3(3, LoggerLevel.INFO, "connect", "disconnect"),

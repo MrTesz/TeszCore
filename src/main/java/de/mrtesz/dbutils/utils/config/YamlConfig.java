@@ -332,6 +332,51 @@ public class YamlConfig {
         return data;
     }
 
+    @SuppressWarnings("unchecked")
+    public List<String> getAllPaths(@NotNull Map<String, Object> section, String parent) {
+        List<String> paths = new ArrayList<>();
+
+        for (Map.Entry<String, Object> entry : section.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            String fullPath = parent.isEmpty() ? key : parent + "." + key;
+
+            if (value instanceof Map<?, ?> map) {
+                paths.addAll(getAllPaths((Map<String, Object>) map, fullPath));
+            } else {
+                paths.add(fullPath);
+            }
+        }
+
+        return paths;
+    }
+
+    /**
+     * Get all paths from a set parent. (Paths contains parent)
+     * @param parent Parent path
+     * @return all paths under parent
+     */
+    @SuppressWarnings("unchecked")
+    public Set<String> getPaths(String parent) {
+        Set<String> paths = new HashSet<>();
+
+        for (Map.Entry<String, Object> entry : getRaw().entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            String fullPath = parent.isEmpty() ? key : parent + "." + key;
+
+            if (value instanceof Map<?, ?> map) {
+                paths.addAll(getAllPaths((Map<String, Object>) map, fullPath));
+            } else {
+                paths.add(fullPath);
+            }
+        }
+
+        return paths;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
