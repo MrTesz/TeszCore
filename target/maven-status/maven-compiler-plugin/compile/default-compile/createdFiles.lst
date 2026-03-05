@@ -4,8 +4,10 @@ de/mrtesz/dbutils/api/DBUtils$DBUtilsInitializer$DBUtilsInitializerBuilder.class
 de/mrtesz/dbutils/utils/exceptions/DBUtilsException.class
 de/mrtesz/dbutils/utils/db/manager/sqlite/AbstractSqliteManager.class
 de/mrtesz/dbutils/utils/logger/api/DebugLevel.class
+de/mrtesz/dbutils/utils/collections/Triple.class
 de/mrtesz/dbutils/utils/init/Init.class
 de/mrtesz/dbutils/api/DBUtils.class
+de/mrtesz/dbutils/utils/collections/Pair.class
 de/mrtesz/dbutils/api/DBUtils$DBUtilsInitializer.class
 de/mrtesz/dbutils/utils/db/selection/SelectionResult.class
 de/mrtesz/dbutils/utils/db/manager/mariadb/MariaDBManager.class

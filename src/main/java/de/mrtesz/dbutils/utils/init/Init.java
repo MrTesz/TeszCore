@@ -50,7 +50,7 @@ public class Init {
                     .build();
             fileAppender = RollingFileAppender.newBuilder()
                     .withFileName(path + "latest-" + fileName + ".log")
-                    .withFilePattern(path + "%d{yyyy-MM-dd}-" + fileName + ".log.gz")
+                    .withFilePattern(path + "%d{yyyy-MM-dd}-" + fileName + "-%i.log.gz")
                     .withPolicy(CompositeTriggeringPolicy.createPolicy(
                             OnStartupTriggeringPolicy.createPolicy(1),
                             SizeBasedTriggeringPolicy.createPolicy("10MB")

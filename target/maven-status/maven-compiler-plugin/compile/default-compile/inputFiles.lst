@@ -4,6 +4,8 @@
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/api/db/manager/DBManager.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/api/db/manager/SyncDBManager.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/api/db/table/DBTable.java
+/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/collections/Pair.java
+/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/collections/Triple.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/config/YamlConfig.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/db/manager/AbstractDBManager.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/db/manager/mariadb/AbstractMariaDBManager.java
