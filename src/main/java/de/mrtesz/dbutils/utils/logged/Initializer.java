@@ -1,4 +1,4 @@
-package de.mrtesz.dbutils.utils.initializer;
+package de.mrtesz.dbutils.utils.logged;
 
 import de.mrtesz.dbutils.api.DBUtils;
 import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
@@ -17,7 +17,7 @@ public class Initializer {
     private final String usingProject;
 
     /**
-     * Referencing {@link #initialize(Class, String, Object...)} with the String being the  provided when construction
+     * Referencing {@link #initialize(Class, String, Object...)} with the String provided on construct
      */
     public <I> I init(Class<I> clazz, Object... parameters) {
         return initialize(clazz, usingProject, parameters);
@@ -28,7 +28,7 @@ public class Initializer {
 
     // statics
     /**
-     * Initialize a class with wrapping logging (Example: <code>de.mrtesz.dbutils.utils.config.YamlConfig</code>: <code>initialize(YamlConfig.class, "config")</code>)
+     * Initialize a class with wrapping logging (Example: {@link Initializer}: <code>initialize(Initializer.class, "DBUtils")</code>)
      * @param clazz The class of the object, initializing
      * @param parameters The parameters of the constructor you want to use
      * @return An instance of the clazz param
@@ -38,7 +38,7 @@ public class Initializer {
         return initialize(clazz, null, parameters);
     }
     /**
-     * Initialize a class with wrapping logging (Example: <code>de.mrtesz.dbutils.utils.config.YamlConfig</code>: <code>initialize(YamlConfig.class, "config")</code>)
+     * Initialize a class with wrapping logging (Example: {@link Initializer}: <code>initialize(Initializer.class, "DBUtils")</code>)
      * @param clazz The class of the object, initializing
      * @param usingProject Optional: The project using the method
      * @param parameters The parameters of the constructor you want to use

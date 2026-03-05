@@ -13,7 +13,7 @@ public enum DebugLevel {
     LEVEL10(10, LoggerLevel.DEBUG, "insert", "update", "select", "remove"),
     LEVEL9(9, LoggerLevel.DEBUG, "Plugin Messages"),
     LEVEL8(8, LoggerLevel.DEBUG, "create", "alter"),
-    LEVEL5(5, LoggerLevel.INFO, "create/close MariaDBManagers", "Initializing projects", "Initializing classes"),
+    LEVEL5(5, LoggerLevel.INFO, "create/close MariaDBManagers", "Initializing projects", "Initializing classes", "Logged Running (Runner.java Methods)"),
     LEVEL3(3, LoggerLevel.INFO, "connect", "disconnect"),
     LEVEL1(1, LoggerLevel.WARNING, "Warning Messages"),
     LEVEL0(0, LoggerLevel.ERROR, "Error StackTraces"),

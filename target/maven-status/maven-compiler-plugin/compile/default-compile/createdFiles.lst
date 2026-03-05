@@ -4,6 +4,7 @@ de/mrtesz/dbutils/api/DBUtils$DBUtilsInitializer$DBUtilsInitializerBuilder.class
 de/mrtesz/dbutils/utils/exceptions/DBUtilsException.class
 de/mrtesz/dbutils/utils/db/manager/sqlite/AbstractSqliteManager.class
 de/mrtesz/dbutils/utils/logger/api/DebugLevel.class
+de/mrtesz/dbutils/utils/logged/Initializer.class
 de/mrtesz/dbutils/utils/collections/Triple.class
 de/mrtesz/dbutils/utils/init/Init.class
 de/mrtesz/dbutils/api/DBUtils.class
@@ -15,6 +16,7 @@ de/mrtesz/dbutils/utils/logger/LoggerLevel.class
 de/mrtesz/dbutils/utils/logger/AnsiConsoleAppender.class
 de/mrtesz/dbutils/utils/logger/api/DBLogger.class
 de/mrtesz/dbutils/utils/db/manager/sqlite/AsyncSqliteManager.class
+de/mrtesz/dbutils/utils/logged/Runner.class
 de/mrtesz/dbutils/utils/exceptions/DatabaseException.class
 de/mrtesz/dbutils/utils/db/manager/mariadb/AsyncMariaDBManager.class
 de/mrtesz/dbutils/utils/db/selection/SelectionResults.class
@@ -22,7 +24,6 @@ de/mrtesz/dbutils/utils/db/manager/sqlite/SqliteTable.class
 de/mrtesz/dbutils/utils/db/manager/mariadb/MariaDBTable.class
 de/mrtesz/dbutils/api/db/manager/AsyncDBManager.class
 de/mrtesz/dbutils/utils/db/manager/AbstractDBManager.class
-de/mrtesz/dbutils/utils/initializer/Initializer.class
 de/mrtesz/dbutils/utils/logger/api/DBLogger$1.class
 de/mrtesz/dbutils/api/db/manager/DBManager.class
 de/mrtesz/dbutils/Main.class
