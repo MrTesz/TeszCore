@@ -1,9 +1,7 @@
 package de.mrtesz.teszcore.api;
 
-import de.mrtesz.teszcore.api.db.manager.SyncDBManager;
 import de.mrtesz.teszcore.utils.db.manager.mariadb.MariaDBManager;
 import de.mrtesz.teszcore.utils.db.manager.sqlite.SqliteManager;
-import de.mrtesz.teszcore.utils.exceptions.DatabaseException;
 import de.mrtesz.teszcore.utils.exceptions.DuplicateInitializationException;
 import de.mrtesz.teszcore.utils.init.Init;
 import de.mrtesz.teszcore.utils.logger.TeszCoreLogger;
@@ -123,10 +121,10 @@ public class TeszCoreApi {
      * @param url Url for the Database
      * @param user User for the Database
      * @param password Password for the Database
-     * @return A MariaDBManager
+     * @return A {@link MariaDBManager}
      */
-    public SyncDBManager createMariaDBManager(@NotNull String projectName, boolean infoWhenCredentialsAreNull, @Nullable String name,
-                                              @Nullable String url, @Nullable String user, @Nullable String password) throws DatabaseException {
+    public MariaDBManager createMariaDBManager(@NotNull String projectName, boolean infoWhenCredentialsAreNull, @Nullable String name,
+                                              @Nullable String url, @Nullable String user, @Nullable String password) {
         return new MariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, null, projectName);
     }
 
@@ -135,10 +133,9 @@ public class TeszCoreApi {
      * @param projectName The name of the Project using the method
      * @param path Path to the .db file
      * @param name Name of the .db file
-     * @return A MariaDBManager
+     * @return A {@link SqliteManager}
      */
-    public SyncDBManager createSqliteManager(@NotNull String projectName, @Nullable String path,
-                                             @NotNull String name) throws DatabaseException {
+    public SqliteManager createSqliteManager(@NotNull String projectName, @Nullable String path, @NotNull String name) {
         return new SqliteManager(path, name, null, projectName);
     }
 

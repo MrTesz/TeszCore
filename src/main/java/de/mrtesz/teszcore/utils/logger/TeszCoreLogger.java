@@ -3,6 +3,7 @@ package de.mrtesz.teszcore.utils.logger;
 import de.mrtesz.teszcore.utils.copyable.Copyable;
 import de.mrtesz.teszcore.utils.logger.level.DebugLevel;
 import de.mrtesz.teszcore.utils.logger.level.LoggerLevel;
+import lombok.Getter;
 import lombok.NonNull;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
@@ -12,7 +13,7 @@ public class TeszCoreLogger implements Copyable<TeszCoreLogger> {
 
     private DebugLevel level;
     private int lvl;
-    private final Logger logger;
+    private final @Getter Logger logger;
     private final @Nullable String projectName;
 
     public TeszCoreLogger(@NonNull Logger logger, @NonNull DebugLevel level, @Nullable String projectName) {
