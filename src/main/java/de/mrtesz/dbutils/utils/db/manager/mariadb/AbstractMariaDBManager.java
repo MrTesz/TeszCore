@@ -18,15 +18,13 @@ import java.sql.SQLException;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractMariaDBManager extends AbstractDBManager {
 
-    private final boolean infoWhenCredentialsAreNull;
-    @Getter
-    private final @NotNull String name;
-    private final String url;
-    private final String user;
-    private final String password;
-    @Getter
-    private HikariDataSource dataSource;
-    private final String projectName;
+    protected final boolean infoWhenCredentialsAreNull;
+    protected final @Getter @NotNull String name;
+    protected final String url;
+    protected final String user;
+    protected final String password;
+    protected @Getter HikariDataSource dataSource;
+    protected final String projectName;
 
     protected @NotNull HikariConfig createHikariConfig() {
         HikariConfig config = new HikariConfig();

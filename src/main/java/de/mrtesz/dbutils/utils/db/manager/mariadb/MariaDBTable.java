@@ -1,6 +1,9 @@
 package de.mrtesz.dbutils.utils.db.manager.mariadb;
 
 import de.mrtesz.dbutils.api.db.table.DBTable;
+import de.mrtesz.dbutils.utils.copyable.Copyable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,13 +11,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
-public class MariaDBTable implements DBTable {
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class MariaDBTable implements DBTable, Copyable<MariaDBTable> {
 
     @Getter
     private final String name;
-    private final Map<String, String> columns = new LinkedHashMap<>();
-    private final List<String> primaryKeyColumns = new ArrayList<>();
-    private final Map<String, String> indexes = new HashMap<>();
+    private Map<String, String> columns = new LinkedHashMap<>();
+    private List<String> primaryKeyColumns = new ArrayList<>();
+    private Map<String, String> indexes = new HashMap<>();
     private @Nullable String unique = null;
 
     /**
@@ -179,4 +183,8 @@ public class MariaDBTable implements DBTable {
         return commands;
     }
 
+    @Override
+    public MariaDBTable copy() {
+        return new MariaDBTable(name, columns, primaryKeyColumns, indexes, unique);
+    }
 }

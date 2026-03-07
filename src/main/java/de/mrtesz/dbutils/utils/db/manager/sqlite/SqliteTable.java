@@ -1,20 +1,23 @@
 package de.mrtesz.dbutils.utils.db.manager.sqlite;
 
 import de.mrtesz.dbutils.api.db.table.DBTable;
+import de.mrtesz.dbutils.utils.copyable.Copyable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SqliteTable implements DBTable {
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class SqliteTable implements DBTable, Copyable<SqliteTable> {
 
-    @Getter
-    private final String name;
-    private final Map<String, String> columns = new LinkedHashMap<>();
+    private final @Getter String name;
+    private Map<String, String> columns = new LinkedHashMap<>();
     private @Nullable String unique = null;
-    private final List<String> primaryKeyColumns = new ArrayList<>();
-    private final Map<String, String> indexes = new HashMap<>();
+    private Set<String> primaryKeyColumns = new HashSet<>();
+    private Map<String, String> indexes = new HashMap<>();
 
     /**
      * Create a Table Object
@@ -146,5 +149,10 @@ public class SqliteTable implements DBTable {
                     "CREATE INDEX IF NOT EXISTS `" + indexName + "` ON `" + name + "`(`" + column + "`)");
         }
         return commands;
+    }
+
+    @Override
+    public SqliteTable copy() {
+        return new SqliteTable(this.name, this.columns, this.unique, this.primaryKeyColumns, this.indexes);
     }
 }

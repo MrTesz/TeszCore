@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import de.mrtesz.dbutils.api.DBUtils;
 import de.mrtesz.dbutils.api.db.manager.AsyncDBManager;
 import de.mrtesz.dbutils.api.db.table.DBTable;
+import de.mrtesz.dbutils.utils.copyable.Copyable;
 import de.mrtesz.dbutils.utils.db.manager.mariadb.MariaDBTable;
 import de.mrtesz.dbutils.utils.db.selection.SelectionResults;
 import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
@@ -15,7 +16,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDBManager {
+public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDBManager, Copyable<AsyncSqliteManager> {
 
     private final String projectName;
     protected final int timeoutSeconds;
@@ -312,5 +313,10 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
             }
             return false;
         });
+    }
+
+    @Override
+    public AsyncSqliteManager copy() {
+        return new AsyncSqliteManager(this.path, this.name, this.dataSource, this.projectName, this.timeoutSeconds);
     }
 }

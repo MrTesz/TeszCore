@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import de.mrtesz.dbutils.api.DBUtils;
 import de.mrtesz.dbutils.api.db.manager.AsyncDBManager;
 import de.mrtesz.dbutils.api.db.table.DBTable;
+import de.mrtesz.dbutils.utils.copyable.Copyable;
 import de.mrtesz.dbutils.utils.db.selection.SelectionResults;
 import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
 import org.jetbrains.annotations.NotNull;
@@ -15,16 +16,14 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class AsyncMariaDBManager extends AbstractMariaDBManager implements AsyncDBManager {
+public class AsyncMariaDBManager extends AbstractMariaDBManager implements AsyncDBManager, Copyable<AsyncMariaDBManager> {
 
-    private final String projectName;
     protected final int timeoutSeconds;
 
     protected AsyncMariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name, @Nullable String url, @Nullable String user, @Nullable String password,
                                   @Nullable HikariDataSource dataSource, @Nullable String projectName, int timeoutSeconds) {
         super(infoWhenCredentialsAreNull, (name == null ? "Main" : name), url, user, password, dataSource, projectName);
         this.timeoutSeconds = timeoutSeconds;
-        this.projectName = projectName;
     }
 
     /**
@@ -324,5 +323,10 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager implements Async
                                 + " timed out after " + timeoutSeconds + " seconds.");
                 }
         );
+    }
+
+    @Override
+    public AsyncMariaDBManager copy() {
+        return new AsyncMariaDBManager(this.infoWhenCredentialsAreNull, this.name, this.url, this.user, this.password, this.dataSource, this.projectName, this.timeoutSeconds);
     }
 }

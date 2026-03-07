@@ -1,18 +1,20 @@
 package de.mrtesz.dbutils.utils.logger.api;
 
+import de.mrtesz.dbutils.utils.copyable.Copyable;
 import de.mrtesz.dbutils.utils.logger.LoggerLevel;
+import lombok.NonNull;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public class DBLogger {
+public class DBLogger implements Copyable<DBLogger> {
 
-    private final DebugLevel level;
-    private final int lvl;
+    private DebugLevel level;
+    private int lvl;
     private final Logger logger;
     private final @Nullable String projectName;
 
-    public DBLogger(Logger logger, DebugLevel level, @Nullable String projectName) {
+    public DBLogger(@NonNull Logger logger, @NonNull DebugLevel level, @Nullable String projectName) {
         this.logger = logger;
         this.level = level;
         this.lvl = level.getIntValue();
@@ -61,8 +63,7 @@ public class DBLogger {
     }
 
     public void debug(String msg) {
-        if (lvl < 11)
-            logger.debug("{}[{}] {}", (projectName != null ? "[" + projectName + "] " : ""), lvl, msg);
+        logger.debug("{}[{}] {}", (projectName != null ? "[" + projectName + "] " : ""), lvl, msg);
     }
 
     public void info(String msg) {
@@ -86,5 +87,15 @@ public class DBLogger {
 
     public void printStackTrace(Throwable t) {
         logger.throwing(t);
+    }
+
+    public void setLevel(DebugLevel level) {
+        this.level = level;
+        this.lvl = level.getIntValue();
+    }
+
+    @Override
+    public DBLogger copy() {
+        return new DBLogger(this.logger, this.level, this.projectName);
     }
 }

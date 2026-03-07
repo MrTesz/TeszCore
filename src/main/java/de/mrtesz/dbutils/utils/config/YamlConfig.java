@@ -1,6 +1,10 @@
 package de.mrtesz.dbutils.utils.config;
 
+import de.mrtesz.dbutils.utils.copyable.Copyable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,7 +22,8 @@ import java.nio.file.Paths;
 import java.util.*;
 
 @SuppressWarnings("unused")
-public class YamlConfig {
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class YamlConfig implements Copyable<YamlConfig> {
 
     private final Path filePath;
     private final Yaml yaml;
@@ -29,126 +34,6 @@ public class YamlConfig {
         this.yaml = yaml;
 
         load();
-    }
-
-    public static class Builder {
-
-        @Getter @Accessors(fluent = true)
-        private @NotNull DumperOptions dumperOptions = new DumperOptions();
-
-        private @Nullable String filePath;
-
-        private String fileName;
-
-        public YamlConfig build() {
-            Objects.requireNonNull(fileName);
-
-            Path path = filePath == null
-                    ? Paths.get(fileName + ".yml")
-                    : Paths.get(filePath, fileName + ".yml");
-
-            Yaml yaml = new Yaml(dumperOptions);
-
-            return new YamlConfig(path, yaml);
-        }
-
-        public Builder setFilePath(@Nullable String filePath) {
-            this.filePath = filePath;
-            return this;
-        }
-        public Builder setFileName(@NotNull String fileName) {
-            this.fileName = fileName;
-            return this;
-        }
-        public Builder setDumperOptions(DumperOptions dumperOptions) {
-            this.dumperOptions = dumperOptions;
-            return this;
-        }
-
-        public Builder setDefaultScalarStyle(DumperOptions.ScalarStyle defaultStyle) {
-            dumperOptions.setDefaultScalarStyle(defaultStyle);
-            return this;
-        }
-        public Builder setDefaultFlowStyle(DumperOptions.FlowStyle defaultFlowStyle) {
-            dumperOptions.setDefaultFlowStyle(defaultFlowStyle);
-            return this;
-        }
-        public Builder setCanonical(boolean canonical) {
-            dumperOptions.setCanonical(canonical);
-            return this;
-        }
-        public Builder setAllowUnicode(boolean allowUnicode) {
-            dumperOptions.setAllowUnicode(allowUnicode);
-            return this;
-        }
-        public Builder setAllowReadOnlyProperties(boolean allowReadOnlyProperties) {
-            dumperOptions.setAllowReadOnlyProperties(allowReadOnlyProperties);
-            return this;
-        }
-        public Builder setIndent(int indent) {
-            dumperOptions.setIndent(indent);
-            return this;
-        }
-        public Builder setIndicatorIndent(int indicatorIndent) {
-            dumperOptions.setIndicatorIndent(indicatorIndent);
-            return this;
-        }
-        public Builder setIndentWithIndicator(boolean indentWithIndicator) {
-            dumperOptions.setIndentWithIndicator(indentWithIndicator);
-            return this;
-        }
-        public Builder setWith(int bestWidth) {
-            dumperOptions.setWidth(bestWidth);
-            return this;
-        }
-        public Builder setSplitLines(boolean splitLines) {
-            dumperOptions.setSplitLines(splitLines);
-            return this;
-        }
-        public Builder setLineBreak(DumperOptions.LineBreak lineBreak) {
-            dumperOptions.setLineBreak(lineBreak);
-            return this;
-        }
-        public Builder setExplicitStart(boolean explicitStart) {
-            dumperOptions.setExplicitStart(explicitStart);
-            return this;
-        }
-        public Builder setExplicitEnd(boolean explicitEnd) {
-            dumperOptions.setExplicitEnd(explicitEnd);
-            return this;
-        }
-        public Builder setTimeZone(TimeZone timeZone) {
-            dumperOptions.setTimeZone(timeZone);
-            return this;
-        }
-        public Builder setMaxSimpleKeyLength(int maxSimpleKeyLength) {
-            dumperOptions.setMaxSimpleKeyLength(maxSimpleKeyLength);
-            return this;
-        }
-        public Builder setProcessComments(boolean processComments) {
-            dumperOptions.setProcessComments(processComments);
-            return this;
-        }
-        public Builder setNonPrintableStyle(DumperOptions.NonPrintableStyle nonPrintableStyle) {
-            dumperOptions.setNonPrintableStyle(nonPrintableStyle);
-            return this;
-        }
-        public Builder setVersion(DumperOptions.Version version) {
-            dumperOptions.setVersion(version);
-            return this;
-        }
-        public Builder setTags(Map<String, String> tags) {
-            dumperOptions.setTags(tags);
-            return this;
-        }
-        public Builder setPrettyFlow(Boolean prettyFlow) {
-            dumperOptions.setPrettyFlow(prettyFlow);
-            return this;
-        }
-        public Builder setAnchorGenerator(AnchorGenerator anchorGenerator) {
-            dumperOptions.setAnchorGenerator(anchorGenerator);
-            return this;
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -377,7 +262,139 @@ public class YamlConfig {
         return paths;
     }
 
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @NoArgsConstructor
+    public static class Builder implements Copyable<Builder> {
+
+        @Getter @Accessors(fluent = true)
+        private @NotNull DumperOptions dumperOptions = new DumperOptions();
+
+        private @Nullable String filePath;
+
+        private String fileName;
+
+        public YamlConfig build() {
+            Objects.requireNonNull(fileName);
+
+            Path path = filePath == null
+                    ? Paths.get(fileName + ".yml")
+                    : Paths.get(filePath, fileName + ".yml");
+
+            Yaml yaml = new Yaml(dumperOptions);
+
+            return new YamlConfig(path, yaml);
+        }
+
+        public Builder setFilePath(@Nullable String filePath) {
+            this.filePath = filePath;
+            return this;
+        }
+        public Builder setFileName(@NotNull String fileName) {
+            this.fileName = fileName;
+            return this;
+        }
+        public Builder setDumperOptions(DumperOptions dumperOptions) {
+            this.dumperOptions = dumperOptions;
+            return this;
+        }
+
+        public Builder setDefaultScalarStyle(DumperOptions.ScalarStyle defaultStyle) {
+            dumperOptions.setDefaultScalarStyle(defaultStyle);
+            return this;
+        }
+        public Builder setDefaultFlowStyle(DumperOptions.FlowStyle defaultFlowStyle) {
+            dumperOptions.setDefaultFlowStyle(defaultFlowStyle);
+            return this;
+        }
+        public Builder setCanonical(boolean canonical) {
+            dumperOptions.setCanonical(canonical);
+            return this;
+        }
+        public Builder setAllowUnicode(boolean allowUnicode) {
+            dumperOptions.setAllowUnicode(allowUnicode);
+            return this;
+        }
+        public Builder setAllowReadOnlyProperties(boolean allowReadOnlyProperties) {
+            dumperOptions.setAllowReadOnlyProperties(allowReadOnlyProperties);
+            return this;
+        }
+        public Builder setIndent(int indent) {
+            dumperOptions.setIndent(indent);
+            return this;
+        }
+        public Builder setIndicatorIndent(int indicatorIndent) {
+            dumperOptions.setIndicatorIndent(indicatorIndent);
+            return this;
+        }
+        public Builder setIndentWithIndicator(boolean indentWithIndicator) {
+            dumperOptions.setIndentWithIndicator(indentWithIndicator);
+            return this;
+        }
+        public Builder setWith(int bestWidth) {
+            dumperOptions.setWidth(bestWidth);
+            return this;
+        }
+        public Builder setSplitLines(boolean splitLines) {
+            dumperOptions.setSplitLines(splitLines);
+            return this;
+        }
+        public Builder setLineBreak(DumperOptions.LineBreak lineBreak) {
+            dumperOptions.setLineBreak(lineBreak);
+            return this;
+        }
+        public Builder setExplicitStart(boolean explicitStart) {
+            dumperOptions.setExplicitStart(explicitStart);
+            return this;
+        }
+        public Builder setExplicitEnd(boolean explicitEnd) {
+            dumperOptions.setExplicitEnd(explicitEnd);
+            return this;
+        }
+        public Builder setTimeZone(TimeZone timeZone) {
+            dumperOptions.setTimeZone(timeZone);
+            return this;
+        }
+        public Builder setMaxSimpleKeyLength(int maxSimpleKeyLength) {
+            dumperOptions.setMaxSimpleKeyLength(maxSimpleKeyLength);
+            return this;
+        }
+        public Builder setProcessComments(boolean processComments) {
+            dumperOptions.setProcessComments(processComments);
+            return this;
+        }
+        public Builder setNonPrintableStyle(DumperOptions.NonPrintableStyle nonPrintableStyle) {
+            dumperOptions.setNonPrintableStyle(nonPrintableStyle);
+            return this;
+        }
+        public Builder setVersion(DumperOptions.Version version) {
+            dumperOptions.setVersion(version);
+            return this;
+        }
+        public Builder setTags(Map<String, String> tags) {
+            dumperOptions.setTags(tags);
+            return this;
+        }
+        public Builder setPrettyFlow(Boolean prettyFlow) {
+            dumperOptions.setPrettyFlow(prettyFlow);
+            return this;
+        }
+        public Builder setAnchorGenerator(AnchorGenerator anchorGenerator) {
+            dumperOptions.setAnchorGenerator(anchorGenerator);
+            return this;
+        }
+
+        @Override
+        public Builder copy() {
+            return new Builder(this.dumperOptions, this.filePath, this.fileName);
+        }
+    }
+
     public static Builder builder() {
         return new Builder();
+    }
+
+    @Override
+    public YamlConfig copy() {
+        return new YamlConfig(this.filePath, this.yaml, this.data);
     }
 }

@@ -143,6 +143,10 @@ public class DBUtils {
         return new SqliteManager(path, name, null, projectName);
     }
 
+    public org.apache.logging.log4j.Logger getLog4jLogger() {
+        return init.getLogger();
+    }
+
     private DBUtilsInitializer getInitializedWith() {
         return initializedWith;
     }

@@ -17,16 +17,18 @@ import java.sql.SQLException;
 public abstract class AbstractSqliteManager extends AbstractDBManager {
 
     @Getter
-    private HikariDataSource dataSource;
+    protected HikariDataSource dataSource;
     @Getter
-    private final @NotNull String name;
-    private final String url;
-    private final String projectName;
+    protected final @NotNull String name;
+    protected final String url;
+    protected final String path;
+    protected final String projectName;
 
     protected AbstractSqliteManager(@Nullable String path, @NotNull String name, @Nullable HikariDataSource dataSource, @Nullable String projectName) {
         if (name.isBlank()) throw new IllegalArgumentException("name param of " + AbstractSqliteManager.class.getName() + " was blank!");
 
         this.name = name;
+        this.path = path;
         this.url = "jdbc:sqlite:" + (path != null ? path + "/" : "") + name + ".db";
         this.projectName = projectName;
         this.dataSource = dataSource;

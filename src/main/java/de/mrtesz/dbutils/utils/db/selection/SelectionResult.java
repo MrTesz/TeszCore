@@ -1,5 +1,6 @@
 package de.mrtesz.dbutils.utils.db.selection;
 
+import de.mrtesz.dbutils.utils.copyable.Copyable;
 import de.mrtesz.dbutils.utils.exceptions.DatabaseException;
 import lombok.AllArgsConstructor;
 
@@ -8,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 @AllArgsConstructor
-public class SelectionResult {
+public class SelectionResult implements Copyable<SelectionResult> {
 
     private final Map<String, Object> result;
 
@@ -158,5 +159,10 @@ public class SelectionResult {
     }
     public Map<String, Object> asMap() {
         return result;
+    }
+
+    @Override
+    public SelectionResult copy() {
+        return new SelectionResult(this.result);
     }
 }

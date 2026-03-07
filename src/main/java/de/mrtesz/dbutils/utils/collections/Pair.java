@@ -1,5 +1,6 @@
 package de.mrtesz.dbutils.utils.collections;
 
+import de.mrtesz.dbutils.utils.copyable.Copyable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class Pair<L, R> {
+public class Pair<L, R> implements Copyable<Pair<L, R>> {
 
     L left;
     R right;
@@ -19,5 +20,8 @@ public class Pair<L, R> {
         return String.format(format, this.getLeft(), this.getRight());
     }
 
-
+    @Override
+    public Pair<L, R> copy() {
+        return new Pair<>(this.left, this.right);
+    }
 }

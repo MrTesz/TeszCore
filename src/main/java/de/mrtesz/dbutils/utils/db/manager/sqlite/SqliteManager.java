@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import de.mrtesz.dbutils.api.DBUtils;
 import de.mrtesz.dbutils.api.db.manager.SyncDBManager;
 import de.mrtesz.dbutils.api.db.table.DBTable;
+import de.mrtesz.dbutils.utils.copyable.Copyable;
 import de.mrtesz.dbutils.utils.db.manager.mariadb.MariaDBTable;
 import de.mrtesz.dbutils.utils.db.selection.SelectionResults;
 import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
@@ -14,13 +15,10 @@ import java.sql.Date;
 import java.sql.*;
 import java.util.*;
 
-public class SqliteManager extends AbstractSqliteManager implements SyncDBManager {
-
-    private final String projectName;
+public class SqliteManager extends AbstractSqliteManager implements SyncDBManager, Copyable<SqliteManager> {
 
     public SqliteManager(@Nullable String path, @NotNull String name, @Nullable HikariDataSource dataSource, @Nullable String projectName) {
         super(path, name, dataSource, projectName);
-        this.projectName = projectName;
     }
 
     /**
@@ -297,5 +295,10 @@ public class SqliteManager extends AbstractSqliteManager implements SyncDBManage
             DBUtils.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
         }
         return false;
+    }
+
+    @Override
+    public SqliteManager copy() {
+        return new SqliteManager(this.path, this.name, this.dataSource, this.projectName);
     }
 }

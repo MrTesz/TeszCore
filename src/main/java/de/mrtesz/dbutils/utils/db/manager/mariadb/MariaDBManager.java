@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import de.mrtesz.dbutils.api.DBUtils;
 import de.mrtesz.dbutils.api.db.manager.SyncDBManager;
 import de.mrtesz.dbutils.api.db.table.DBTable;
+import de.mrtesz.dbutils.utils.copyable.Copyable;
 import de.mrtesz.dbutils.utils.db.selection.SelectionResults;
 import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
 import org.jetbrains.annotations.NotNull;
@@ -13,14 +14,11 @@ import java.sql.Date;
 import java.sql.*;
 import java.util.*;
 
-public class MariaDBManager extends AbstractMariaDBManager implements SyncDBManager {
-
-    private final @Nullable String projectName;
+public class MariaDBManager extends AbstractMariaDBManager implements SyncDBManager, Copyable<MariaDBManager> {
 
     public MariaDBManager(boolean infoWhenCredentialsAreNull, @Nullable String name,
                           @Nullable String url, @Nullable String user, @Nullable String password, @Nullable HikariDataSource dataSource, @Nullable String projectName) {
         super(infoWhenCredentialsAreNull, (name == null ? "Main" : name), url, user, password, dataSource, projectName);
-        this.projectName = projectName;
     }
 
     /**
@@ -254,5 +252,10 @@ public class MariaDBManager extends AbstractMariaDBManager implements SyncDBMana
             DBUtils.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
         }
         return false;
+    }
+
+    @Override
+    public MariaDBManager copy() {
+        return new MariaDBManager(this.infoWhenCredentialsAreNull, this.name, this.url, this.user, this.password, this.dataSource, this.projectName);
     }
 }
