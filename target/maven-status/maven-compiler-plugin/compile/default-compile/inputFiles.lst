@@ -7,6 +7,7 @@
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/collections/Pair.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/collections/Triple.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/config/YamlConfig.java
+/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/copyable/Copyable.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/db/manager/AbstractDBManager.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/db/manager/mariadb/AbstractMariaDBManager.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/db/manager/mariadb/AsyncMariaDBManager.java
@@ -24,7 +25,8 @@
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/init/Init.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/logged/Initializer.java
 /home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/logged/Runner.java
-/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/logger/AnsiConsoleAppender.java
-/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/logger/LoggerLevel.java
-/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/logger/api/DBLogger.java
-/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/logger/api/DebugLevel.java
+/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/logger/DBLogger.java
+/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/logger/DBLoggerFactory.java
+/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/logger/level/DebugLevel.java
+/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/logger/level/LoggerLevel.java
+/home/joprivat/Schreibtisch/Coding/workspace/DBUtils/src/main/java/de/mrtesz/dbutils/utils/logger/log4j/AnsiConsoleAppender.java

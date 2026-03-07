@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.mrtesz</groupId>
-    <artifactId>dbutils</artifactId>
-    <version>1.1.0</version>
+    <artifactId>teszcore</artifactId>
+    <version>2.0.0</version>
     <packaging>jar</packaging>
 
-    <name>dbutils</name>
+    <name>teszcore</name>
 
     <properties>
         <java.version>21</java.version>
