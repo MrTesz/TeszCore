@@ -1,9 +1,11 @@
 package de.mrtesz.dbutils.utils.init;
 
-import de.mrtesz.dbutils.utils.logger.AnsiConsoleAppender;
-import de.mrtesz.dbutils.utils.logger.api.DBLogger;
-import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
+import de.mrtesz.dbutils.utils.logger.DBLogger;
+import de.mrtesz.dbutils.utils.logger.DBLoggerFactory;
+import de.mrtesz.dbutils.utils.logger.level.DebugLevel;
+import de.mrtesz.dbutils.utils.logger.log4j.AnsiConsoleAppender;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,13 +29,17 @@ public class Init {
     private final Logger logger;
     private final @Nullable java.util.logging.Logger javaLogger;
 
+    @Setter
+    private DBLoggerFactory dbLoggerFactory;
+
     public Init(@Nullable java.util.logging.Logger javaLogger, Level consoleLoggerLevel, boolean loggerFileEnabled, @NotNull String maxFilesToKeep,
-                @Nullable String loggerPath, @NotNull String loggerName, @NotNull String loggerFileName) {
+                @Nullable String loggerPath, @NotNull String loggerName, @NotNull String loggerFileName, DBLoggerFactory dbLoggerFactory) {
         this.javaLogger = javaLogger;
         setDefaultUncaughtExceptionHandler();
 
         logger = setupLogger(loggerName, loggerPath == null ? "" : loggerPath, loggerFileName, loggerFileEnabled, maxFilesToKeep, consoleLoggerLevel);
 
+        this.dbLoggerFactory = dbLoggerFactory;
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -100,9 +106,9 @@ public class Init {
     }
 
     public DBLogger getLogger(DebugLevel level) {
-        return new DBLogger(logger, level, null);
+        return dbLoggerFactory.create(logger, level, null);
     }
     public DBLogger getLogger(DebugLevel level, String projectName) {
-        return new DBLogger(logger, level, projectName);
+        return dbLoggerFactory.create(logger, level, projectName);
     }
 }

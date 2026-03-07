@@ -1,4 +1,4 @@
-package de.mrtesz.dbutils.utils.logger;
+package de.mrtesz.dbutils.utils.logger.log4j;
 
 import de.mrtesz.ansi_impl.AnsiParser;
 import org.apache.logging.log4j.core.Filter;

@@ -6,7 +6,7 @@ import de.mrtesz.dbutils.api.db.manager.SyncDBManager;
 import de.mrtesz.dbutils.api.db.table.DBTable;
 import de.mrtesz.dbutils.utils.copyable.Copyable;
 import de.mrtesz.dbutils.utils.db.selection.SelectionResults;
-import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
+import de.mrtesz.dbutils.utils.logger.level.DebugLevel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

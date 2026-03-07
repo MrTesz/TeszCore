@@ -6,8 +6,9 @@ import de.mrtesz.dbutils.utils.db.manager.sqlite.SqliteManager;
 import de.mrtesz.dbutils.utils.exceptions.DatabaseException;
 import de.mrtesz.dbutils.utils.exceptions.DuplicateInitializationException;
 import de.mrtesz.dbutils.utils.init.Init;
-import de.mrtesz.dbutils.utils.logger.api.DBLogger;
-import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
+import de.mrtesz.dbutils.utils.logger.DBLogger;
+import de.mrtesz.dbutils.utils.logger.DBLoggerFactory;
+import de.mrtesz.dbutils.utils.logger.level.DebugLevel;
 import lombok.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
@@ -27,10 +28,10 @@ public class DBUtils {
     private final Init init;
 
     private DBUtils(DBUtilsInitializer initializer, @Nullable Logger javaLogger, Level consoleLoggerLevel, boolean loggerFileEnabled, @NotNull String maxFilesToKeep,
-                    @Nullable String loggerPath, @NotNull String loggerName, @NotNull String loggerFileName) {
+                    @Nullable String loggerPath, @NotNull String loggerName, @NotNull String loggerFileName, DBLoggerFactory dbLoggerFactory) {
         this.initializedWith = initializer;
 
-        this.init = new Init(javaLogger, consoleLoggerLevel, loggerFileEnabled, maxFilesToKeep, loggerPath, loggerName, loggerFileName);
+        this.init = new Init(javaLogger, consoleLoggerLevel, loggerFileEnabled, maxFilesToKeep, loggerPath, loggerName, loggerFileName, dbLoggerFactory);
 
         instance = this;
     }
@@ -66,37 +67,33 @@ public class DBUtils {
         /** The name of the logger file. Ignored if {@link #loggerFileEnabled} is false. Default: "DBUtils" */
         @Builder.Default
         private @NonNull @NotNull String loggerFileName = "DBUtils";
+
+        /** The supplier called when using {@link DBUtils#getLogger(DebugLevel)} or {@link DBUtils#getLogger(DebugLevel, String)} */
+        @Builder.Default
+        private DBLoggerFactory dbLoggerFactory = DBLogger::new;
+
+        /** Should {@link DBUtils#initialize(DBUtilsInitializer)} overwrite the current instance if initialized earlier. Default: false */
+        @Builder.Default
+        private boolean overwrite = false;
     }
 
     /**
      * Create a new {@link DBUtils} instance
      * @param dbUtilsInitializer Initializer class (previously created with the {@link DBUtilsInitializer#builder()})
      * @return The created {@link DBUtils} instance (can also be obtained with {@link DBUtils#getInstance()}
-     * @throws DuplicateInitializationException when a {@link DBUtils} instance was already initialized by other projects (can be bypassed with {@link #initializeOverwrite(DBUtilsInitializer)}
+     * @throws DuplicateInitializationException when a {@link DBUtils} instance was already initialized by other projects (can be bypassed with setting {@link DBUtilsInitializer#overwrite} to true)
      * @throws IllegalArgumentException when the {@link DBUtilsInitializer#loggerFilePath} is not null and doesn't end with a '/'
      */
     public static DBUtils initialize(DBUtilsInitializer dbUtilsInitializer) throws DuplicateInitializationException, IllegalArgumentException {
         DBUtils currentInstance = getInstance();
-        if (currentInstance != null) throw new DuplicateInitializationException("Failed to initialize DBUtils.java: An instance of DBUtils is already initialized. Previous Installation: " + currentInstance.getInitializedWith());
-        if (dbUtilsInitializer.loggerFilePath != null && !dbUtilsInitializer.loggerFilePath.endsWith("/")) throw new IllegalArgumentException("path in DBUtils#<init> doesn't end with '/'!");
+        if (currentInstance != null && !dbUtilsInitializer.overwrite)
+            throw new DuplicateInitializationException("Failed to initialize DBUtils.java: An instance of DBUtils is already initialized. Previous Installation: " + currentInstance.getInitializedWith());
+        if (dbUtilsInitializer.loggerFilePath != null && !dbUtilsInitializer.loggerFilePath.endsWith("/"))
+            throw new IllegalArgumentException("path in DBUtils#<init> doesn't end with '/'!");
 
         return new DBUtils(dbUtilsInitializer, dbUtilsInitializer.javaLogger, dbUtilsInitializer.consoleLoggerLevel, dbUtilsInitializer.loggerFileEnabled,
-                dbUtilsInitializer.maxLoggerFilesToKeep, dbUtilsInitializer.loggerFilePath, dbUtilsInitializer.loggerName, dbUtilsInitializer.loggerFileName);
+                dbUtilsInitializer.maxLoggerFilesToKeep, dbUtilsInitializer.loggerFilePath, dbUtilsInitializer.loggerName, dbUtilsInitializer.loggerFileName, dbUtilsInitializer.dbLoggerFactory);
     }
-    /**
-     * Create a new {@link DBUtils} instance
-     * @param dbUtilsInitializer Initializer class (previously created with the {@link DBUtilsInitializer#builder()})
-     * @return The created {@link DBUtils} instance (can also be obtained with {@link DBUtils#getInstance()}
-     * @throws IllegalArgumentException when the {@link DBUtilsInitializer#loggerFilePath} is not null and doesn't end with a '/'
-     */
-    public static DBUtils initializeOverwrite(DBUtilsInitializer dbUtilsInitializer) throws IllegalArgumentException {
-        DBUtils currentInstance = getInstance();
-        if (dbUtilsInitializer.loggerFilePath != null && !dbUtilsInitializer.loggerFilePath.endsWith("/")) throw new IllegalArgumentException("path in DBUtils#<init> doesn't end with '/'!");
-
-        return new DBUtils(dbUtilsInitializer, dbUtilsInitializer.javaLogger, dbUtilsInitializer.consoleLoggerLevel, dbUtilsInitializer.loggerFileEnabled,
-                dbUtilsInitializer.maxLoggerFilesToKeep, dbUtilsInitializer.loggerFilePath, dbUtilsInitializer.loggerName, dbUtilsInitializer.loggerFileName);
-    }
-
 
     /** Logs an exception */
     public void logException(@NotNull Throwable throwable) {

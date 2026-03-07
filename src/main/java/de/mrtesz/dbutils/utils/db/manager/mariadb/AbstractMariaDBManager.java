@@ -6,7 +6,7 @@ import de.mrtesz.dbutils.api.DBUtils;
 import de.mrtesz.dbutils.api.db.manager.AsyncDBManager;
 import de.mrtesz.dbutils.api.db.manager.SyncDBManager;
 import de.mrtesz.dbutils.utils.db.manager.AbstractDBManager;
-import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
+import de.mrtesz.dbutils.utils.logger.level.DebugLevel;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -2,8 +2,8 @@ package de.mrtesz.dbutils.utils.logged;
 
 import de.mrtesz.dbutils.api.DBUtils;
 import de.mrtesz.dbutils.utils.copyable.Copyable;
-import de.mrtesz.dbutils.utils.logger.api.DBLogger;
-import de.mrtesz.dbutils.utils.logger.api.DebugLevel;
+import de.mrtesz.dbutils.utils.logger.DBLogger;
+import de.mrtesz.dbutils.utils.logger.level.DebugLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;

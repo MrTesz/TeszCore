@@ -1,4 +1,4 @@
-package de.mrtesz.dbutils.utils.logger;
+package de.mrtesz.dbutils.utils.logger.level;
 
 public enum LoggerLevel {
     DEBUG,

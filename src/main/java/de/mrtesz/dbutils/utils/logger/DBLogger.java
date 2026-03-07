@@ -1,7 +1,8 @@
-package de.mrtesz.dbutils.utils.logger.api;
+package de.mrtesz.dbutils.utils.logger;
 
 import de.mrtesz.dbutils.utils.copyable.Copyable;
-import de.mrtesz.dbutils.utils.logger.LoggerLevel;
+import de.mrtesz.dbutils.utils.logger.level.DebugLevel;
+import de.mrtesz.dbutils.utils.logger.level.LoggerLevel;
 import lombok.NonNull;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;

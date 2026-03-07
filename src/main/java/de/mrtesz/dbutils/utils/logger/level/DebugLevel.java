@@ -1,6 +1,5 @@
-package de.mrtesz.dbutils.utils.logger.api;
+package de.mrtesz.dbutils.utils.logger.level;
 
-import de.mrtesz.dbutils.utils.logger.LoggerLevel;
 import lombok.Getter;
 
 import java.util.Arrays;
