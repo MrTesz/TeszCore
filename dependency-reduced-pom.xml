@@ -1,10 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>de.mrtesz</groupId>
+  <groupId>io.github.mrtesz</groupId>
   <artifactId>teszcore</artifactId>
   <name>teszcore</name>
   <version>2.0.0</version>
+  <description>Utility project for easier SQL Database usage, logging and easier development</description>
+  <url>https://github.com/MrTesz/TeszCore</url>
+  <developers>
+    <developer>
+      <id>mrtesz</id>
+      <name>MrTesz</name>
+      <url>https://github.com/MrTesz</url>
+    </developer>
+  </developers>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:git://github.com/MrTesz/ansi-impl.git</connection>
+    <developerConnection>scm:git:ssh://github.com/MrTesz/ansi-impl.git</developerConnection>
+    <url>https://github.com/MrTesz/ansi-impl</url>
+  </scm>
   <build>
     <defaultGoal>clean package</defaultGoal>
     <resources>
@@ -52,6 +72,44 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.12.0</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <doclint>none</doclint>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>3.2.8</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.9.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>central</publishingServerId>
+          <autoPublish>true</autoPublish>
+        </configuration>
       </plugin>
     </plugins>
   </build>
