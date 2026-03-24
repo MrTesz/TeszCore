@@ -1,6 +1,0 @@
-/target/
-/.idea/
-*.env
-*.gitignore
-.gitignore
-dependency-reduced-pom.xml
