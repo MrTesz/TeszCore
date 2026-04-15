@@ -11,7 +11,7 @@
 
     <name>teszcore</name>
     <description>Utility project for easier SQL Database usage, logging and easier development</description>
-    <url>https://github.com/MrTesz/TeszCore</url>
+    <url>https://mrtesz.github.io/projects/TeszCore</url>
 
     <properties>
         <java.version>21</java.version>
@@ -139,9 +139,9 @@
     </build>
 
     <scm>
-        <connection>scm:git:git://github.com/MrTesz/ansi-impl.git</connection>
-        <developerConnection>scm:git:ssh://github.com/MrTesz/ansi-impl.git</developerConnection>
-        <url>https://github.com/MrTesz/ansi-impl</url>
+        <connection>scm:git:git://github.com/MrTesz/TeszCore.git</connection>
+        <developerConnection>scm:git:ssh://github.com/MrTesz/TeszCore.git</developerConnection>
+        <url>https://github.com/MrTesz/TeszCore</url>
     </scm>
 
     <dependencies>
