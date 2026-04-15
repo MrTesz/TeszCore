@@ -1,1 +1,1 @@
-Wiki: [mrtesz.github.io](mrtesz.github.io/projects/TeszCore)
+Wiki: [mrtesz.github.io](https://mrtesz.github.io/projects/TeszCore)
