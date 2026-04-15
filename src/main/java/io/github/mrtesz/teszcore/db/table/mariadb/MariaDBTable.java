@@ -1,11 +1,10 @@
-package io.github.mrtesz.teszcore.db.manager.mariadb;
+package io.github.mrtesz.teszcore.db.table.mariadb;
 
 import io.github.mrtesz.teszcore.api.db.table.DBTable;
-import io.github.mrtesz.teszcore.copyable.Copyable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,18 +18,18 @@ public class MariaDBTable implements DBTable {
     private Map<String, String> columns = new LinkedHashMap<>();
     private List<String> primaryKeyColumns = new ArrayList<>();
     private Map<String, String> indexes = new HashMap<>();
-    private @Nullable String unique = null;
+    private List<String> uniques = new ArrayList<>();
 
     /**
      * Create a {@link MariaDBTable} Object
      * @param name Name of the Table
      */
-    public MariaDBTable(String name) {
+    public MariaDBTable(@NotNull String name) {
         this.name = name;
     }
 
     @Override
-    public MariaDBTable addColumn(String columnName, String definition) {
+    public MariaDBTable addColumn(@NotNull String columnName, @NotNull String definition) {
         columns.put(columnName, definition);
         return this;
     }
@@ -46,99 +45,114 @@ public class MariaDBTable implements DBTable {
     }
 
     @Override
-    public MariaDBTable setUnique(String... unique) {
-        this.unique = "UNIQUE(`" + String.join("`, `", unique) + "`)";
+    public MariaDBTable addUnique(String... unique) {
+        this.uniques.add("UNIQUE(`" + String.join("`, `", unique) + "`)");
         return this;
     }
 
     @Override
-    public MariaDBTable addInt(String name) {
+    public MariaDBTable addInt(@NotNull String name) {
         return addColumn(name, "INT");
     }
     @Override
-    public MariaDBTable addInt(String name, Integer def) {
+    public MariaDBTable addInt(@NotNull String name, Integer def) {
         return addColumn(name, "INT DEFAULT " + (def == null ? "NULL" : def));
     }
 
     @Override
-    public MariaDBTable addLong(String name) {
+    public MariaDBTable addLong(@NotNull String name) {
         return addBigInt(name);
     }
     @Override
-    public MariaDBTable addLong(String name, long def) {
+    public MariaDBTable addLong(@NotNull String name, long def) {
         return addBigInt(name, def);
     }
 
     @Override
-    public MariaDBTable addBigInt(String name) {
+    public MariaDBTable addBigInt(@NotNull String name) {
         return addColumn(name, "BIGINT");
     }
     @Override
-    public MariaDBTable addBigInt(String name, long def) {
+    public MariaDBTable addBigInt(@NotNull String name, long def) {
         return addColumn(name, "BIGINT DEFAULT " + def);
     }
 
-    public MariaDBTable addDate(String name) {
-        return addColumn(name, "DATE");
-    }
-
     @Override
-    public MariaDBTable addDouble(String name) {
+    public MariaDBTable addDouble(@NotNull String name) {
         return addColumn(name, "DOUBLE");
     }
     @Override
-    public MariaDBTable addDouble(String name, double def) {
+    public MariaDBTable addDouble(@NotNull String name, double def) {
         return addColumn(name, "DOUBLE DEFAULT " + def);
     }
 
     @Override
-    public MariaDBTable addFloat(String name) {
+    public MariaDBTable addFloat(@NotNull String name) {
         return addColumn(name, "FLOAT");
     }
     @Override
-    public MariaDBTable addFloat(String name, float def) {
+    public MariaDBTable addFloat(@NotNull String name, float def) {
         return addColumn(name, "FLOAT DEFAULT " + def);
     }
 
-    public MariaDBTable addBoolean(String name) {
-        return addColumn(name, "BOOLEAN");
-    }
-    public MariaDBTable addBoolean(String name, boolean def) {
-        return addColumn(name, "BOOLEAN DEFAULT " + def);
-    }
-
     @Override
-    public MariaDBTable addText(String name) {
+    public MariaDBTable addText(@NotNull String name) {
         return addColumn(name, "TEXT");
     }
     @Override
-    public MariaDBTable addText(String name, String def) {
+    public MariaDBTable addText(@NotNull String name, String def) {
         return addColumn(name, "TEXT DEFAULT " + def);
     }
 
-    public MariaDBTable addVarchar(String name, int length) {
+    public MariaDBTable addVarchar(@NotNull String name, int length) {
         return addColumn(name, "VARCHAR(" + length + ")");
     }
+    public MariaDBTable addVarchar(@NotNull String name, int length, String def) {
+        return addColumn(name, "VARCHAR(" + length + ") DEFAULT " + def);
+    }
 
-    public MariaDBTable addMediumText(String name) {
+    public MariaDBTable addMediumText(@NotNull String name) {
         return addColumn(name, "MEDIUMTEXT");
     }
-    public MariaDBTable addMediumText(String name, String def) {
+    public MariaDBTable addMediumText(@NotNull String name, String def) {
         return addColumn(name, "MEDIUMTEXT DEFAULT " + def);
     }
 
-    public MariaDBTable addLongText(String name) {
+    public MariaDBTable addLongText(@NotNull String name) {
         return addColumn(name, "LONGTEXT");
     }
-    public MariaDBTable addLongText(String name, String def) {
+    public MariaDBTable addLongText(@NotNull String name, String def) {
         return addColumn(name, "LONGTEXT DEFAULT " + def);
     }
 
+    public MariaDBTable addBoolean(@NotNull String name) {
+        return addColumn(name, "BOOLEAN");
+    }
+    public MariaDBTable addBoolean(@NotNull String name, boolean def) {
+        return addColumn(name, "BOOLEAN DEFAULT " + def);
+    }
+
+    public MariaDBTable addDate(@NotNull String name) {
+        return addColumn(name, "DATE");
+    }
+    public MariaDBTable addDateNow(@NotNull String name) {
+        return addColumn(name, "DATE DEFAULT (CURRENT_DATE)");
+    }
+
+    public MariaDBTable addTimestamp(@NotNull String name) {
+        return addColumn(name, "TIMESTAMP");
+    }
+    public MariaDBTable addTimestampNow(@NotNull String name) {
+        return addColumn(name, "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+    }
+
+    @Override
     public MariaDBTable addIndex(String indexName, String column) {
         indexes.put(indexName, "INDEX " + indexName + " (`" + column + "`)");
         return this;
     }
 
+    @Override
     public String getCreateCommand() {
         StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS `").append(name).append("` (");
         boolean first = true;
@@ -154,8 +168,11 @@ public class MariaDBTable implements DBTable {
                     .collect(Collectors.joining(", ")));
             sb.append(")");
         }
-        if (unique != null)
-            sb.append(", ").append(unique);
+        if (!uniques.isEmpty()) {
+            for (String unique : uniques) {
+                sb.append(", ").append(unique);
+            }
+        }
 
         for (String index : indexes.values()) {
             sb.append(", ").append(index);
@@ -165,6 +182,7 @@ public class MariaDBTable implements DBTable {
         return sb.toString();
     }
 
+    @Override
     public Map<String, String> getAlterColumnsCommands() {
         Map<String, String> commands = new HashMap<>();
         for (Map.Entry<String, String> entry : columns.entrySet()) {
@@ -174,6 +192,7 @@ public class MariaDBTable implements DBTable {
 
         return commands;
     }
+    @Override
     public Map<String, String> getAlterIndexCommands() {
         Map<String, String> commands = new HashMap<>();
         for (Map.Entry<String, String> entry : indexes.entrySet()) {
@@ -185,6 +204,6 @@ public class MariaDBTable implements DBTable {
 
     @Override
     public MariaDBTable copy() {
-        return new MariaDBTable(name, columns, primaryKeyColumns, indexes, unique);
+        return new MariaDBTable(name, columns, primaryKeyColumns, indexes, uniques);
     }
 }

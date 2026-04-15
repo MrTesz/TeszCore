@@ -16,7 +16,7 @@ public interface DBTable extends Copyable<DBTable> {
      */
     DBTable setPrimaryKeys(String... keys);
 
-    DBTable setUnique(String... unique);
+    DBTable addUnique(String... unique);
 
     DBTable addInt(String name);
     DBTable addInt(String name, Integer def);

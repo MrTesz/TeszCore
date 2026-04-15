@@ -2,6 +2,7 @@ package io.github.mrtesz.teszcore.logged;
 
 import io.github.mrtesz.teszcore.api.TeszCoreApi;
 import io.github.mrtesz.teszcore.copyable.Copyable;
+import io.github.mrtesz.teszcore.exceptions.InitializerException;
 import io.github.mrtesz.teszcore.logger.TeszCoreLogger;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Utility class for initializing classes with wrapping logging
@@ -18,7 +20,7 @@ import java.lang.reflect.Constructor;
 public class Initializer implements Copyable<Initializer> {
 
     private final @Nullable String usingProject;
-    private final @NonNull @NotNull TeszCoreLogger logger;
+    private final @NotNull TeszCoreLogger logger;
 
     public Initializer(@Nullable String usingProject) {
         this(usingProject, TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL5, usingProject));
@@ -28,7 +30,7 @@ public class Initializer implements Copyable<Initializer> {
      * {@link #initialize(Class, String, TeszCoreLogger, Object...)}, with {@link #usingProject} and {@link #logger}
      * @see #initialize(Class, String, TeszCoreLogger, Object...)
      */
-    public <I> I init(Class<I> clazz, Object... parameters) {
+    public <T> T init(@NotNull Class<T> clazz, Object... parameters) throws InitializerException {
         return initialize(clazz, usingProject, logger, parameters);
     }
 
@@ -40,42 +42,43 @@ public class Initializer implements Copyable<Initializer> {
      * @param logger Logger
      * @param parameters Parameters of the constructor you want to use
      * @return An instance of the clazz param
-     * @param <I> The type of the instance, initialized
+     * @param <T> The type of the instance, initialized
      */
-    public static <I> I initialize(Class<I> clazz, @Nullable String usingProject, @NonNull TeszCoreLogger logger, Object... parameters) {
+    public static <T> T initialize(@NotNull Class<T> clazz, @Nullable String usingProject, @NotNull TeszCoreLogger logger, Object... parameters) throws InitializerException {
         logger.info("Initializing " + clazz.getName() + (usingProject != null ? " for project " + usingProject : "") + "...");
 
         try {
-            Constructor<I> constructor = findMatchingConstructor(clazz, parameters);
+            Constructor<T> constructor = findMatchingConstructor(clazz, parameters);
             constructor.setAccessible(true);
-            I instance = constructor.newInstance(parameters);
+            T instance = constructor.newInstance(parameters);
 
             logger.info("Initialized " + clazz.getName() + (usingProject != null ? " for project " + usingProject : ""));
             return instance;
         } catch (Exception e) {
-            getErrorLogger(logger).error("Failed to initialize " + clazz.getName() + (usingProject != null ? " for project " + usingProject : ""));
-            throw new RuntimeException(e);
+            String errorMessage = "Failed to initialize " + clazz.getName() + (usingProject != null ? " for project " + usingProject : "");
+            getErrorLogger(logger).error(errorMessage);
+            throw new InitializerException(errorMessage, e);
         }
     }
 
     /** {@link #initialize(Class, String, TeszCoreLogger, Object...)}, using a LEVEL5 logger
      * @see #initialize(Class, String, TeszCoreLogger, Object...) */
-    public static <I> I initialize(Class<I> clazz, @Nullable String usingProject, Object... parameters) {
+    public static <T> T initialize(@NotNull Class<T> clazz, @Nullable String usingProject, Object... parameters) throws InitializerException {
         return initialize(clazz, usingProject, TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL5, usingProject), parameters);
     }
     /** {@link #initialize(Class, String, TeszCoreLogger, Object...)}, with {@code usingProject} = null
      * @see #initialize(Class, String, TeszCoreLogger, Object...) */
-    public static <I> I initialize(Class<I> clazz, TeszCoreLogger logger, Object... parameters) {
+    public static <T> T initialize(@NotNull Class<T> clazz, @NotNull TeszCoreLogger logger, Object... parameters) throws InitializerException {
         return initialize(clazz, null, logger, parameters);
     }
     /** {@link #initialize(Class, String, TeszCoreLogger, Object...)}, with {@code usingProject} = null and a LEVEL5 logger
      * @see #initialize(Class, String, TeszCoreLogger, Object...) */
-    public static <I> I initialize(Class<I> clazz, Object... parameters) {
+    public static <T> T initialize(@NotNull Class<T> clazz, Object... parameters) throws InitializerException {
         return initialize(clazz, null, TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL5, null), parameters);
     }
     
     @SuppressWarnings("unchecked")
-    private static <I> Constructor<I> findMatchingConstructor(Class<I> clazz, Object[] parameters) throws NoSuchMethodException {
+    private static <T> Constructor<T> findMatchingConstructor(@NotNull Class<T> clazz, Object[] parameters) throws NoSuchMethodException {
         outer:
         for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
             Class<?>[] paramTypes = constructor.getParameterTypes();
@@ -94,7 +97,7 @@ public class Initializer implements Copyable<Initializer> {
                     continue outer;
                 }
             }
-            return (Constructor<I>) constructor;
+            return (Constructor<T>) constructor;
         }
         throw new NoSuchMethodException("No matching constructor found for " + clazz.getSimpleName());
     }

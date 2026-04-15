@@ -18,29 +18,29 @@ import java.util.function.Supplier;
 public class Runner implements Copyable<Runner> {
 
     private final @Nullable String usingProject;
-    private final @NonNull @NotNull TeszCoreLogger logger;
+    private final @NotNull TeszCoreLogger logger;
 
-    public Runner(String usingProject) {
+    public Runner(@Nullable String usingProject) {
         this(usingProject, TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL5, usingProject));
     }
 
     /**
      * Referencing {@link #executeSupply(Supplier, String, String, TeszCoreLogger)} with usingProject and logger being the params provided on construct
      */
-    public <T> T get(@NotNull @NonNull Supplier<T> supplier, @Nullable String extraInfo) {
+    public <T> T get(@NotNull Supplier<T> supplier, @Nullable String extraInfo) {
         return executeSupply(supplier, extraInfo, usingProject, logger);
     }
-    public <T> T get(@NotNull @NonNull Supplier<T> supplier) {
+    public <T> T get(@NotNull Supplier<T> supplier) {
         return get(supplier, null);
     }
 
     /**
      * Referencing {@link #executeRunnable(Runnable, String, String)} with usingProject being the String provided on construct
      */
-    public void run(@NotNull @NonNull Runnable runnable, @Nullable String extraInfo) {
+    public void run(@NotNull Runnable runnable, @Nullable String extraInfo) {
         executeRunnable(runnable, extraInfo, usingProject);
     }
-    public void run(@NotNull @NonNull Runnable runnable) {
+    public void run(@NotNull Runnable runnable) {
         run(runnable, null);
     }
 
@@ -52,7 +52,7 @@ public class Runner implements Copyable<Runner> {
      * @param logger Logger
      * @return the return value of provided supplier
      */
-    public static <T> T executeSupply(@NotNull @NonNull Supplier<T> supplier, @Nullable String extraInfo, @Nullable String usingProject, @NotNull @NonNull TeszCoreLogger logger) {
+    public static <T> T executeSupply(@NotNull Supplier<T> supplier, @Nullable String extraInfo, @Nullable String usingProject, @NotNull TeszCoreLogger logger) {
         logger.info("Supplying" + (extraInfo != null ? " " + extraInfo : "") + (usingProject != null ? " for project " + usingProject : "") + "...");
         long startTimestamp = System.currentTimeMillis();
 
@@ -71,13 +71,13 @@ public class Runner implements Copyable<Runner> {
      * @param usingProject Optional: Project using the method
      * @return the return value of provided supplier
      */
-    public static <T> T executeSupply(@NotNull @NonNull Supplier<T> supplier, @Nullable String extraInfo, @Nullable String usingProject) {
+    public static <T> T executeSupply(@NotNull Supplier<T> supplier, @Nullable String extraInfo, @Nullable String usingProject) {
         return executeSupply(supplier, extraInfo, usingProject, TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL5, usingProject));
     }
-    public static <T> T executeSupply(@NotNull @NonNull Supplier<T> supplier, @Nullable String extraInfo) {
+    public static <T> T executeSupply(@NotNull Supplier<T> supplier, @Nullable String extraInfo) {
         return executeSupply(supplier, extraInfo, null);
     }
-    public static <T> T executeSupply(@NotNull @NonNull Supplier<T> supplier) {
+    public static <T> T executeSupply(@NotNull Supplier<T> supplier) {
         return executeSupply(supplier, null, null);
     }
 
@@ -88,7 +88,7 @@ public class Runner implements Copyable<Runner> {
      * @param usingProject Optional: Project using the method
      * @param logger Logger
      */
-    public static void executeRunnable(@NotNull @NonNull Runnable runnable, @Nullable String extraInfo, @Nullable String usingProject, @NotNull @NonNull TeszCoreLogger logger) {
+    public static void executeRunnable(@NotNull Runnable runnable, @Nullable String extraInfo, @Nullable String usingProject, @NotNull TeszCoreLogger logger) {
         logger.info("Running runnable" +
                         (extraInfo != null ? " " + extraInfo : "") +
                         (usingProject != null ? " for project " + usingProject : "") +
@@ -110,13 +110,13 @@ public class Runner implements Copyable<Runner> {
      * @param extraInfo Optional: Extra infos to display in the logging
      * @param usingProject Optional: Project using the method
      */
-    public static void executeRunnable(@NotNull @NonNull Runnable runnable, @Nullable String extraInfo, @Nullable String usingProject) {
+    public static void executeRunnable(@NotNull Runnable runnable, @Nullable String extraInfo, @Nullable String usingProject) {
         executeRunnable(runnable, extraInfo, usingProject, TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL5, usingProject));
     }
-    public static void executeRunnable(@NotNull @NonNull Runnable runnable, @Nullable String extraInfo) {
+    public static void executeRunnable(@NotNull Runnable runnable, @Nullable String extraInfo) {
         executeRunnable(runnable, extraInfo, null);
     }
-    public static void executeRunnable(@NotNull @NonNull Runnable runnable) {
+    public static void executeRunnable(@NotNull Runnable runnable) {
         executeRunnable(runnable, null, null);
     }
 

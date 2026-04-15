@@ -14,6 +14,7 @@ public abstract class AbstractDBManager implements DBManager {
 
     @Override
     public void close() {
+        disconnect();
         this.closed = true;
     }
 }

@@ -3,7 +3,7 @@ package io.github.mrtesz.teszcore.internal.init;
 import io.github.mrtesz.teszcore.logger.TeszCoreLogger;
 import io.github.mrtesz.teszcore.logger.TeszCoreLoggerFactory;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
-import io.github.mrtesz.teszcore.logger.log4j.AnsiConsoleAppender;
+import io.github.mrtesz.teszcore.internal.log4j.AnsiConsoleAppender;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.logging.log4j.Level;
@@ -102,7 +102,7 @@ public class Init {
     }
 
     private void setDefaultUncaughtExceptionHandler() {
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> getLogger(DebugLevel.LEVEL0).logException(throwable));
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> getLogger(DebugLevel.LEVEL0).printStackTrace(throwable));
     }
 
     public TeszCoreLogger getLogger(DebugLevel level) {

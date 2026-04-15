@@ -13,7 +13,7 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public interface SyncDBManager extends DBManager {
 
-    void createOrAlter(@NotNull DBTable dbTable);
+    void createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException;
 
     /**
      * Execute a SQL query with a {@link List} replacing the question marks in the {@code sql} <br>
@@ -158,7 +158,7 @@ public interface SyncDBManager extends DBManager {
      * <code>
      *     dropTable("current-weak-save");
      * </code>
-     * @param tableName Name of the table, dropping from
+     * @param tableName Name of the table to drop
      * @return Return value of {@link PreparedStatement#executeUpdate()}
      */
     int dropTable(@NotNull String tableName);

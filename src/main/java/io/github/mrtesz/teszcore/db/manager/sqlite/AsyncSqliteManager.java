@@ -4,8 +4,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.mrtesz.teszcore.api.TeszCoreApi;
 import io.github.mrtesz.teszcore.api.db.manager.AsyncDBManager;
 import io.github.mrtesz.teszcore.api.db.table.DBTable;
-import io.github.mrtesz.teszcore.db.manager.mariadb.MariaDBTable;
+import io.github.mrtesz.teszcore.db.table.mariadb.MariaDBTable;
 import io.github.mrtesz.teszcore.db.selection.SelectionResults;
+import io.github.mrtesz.teszcore.db.table.sqlite.SqliteTable;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +15,7 @@ import java.sql.*;
 import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDBManager {
 
@@ -31,7 +33,8 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
      */
     @Override
     public CompletableFuture<Void> createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException {
-        if(!(dbTable instanceof io.github.mrtesz.teszcore.db.manager.sqlite.SqliteTable sqliteTable)) throw new IllegalArgumentException("DBTable object was not " + MariaDBTable.class.getName() + " but " + dbTable.getClass().getName() + ".");
+        if(!(dbTable instanceof SqliteTable sqliteTable))
+            throw new IllegalArgumentException("DBTable object was not " + MariaDBTable.class.getName() + " but " + dbTable.getClass().getName() + ".");
 
         return CompletableFuture.runAsync(() -> {
 
@@ -62,7 +65,7 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
                         } catch (SQLException e) {
                             TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName)
                                     .error("Error while adding column '" + column + "' in table '" + tableName + "': " + e.getMessage());
-                            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+                            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
                         }
                     }
                 }
@@ -85,19 +88,30 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
                         } catch (SQLException e) {
                             TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName)
                                     .error("Error while creating index '" + indexName + "' on table '" + tableName + "': " + e.getMessage());
-                            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+                            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
                         }
                     }
                 }
             } catch (SQLException e) {
                 TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while create/alter table '" + tableName + "' with '" + sqliteTable.getCreateCommand() + "': " + e.getMessage());
-                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
             }
-        });
+        })
+                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
+                .whenComplete(
+                        (v, ex) -> {
+                            if (ex == null)
+                                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error(
+                                        "Async createOrAlter task of AsyncMariaDBManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
+                                );
+                            if (ex != null)
+                                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(ex);
+                        }
+                );
     }
 
     @Override
-    public CompletableFuture<Integer> executeSql(@NotNull String sql, @NotNull List<Object> sqlParams, @NotNull String tableName, @Nullable String type) {
+    public CompletableFuture<Integer> executeSql(@NotNull String sql, @NotNull String tableName, @Nullable String type, @NotNull List<Object> sqlParams) {
         return CompletableFuture.supplyAsync(() -> {
             long start = System.currentTimeMillis();
 
@@ -122,20 +136,31 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
             } catch (SQLException e) {
                 TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while executing " + (type == null ? "unspecified" : type) + " '" + buildSqlWithParams(sql, sqlParams, false) + "' in '" + tableName +
                         "' Error: " + e.getMessage());
-                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
             }
 
             return 0;
-        });
+        })
+                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
+                .whenComplete(
+                        (result, ex) -> {
+                            if (result == null && ex == null)
+                                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error(
+                                        "Async executeSql task of AsyncMariaDBManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
+                                );
+                            if (ex != null)
+                                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(ex);
+                        }
+                );
     }
 
     @Override
     public CompletableFuture<Integer> executeSql(@NotNull String sql, @NotNull String tableName, @Nullable String type) {
-        return executeSql(sql, List.of(), tableName, type);
+        return executeSql(sql, tableName, type, List.of());
     }
 
     @Override
-    public CompletableFuture<SelectionResults> executeSelect(@NotNull String sql, @NotNull List<Object> sqlParams, @NotNull String tableName) {
+    public CompletableFuture<SelectionResults> executeSelect(@NotNull String sql, @NotNull String tableName, @NotNull List<Object> sqlParams) {
         return CompletableFuture.supplyAsync(() -> {
             List<Map<String, Object>> returnValue = new ArrayList<>();
             long start = System.currentTimeMillis();
@@ -188,16 +213,27 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
             } catch (SQLException e) {
                 TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName +
                         "' Command: '" + buildSqlWithParams(sql, sqlParams, false) + "' Error: " + e.getMessage());
-                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
             }
 
             return new SelectionResults(returnValue);
-        });
+        })
+                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
+                .whenComplete(
+                        (result, ex) -> {
+                            if (result == null && ex == null)
+                                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error(
+                                        "Async executeSelect task of AsyncMariaDBManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
+                                );
+                            if (ex != null)
+                                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(ex);
+                        }
+                );
     }
 
     @Override
     public CompletableFuture<SelectionResults> executeSelect(@NotNull String sql, @NotNull String tableName) {
-        return executeSelect(sql, List.of(), tableName);
+        return executeSelect(sql, tableName, List.of());
     }
 
     @Override
@@ -206,7 +242,7 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
         String placeholders = String.join(", ", Collections.nCopies(values.size(), "?"));
         String sql = "INSERT INTO `" + tableName + "` (" + columns + ") VALUES (" + placeholders + ")";
 
-        return this.executeSql(sql, values.values().stream().toList(), tableName, "insert");
+        return this.executeSql(sql, tableName, "insert", values.values().stream().toList());
     }
 
     @Override
@@ -215,14 +251,14 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
         String placeholders = String.join(", ", Collections.nCopies(values.size(), "?"));
         String sql = "INSERT OR IGNORE INTO `" + tableName + "` (" + columns + ") VALUES (" + placeholders + ")";
 
-        return this.executeSql(sql, values.values().stream().toList(), tableName, "insert_ignore");
+        return this.executeSql(sql, tableName, "insert_ignore", values.values().stream().toList());
     }
 
     @Override
     public CompletableFuture<Integer> deleteFrom(@NotNull String tableName, @Nullable String whereClause, @NotNull List<Object> whereParams) {
         String sql = "DELETE FROM `" + tableName + "`" + (whereClause != null ? "WHERE " + whereClause : "");
 
-        return this.executeSql(sql, whereParams, tableName, "delete");
+        return this.executeSql(sql, tableName, "delete", whereParams);
     }
 
     @Override
@@ -240,7 +276,7 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
         sqlValues.addAll(values.values());
         sqlValues.addAll(whereParams);
 
-        return this.executeSql(sql, sqlValues, tableName, "update");
+        return this.executeSql(sql, tableName, "update", sqlValues);
     }
 
     @Override
@@ -250,7 +286,7 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
 
     @Override
     public CompletableFuture<Integer> dropTable(@NotNull String tableName) {
-        return this.executeSql("DROP TABLE IF EXISTS " + tableName, List.of(), tableName, "drop table");
+        return this.executeSql("DROP TABLE IF EXISTS " + tableName, tableName, "drop table", List.of());
     }
 
     @Override
@@ -271,16 +307,28 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
                     }
                 }
 
-                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL11, projectName).debug("Column '" + columnName + "' exists in '" + tableName + "'? -> " + returnValue + " - "
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL10, projectName).debug("Column '" + columnName + "' exists in '" + tableName + "'? -> " + returnValue + " - "
                         + (System.currentTimeMillis() - start) + " ms");
 
                 return returnValue;
             } catch (SQLException e) {
-                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while check if column '" + columnName + "' exists in '" + tableName + "' Error: " + e.getMessage());
-                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while check if column '" + columnName + "' exists in '" + tableName + "' " +
+                        "Error: " + e.getMessage());
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
             }
             return false;
-        });
+        })
+                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
+                .whenComplete(
+                        (result, ex) -> {
+                            if (result == null && ex == null)
+                                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error(
+                                        "Async columnExists task of AsyncMariaDBManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
+                                );
+                            if (ex != null)
+                                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(ex);
+                        }
+                );
     }
 
     @Override
@@ -301,15 +349,26 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
                     }
                 }
 
-                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL11, projectName).debug("Index '" + indexName + "' exists in '" + tableName + "'? -> " + returnValue + " - " +
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL10, projectName).debug("Index '" + indexName + "' exists in '" + tableName + "'? -> " + returnValue + " - " +
                         (System.currentTimeMillis() - start) + " ms");
                 return returnValue;
             } catch (SQLException e) {
                 TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while check if index " + indexName + " exists in " + tableName + " Error: " + e.getMessage());
-                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
             }
             return false;
-        });
+        })
+                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
+                .whenComplete(
+                        (result, ex) -> {
+                            if (result == null && ex == null)
+                                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error(
+                                        "Async indexExists task of AsyncSqliteManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
+                                );
+                            if (ex != null)
+                                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(ex);
+                        }
+                );
     }
 
     @Override

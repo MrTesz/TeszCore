@@ -4,8 +4,8 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.mrtesz.teszcore.api.TeszCoreApi;
 import io.github.mrtesz.teszcore.api.db.manager.SyncDBManager;
 import io.github.mrtesz.teszcore.api.db.table.DBTable;
-import io.github.mrtesz.teszcore.copyable.Copyable;
 import io.github.mrtesz.teszcore.db.selection.SelectionResults;
+import io.github.mrtesz.teszcore.db.table.mariadb.MariaDBTable;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,7 +28,7 @@ public class MariaDBManager extends AbstractMariaDBManager implements SyncDBMana
      */
     @Override
     public void createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException {
-        if (!(dbTable instanceof io.github.mrtesz.teszcore.db.manager.mariadb.MariaDBTable mariaDBTable)) throw new IllegalArgumentException("DBTable object was not " + io.github.mrtesz.teszcore.db.manager.mariadb.MariaDBTable.class.getName() + " but " + dbTable.getClass().getName() + ".");
+        if (!(dbTable instanceof MariaDBTable mariaDBTable)) throw new IllegalArgumentException("DBTable object was not " + MariaDBTable.class.getName() + " but " + dbTable.getClass().getName() + ".");
 
         String name = mariaDBTable.getName();
         long start = System.currentTimeMillis();
@@ -46,7 +46,7 @@ public class MariaDBManager extends AbstractMariaDBManager implements SyncDBMana
                         TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL8, projectName).debug("Altered Table " + name + "'s column in " + (System.currentTimeMillis() - start) + " ms");
                     } catch (SQLException e) {
                         TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while altering table '" + name + "' with '" + entry.getValue() + "': " + e.getMessage());
-                        TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+                        TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
                     }
                 }
             }
@@ -58,13 +58,13 @@ public class MariaDBManager extends AbstractMariaDBManager implements SyncDBMana
                         TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL8, projectName).debug("Altered Table " + name + "'s index in " + (System.currentTimeMillis() - start) + " ms");
                     } catch (SQLException e) {
                         TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while altering table '" + name + "' with '" + entry.getValue() + "': " + e.getMessage());
-                        TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+                        TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
                     }
                 }
             }
         } catch (SQLException e) {
             TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while create/alter table '" + name + "' with '" + mariaDBTable.getCreateCommand() + "': " + e.getMessage());
-            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
         }
     }
 
@@ -93,7 +93,7 @@ public class MariaDBManager extends AbstractMariaDBManager implements SyncDBMana
         } catch (SQLException e) {
             TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while executing " + (type == null ? "unspecified" : type) + " '" + buildSqlWithParams(sql, sqlParams, false) + "' in '" + tableName +
                     "' Error: " + e.getMessage());
-            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
         }
 
         return 0;
@@ -156,7 +156,7 @@ public class MariaDBManager extends AbstractMariaDBManager implements SyncDBMana
 
         } catch (SQLException e) {
             TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while select from '" + tableName + "' Command: '" + buildSqlWithParams(sql, sqlParams, false) + "' Error: " + e.getMessage());
-            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
         }
 
         return new SelectionResults(returnValue);
@@ -226,11 +226,11 @@ public class MariaDBManager extends AbstractMariaDBManager implements SyncDBMana
             try (ResultSet set = statement.executeQuery()) {
                 exists = set.next();
             }
-            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL11, projectName).debug("Column '" + columnName + "' exists in '" + tableName + "'? -> " + exists + " - " + (System.currentTimeMillis() - start) + " ms");
+            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL10, projectName).debug("Column '" + columnName + "' exists in '" + tableName + "'? -> " + exists + " - " + (System.currentTimeMillis() - start) + " ms");
             return exists;
         } catch (SQLException e) {
             TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while checking if column '" + columnName + "' exists in '" + tableName + "' Error: " + e.getMessage());
-            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
         }
         return false;
     }
@@ -245,11 +245,11 @@ public class MariaDBManager extends AbstractMariaDBManager implements SyncDBMana
             try (ResultSet set = statement.executeQuery()) {
                 exists = set.next();
             }
-            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL11, projectName).debug("Index '" + indexName + "' exists in '" + tableName + "'? -> " + exists + " - " + (System.currentTimeMillis() - start) + " ms");
+            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL10, projectName).debug("Index '" + indexName + "' exists in '" + tableName + "'? -> " + exists + " - " + (System.currentTimeMillis() - start) + " ms");
             return exists;
         } catch (SQLException e) {
             TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while checking if index '" + indexName + "' exists in '" + tableName + "' Error: " + e.getMessage());
-            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
         }
         return false;
     }

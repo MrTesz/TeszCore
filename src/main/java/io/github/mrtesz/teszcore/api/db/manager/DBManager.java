@@ -14,9 +14,9 @@ public interface DBManager extends Copyable<DBManager> {
     boolean isClosed();
     void close();
 
-    void connect();
+    void connect() throws IllegalStateException;
     void disconnect();
-    void checkConnection();
+    void checkConnection() throws IllegalStateException;
 
     Connection getConnection();
 

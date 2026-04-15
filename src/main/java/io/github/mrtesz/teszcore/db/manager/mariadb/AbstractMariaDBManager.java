@@ -7,6 +7,7 @@ import io.github.mrtesz.teszcore.api.db.manager.AsyncDBManager;
 import io.github.mrtesz.teszcore.api.db.manager.SyncDBManager;
 import io.github.mrtesz.teszcore.db.manager.AbstractDBManager;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
+import io.github.mrtesz.teszcore.util.Conditions;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,11 +20,13 @@ import java.sql.SQLException;
 public abstract class AbstractMariaDBManager extends AbstractDBManager {
 
     protected final boolean infoWhenCredentialsAreNull;
-    protected final @Getter @NotNull String name;
+    @Getter
+    protected final @NotNull String name;
     protected final String url;
     protected final String user;
     protected final String password;
-    protected @Getter HikariDataSource dataSource;
+    @Getter
+    protected HikariDataSource dataSource;
     protected final String projectName;
 
     protected @NotNull HikariConfig createHikariConfig() {
@@ -43,9 +46,8 @@ public abstract class AbstractMariaDBManager extends AbstractDBManager {
     }
 
     @Override
-    public void connect() {
-        if(isClosed())
-            throw new IllegalStateException(projectName + " executed after disable! Manager already closed");
+    public void connect() throws IllegalStateException, NullPointerException {
+        Conditions.checkState(!isClosed(), projectName + " executed after disable! Manager already closed");
 
         if (url == null || user == null || password == null || url.isBlank() || user.isBlank() || password.isBlank()) {
             if(infoWhenCredentialsAreNull)
@@ -65,9 +67,8 @@ public abstract class AbstractMariaDBManager extends AbstractDBManager {
         TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL3, projectName).info("Connected to '" + config.getJdbcUrl() + "' in " + (System.currentTimeMillis() - start) + " ms");
     }
     @Override
-    public void checkConnection() {
-        if (isClosed())
-            throw new IllegalStateException(projectName + " executed after disable! Manager already closed");
+    public void checkConnection() throws IllegalStateException {
+        Conditions.checkState(!isClosed(), projectName + " executed after disable! Manager already closed");
 
         if (getDataSource() == null || getDataSource().isClosed()) {
             connect();
@@ -80,8 +81,13 @@ public abstract class AbstractMariaDBManager extends AbstractDBManager {
     public void disconnect() {
         long start = System.currentTimeMillis();
         if(dataSource != null && !dataSource.isClosed()) {
-            dataSource.close();
-            dataSource = null;
+            try {
+                getConnection().close();
+                dataSource.close();
+            } catch (SQLException e) {
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while disconnect: " + e.getMessage());
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
+            }
             TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL3, projectName).info("Disconnected from '" + url + "' in " + (System.currentTimeMillis() - start) + " ms");
         } else
             TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).info("Couldn't disconnect from '" + url + "': Not connected");
@@ -94,7 +100,7 @@ public abstract class AbstractMariaDBManager extends AbstractDBManager {
             return dataSource.getConnection();
         } catch (SQLException e) {
             TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while getConnection: " + e.getMessage());
-            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
             return null;
         }
     }
@@ -103,14 +109,15 @@ public abstract class AbstractMariaDBManager extends AbstractDBManager {
      * Creates an {@link AsyncMariaDBManager} with the existing arguments of the object calling this method
      * @param timeoutSecs References the {@link AsyncMariaDBManager#timeoutSeconds}
      */
+    @Override
     public AsyncDBManager async(int timeoutSecs) {
-        return new io.github.mrtesz.teszcore.db.manager.mariadb.AsyncMariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, dataSource, projectName, timeoutSecs);
+        return new AsyncMariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, dataSource, projectName, timeoutSecs);
     }
 
     /**
      * Creates a {@link MariaDBManager} with the existing arguments of the object calling this method
      */
     public SyncDBManager sync() {
-        return new io.github.mrtesz.teszcore.db.manager.mariadb.MariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, dataSource, projectName);
+        return new MariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, dataSource, projectName);
     }
 }

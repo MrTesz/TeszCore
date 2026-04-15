@@ -3,51 +3,57 @@ package io.github.mrtesz.teszcore.db.selection;
 import io.github.mrtesz.teszcore.copyable.Copyable;
 import io.github.mrtesz.teszcore.exceptions.DatabaseException;
 import lombok.AllArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Set;
 
 @AllArgsConstructor
 public class SelectionResult implements Copyable<SelectionResult> {
 
-    private final Map<String, Object> result;
+    private final @NotNull Map<String, Object> result;
 
-    public Object get(String s) {
-        return result.get(s);
+    public @Nullable Object get(@NotNull String columnName) {
+        return result.get(columnName);
+    }
+    public @Nullable Object get(@NotNull String columnName, Object def) {
+        return result.getOrDefault(columnName, def);
     }
 
-    public String getString(String s) throws DatabaseException {
-        Object o = result.get(s);
+    public @Nullable String getString(@NotNull String columnName) throws DatabaseException {
+        Object o = result.get(columnName);
 
-        if (o instanceof String s1)
-            return s1;
+        if (o instanceof String s)
+            return s;
         if (o == null)
             return null;
 
-        throw new DatabaseException("result.get(" + s + ") was not a String! Was instead: " + o + " Type: " + o.getClass().getName());
+        throw new DatabaseException("result.get(" + columnName + ") was not a String! Was instead: " + o + " Type: " + o.getClass().getName());
     }
-    public String getString(String s, String def) {
-        Object o = result.get(s);
+    public @Nullable String getString(@NotNull String columnName, String def) {
+        Object o = result.get(columnName);
 
-        if (o instanceof String s1)
-            return s1;
+        if (o instanceof String s)
+            return s;
 
         return def;
     }
 
-    public Integer getInt(String s) throws DatabaseException {
-        Object o = result.get(s);
+    public @Nullable Integer getInt(@NotNull String columnName) throws DatabaseException {
+        Object o = result.get(columnName);
 
         if (o instanceof Integer i)
             return i;
         if (o == null)
             return null;
 
-        throw new DatabaseException("result.get(" + s + ") was not an Integer! Was instead: " + o + " Type: " + o.getClass().getName());
+        throw new DatabaseException("result.get(" + columnName + ") was not an Integer! Was instead: " + o + " Type: " + o.getClass().getName());
     }
-    public Integer getInt(String s, Integer def) {
-        Object o = result.get(s);
+    public @Nullable Integer getInt(@NotNull String columnName, Integer def) {
+        Object o = result.get(columnName);
 
         if (o instanceof Integer i)
             return i;
@@ -55,18 +61,18 @@ public class SelectionResult implements Copyable<SelectionResult> {
         return def;
     }
 
-    public Long getLong(String s) throws DatabaseException {
-        Object o = result.get(s);
+    public @Nullable Long getLong(@NotNull String columnName) throws DatabaseException {
+        Object o = result.get(columnName);
 
         if (o instanceof Long l)
             return l;
         if (o == null)
             return null;
 
-        throw new DatabaseException("result.get(" + s + ") was not a Long! Was instead: " + o + " Type: " + o.getClass().getName());
+        throw new DatabaseException("result.get(" + columnName + ") was not a Long! Was instead: " + o + " Type: " + o.getClass().getName());
     }
-    public Long getLong(String s, Long def) {
-        Object o = result.get(s);
+    public @Nullable Long getLong(@NotNull String columnName, Long def) {
+        Object o = result.get(columnName);
 
         if (o instanceof Long l)
             return l;
@@ -74,18 +80,18 @@ public class SelectionResult implements Copyable<SelectionResult> {
         return def;
     }
 
-    public Double getDouble(String s) throws DatabaseException {
-        Object o = result.get(s);
+    public @Nullable Double getDouble(@NotNull String columnName) throws DatabaseException {
+        Object o = result.get(columnName);
 
         if (o instanceof Double d)
             return d;
         if (o == null)
             return null;
 
-        throw new DatabaseException("result.get(" + s + ") was not a Double! Was instead: " + o + " Type: " + o.getClass().getName());
+        throw new DatabaseException("result.get(" + columnName + ") was not a Double! Was instead: " + o + " Type: " + o.getClass().getName());
     }
-    public Double getDouble(String s, Double def) {
-        Object o = result.get(s);
+    public @Nullable Double getDouble(@NotNull String columnName, Double def) {
+        Object o = result.get(columnName);
 
         if (o instanceof Double d)
             return d;
@@ -93,18 +99,18 @@ public class SelectionResult implements Copyable<SelectionResult> {
         return def;
     }
 
-    public Float getFloat(String s) throws DatabaseException {
-        Object o = result.get(s);
+    public @Nullable Float getFloat(@NotNull String columnName) throws DatabaseException {
+        Object o = result.get(columnName);
 
         if (o instanceof Float f)
             return f;
         if (o == null)
             return null;
 
-        throw new DatabaseException("result.get(" + s + ") was not a Float! Was instead: " + o + " Type: " + o.getClass().getName());
+        throw new DatabaseException("result.get(" + columnName + ") was not a Float! Was instead: " + o + " Type: " + o.getClass().getName());
     }
-    public Float getFloat(String s, Float def) {
-        Object o = result.get(s);
+    public @Nullable Float getFloat(@NotNull String columnName, Float def) {
+        Object o = result.get(columnName);
 
         if (o instanceof Float f)
             return f;
@@ -112,18 +118,18 @@ public class SelectionResult implements Copyable<SelectionResult> {
         return def;
     }
 
-    public Boolean getBoolean(String s) throws DatabaseException {
-        Object o = result.get(s);
+    public @Nullable Boolean getBoolean(@NotNull String columnName) throws DatabaseException {
+        Object o = result.get(columnName);
 
         if (o instanceof Boolean b)
             return b;
         if (o == null)
             return null;
 
-        throw new DatabaseException("result.get(" + s + ") was not a Boolean! Was instead: " + o + " Type: " + o.getClass().getName());
+        throw new DatabaseException("result.get(" + columnName + ") was not a Boolean! Was instead: " + o + " Type: " + o.getClass().getName());
     }
-    public Boolean getBoolean(String s, Boolean def) {
-        Object o = result.get(s);
+    public @Nullable Boolean getBoolean(@NotNull String columnName, Boolean def) {
+        Object o = result.get(columnName);
 
         if (o instanceof Boolean b)
             return b;
@@ -131,21 +137,40 @@ public class SelectionResult implements Copyable<SelectionResult> {
         return def;
     }
 
-    public Date getDate(String s) throws DatabaseException {
-        Object o = result.get(s);
+    public @Nullable Date getDate(@NotNull String columnName) throws DatabaseException {
+        Object o = result.get(columnName);
 
         if (o instanceof Date d)
             return d;
         if (o == null)
             return null;
 
-        throw new DatabaseException("result.get(" + s + ") was not a Date! Was instead: " + o + " Type: " + o.getClass().getName());
+        throw new DatabaseException("result.get(" + columnName + ") was not a Date! Was instead: " + o + " Type: " + o.getClass().getName());
     }
-    public Date getDate(String s, Date def) {
-        Object o = result.get(s);
+    public @Nullable Date getDate(@NotNull String columnName, Date def) {
+        Object o = result.get(columnName);
 
         if (o instanceof Date d)
             return d;
+
+        return def;
+    }
+
+    public @Nullable Timestamp getTimestamp(@NotNull String columnName) throws DatabaseException {
+        Object o = result.get(columnName);
+
+        if (o instanceof Timestamp t)
+            return t;
+        if (o == null)
+            return null;
+
+        throw new DatabaseException("result.get(" + columnName + ") was not a Timestamp! Was instead: " + o + " Type: " + o.getClass().getName());
+    }
+    public @Nullable Timestamp getTimestamp(@NotNull String columnName, Timestamp def) {
+        Object o = result.get(columnName);
+
+        if (o instanceof Timestamp t)
+            return t;
 
         return def;
     }

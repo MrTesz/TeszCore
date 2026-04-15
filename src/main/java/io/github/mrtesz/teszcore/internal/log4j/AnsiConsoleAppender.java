@@ -1,4 +1,4 @@
-package io.github.mrtesz.teszcore.logger.log4j;
+package io.github.mrtesz.teszcore.internal.log4j;
 
 import io.github.mrtesz.ansi_impl.AnsiParser;
 import org.apache.logging.log4j.core.Filter;

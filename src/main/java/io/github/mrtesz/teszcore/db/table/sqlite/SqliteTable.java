@@ -1,11 +1,9 @@
-package io.github.mrtesz.teszcore.db.manager.sqlite;
+package io.github.mrtesz.teszcore.db.table.sqlite;
 
 import io.github.mrtesz.teszcore.api.db.table.DBTable;
-import io.github.mrtesz.teszcore.copyable.Copyable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,7 +13,7 @@ public class SqliteTable implements DBTable {
 
     private final @Getter String name;
     private Map<String, String> columns = new LinkedHashMap<>();
-    private @Nullable String unique = null;
+    private List<String> uniques = new ArrayList<>();
     private Set<String> primaryKeyColumns = new HashSet<>();
     private Map<String, String> indexes = new HashMap<>();
 
@@ -44,8 +42,8 @@ public class SqliteTable implements DBTable {
     }
 
     @Override
-    public SqliteTable setUnique(String... unique) {
-        this.unique = "UNIQUE(`" + String.join("`, `", unique) + "`)";
+    public SqliteTable addUnique(String... unique) {
+        this.uniques.add("UNIQUE(`" + String.join("`, `", unique) + "`)");
         return this;
     }
 
@@ -103,11 +101,13 @@ public class SqliteTable implements DBTable {
         return addColumn(name, "TEXT DEFAULT " + def);
     }
 
+    @Override
     public SqliteTable addIndex(String indexName, String column) {
         indexes.put(indexName, column);
         return this;
     }
 
+    @Override
     public String getCreateCommand() {
         StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS `").append(name).append("` (");
         boolean first = true;
@@ -123,13 +123,17 @@ public class SqliteTable implements DBTable {
                     .collect(Collectors.joining(", ")));
             sb.append(")");
         }
-        if (unique != null)
-            sb.append(", ").append(unique);
+        if (!uniques.isEmpty()) {
+            for (String unique : uniques) {
+                sb.append(", ").append(unique);
+            }
+        }
 
         sb.append(")");
         return sb.toString();
     }
 
+    @Override
     public Map<String, String> getAlterColumnsCommands() {
         Map<String, String> commands = new HashMap<>();
         for (Map.Entry<String, String> entry : columns.entrySet()) {
@@ -140,6 +144,7 @@ public class SqliteTable implements DBTable {
         return commands;
     }
 
+    @Override
     public Map<String, String> getAlterIndexCommands() {
         Map<String, String> commands = new HashMap<>();
         for (Map.Entry<String, String> entry : indexes.entrySet()) {
@@ -153,6 +158,6 @@ public class SqliteTable implements DBTable {
 
     @Override
     public SqliteTable copy() {
-        return new SqliteTable(this.name, this.columns, this.unique, this.primaryKeyColumns, this.indexes);
+        return new SqliteTable(this.name, this.columns, this.uniques, this.primaryKeyColumns, this.indexes);
     }
 }

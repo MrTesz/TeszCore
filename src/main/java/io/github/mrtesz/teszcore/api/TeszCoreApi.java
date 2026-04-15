@@ -1,6 +1,6 @@
 package io.github.mrtesz.teszcore.api;
 
-import io.github.mrtesz.teszcore.copyable.ThrowingCopyable;
+import io.github.mrtesz.teszcore.copyable.Copyable;
 import io.github.mrtesz.teszcore.internal.init.Init;
 import io.github.mrtesz.teszcore.db.manager.mariadb.MariaDBManager;
 import io.github.mrtesz.teszcore.db.manager.sqlite.SqliteManager;
@@ -8,6 +8,7 @@ import io.github.mrtesz.teszcore.exceptions.DuplicateInitializationException;
 import io.github.mrtesz.teszcore.logger.TeszCoreLogger;
 import io.github.mrtesz.teszcore.logger.TeszCoreLoggerFactory;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
+import io.github.mrtesz.teszcore.util.Conditions;
 import lombok.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
@@ -20,16 +21,15 @@ import java.util.logging.Logger;
  * API Class
  */
 @SuppressWarnings("unused")
-public class TeszCoreApi implements ThrowingCopyable<TeszCoreApi> {
+public class TeszCoreApi implements Copyable<TeszCoreApi> {
 
-    @Getter
     private static TeszCoreApi instance = null;
 
-    private final TeszCoreInitializer initializedWith;
+    private final Initializer initializedWith;
 
     private final Init init;
 
-    private TeszCoreApi(TeszCoreInitializer initializer, @Nullable Logger javaLogger, Level consoleLoggerLevel, boolean loggerFileEnabled, @NotNull String maxFilesToKeep,
+    private TeszCoreApi(Initializer initializer, @Nullable Logger javaLogger, Level consoleLoggerLevel, boolean loggerFileEnabled, @NotNull String maxFilesToKeep,
                         @Nullable String loggerPath, @NotNull String loggerName, @NotNull String loggerFileName, TeszCoreLoggerFactory teszCoreLoggerFactory) {
         this.initializedWith = initializer;
 
@@ -42,15 +42,15 @@ public class TeszCoreApi implements ThrowingCopyable<TeszCoreApi> {
     @ToString
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class TeszCoreInitializer {
+    public static class Initializer {
 
-        /** Optional: Java {@link Logger} e.g. for Paper Plugins. Default: null */
+        /** Optional: Java {@link Logger} e.g. for Plugins. Default: null */
         @Builder.Default
         private @Nullable Logger javaLogger = null;
 
         /** Lowest {@link Level} of messages, logged in the console. Default: {@link Level#INFO} */
         @Builder.Default
-        private Level consoleLoggerLevel = Level.INFO;
+        private @NonNull @NotNull Level consoleLoggerLevel = Level.INFO;
 
         /** The name of the Logger. Represents the {@link AbstractAppender.Builder#getName()}. Default: TeszCoreLogger*/
         @Builder.Default
@@ -74,41 +74,41 @@ public class TeszCoreApi implements ThrowingCopyable<TeszCoreApi> {
 
         /** The supplier called when using {@link TeszCoreApi#getLogger(DebugLevel)} or {@link TeszCoreApi#getLogger(DebugLevel, String)}. Default: TeszCoreLogger::new */
         @Builder.Default
-        private TeszCoreLoggerFactory teszCoreLoggerFactory = TeszCoreLogger::new;
+        private @NonNull @NotNull TeszCoreLoggerFactory teszCoreLoggerFactory = TeszCoreLogger::new;
 
-        /** Should {@link TeszCoreApi#initialize(TeszCoreInitializer)} overwrite the current instance if initialized earlier. Default: false */
+        /** Should {@link TeszCoreApi#initialize(Initializer)} overwrite the current instance if initialized earlier. Default: false */
         @Builder.Default
         private boolean overwrite = false;
     }
 
     /**
      * Create a new {@link TeszCoreApi} instance
-     * @param teszCoreInitializer Initializer class (previously created with the {@link TeszCoreInitializer#builder()})
+     * @param initializer Initializer class (previously created with the {@link Initializer#builder()})
      * @return The created {@link TeszCoreApi} instance (can also be obtained with {@link TeszCoreApi#getInstance()}
-     * @throws DuplicateInitializationException when a {@link TeszCoreApi} instance was already initialized by other projects (can be bypassed with setting {@link TeszCoreInitializer#overwrite} to true)
-     * @throws IllegalArgumentException when the {@link TeszCoreInitializer#loggerFilePath} is not null and doesn't end with a '/'
+     * @throws DuplicateInitializationException when a {@link TeszCoreApi} instance was already initialized by other projects (can be bypassed with setting {@link Initializer#overwrite} to true)
+     * @throws IllegalArgumentException when the {@link Initializer#loggerFilePath} is not null and doesn't end with a '/'
      */
-    public static TeszCoreApi initialize(TeszCoreInitializer teszCoreInitializer) throws DuplicateInitializationException, IllegalArgumentException {
+    public static TeszCoreApi initialize(Initializer initializer) throws DuplicateInitializationException, IllegalArgumentException {
         TeszCoreApi currentInstance = getInstance();
-        if (currentInstance != null && !teszCoreInitializer.overwrite)
+        if (currentInstance != null && !initializer.overwrite)
             throw new DuplicateInitializationException("Failed to initialize TeszCoreApi.java: An instance of TeszCore is already initialized. Previous Installation: " + currentInstance.getInitializedWith());
-        if (teszCoreInitializer.loggerFilePath != null && !teszCoreInitializer.loggerFilePath.endsWith("/"))
+        if (initializer.loggerFilePath != null && !initializer.loggerFilePath.endsWith("/"))
             throw new IllegalArgumentException("path in TeszCoreApi#<init> doesn't end with '/'!");
 
-        return new TeszCoreApi(teszCoreInitializer,
-                teszCoreInitializer.javaLogger,
-                teszCoreInitializer.consoleLoggerLevel,
-                teszCoreInitializer.loggerFileEnabled,
-                teszCoreInitializer.maxLoggerFilesToKeep,
-                teszCoreInitializer.loggerFilePath,
-                teszCoreInitializer.loggerName,
-                teszCoreInitializer.loggerFileName,
-                teszCoreInitializer.teszCoreLoggerFactory);
+        return new TeszCoreApi(initializer,
+                initializer.javaLogger,
+                initializer.consoleLoggerLevel,
+                initializer.loggerFileEnabled,
+                initializer.maxLoggerFilesToKeep,
+                initializer.loggerFilePath,
+                initializer.loggerName,
+                initializer.loggerFileName,
+                initializer.teszCoreLoggerFactory);
     }
 
     /** Logs an exception */
     public void logException(@NotNull Throwable throwable) {
-        init.getLogger(DebugLevel.LEVEL0).logException(throwable);
+        init.getLogger(DebugLevel.LEVEL0).printStackTrace(throwable);
     }
 
     /**
@@ -134,7 +134,7 @@ public class TeszCoreApi implements ThrowingCopyable<TeszCoreApi> {
      * @param password Password for the Database
      * @return A {@link MariaDBManager}
      */
-    public MariaDBManager createMariaDBManager(@NotNull String projectName, boolean infoWhenCredentialsAreNull, @Nullable String name,
+    public MariaDBManager createMariaDBManager(@Nullable String projectName, boolean infoWhenCredentialsAreNull, @Nullable String name,
                                               @Nullable String url, @Nullable String user, @Nullable String password) {
         return new MariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, null, projectName);
     }
@@ -146,7 +146,7 @@ public class TeszCoreApi implements ThrowingCopyable<TeszCoreApi> {
      * @param name Name of the .db file
      * @return A {@link SqliteManager}
      */
-    public SqliteManager createSqliteManager(@NotNull String projectName, @Nullable String path, @NotNull String name) {
+    public SqliteManager createSqliteManager(@Nullable String projectName, @Nullable String path, @NotNull String name) {
         return new SqliteManager(path, name, null, projectName);
     }
 
@@ -154,8 +154,18 @@ public class TeszCoreApi implements ThrowingCopyable<TeszCoreApi> {
         return init.getLogger();
     }
 
-    private TeszCoreInitializer getInitializedWith() {
+    private Initializer getInitializedWith() {
         return initializedWith;
+    }
+
+    /**
+     * Get the current instance
+     * @return Current TeszCoreApi instance
+     * @throws NullPointerException if the TeszCoreApi was not initialized before with {@link #initialize(Initializer)}
+     */
+    public static TeszCoreApi getInstance() throws NullPointerException {
+        Conditions.checkNonNull(instance, "TeszCoreApi was not initialized. Initialize the TeszCoreApi with TeszCoreApi#initialize");
+        return instance;
     }
 
     @Override

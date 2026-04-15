@@ -1,7 +1,6 @@
 package io.github.mrtesz.teszcore.api.db.manager;
 
 import io.github.mrtesz.teszcore.api.db.table.DBTable;
-import io.github.mrtesz.teszcore.copyable.Copyable;
 import io.github.mrtesz.teszcore.db.selection.SelectionResults;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,12 +23,12 @@ public interface AsyncDBManager extends DBManager {
      *     executeSql("UPDATE users SET name = ? WHERE id = ?", {@link List}.of(username, userId), "users", "update username");
      * </code>
      * @param sql Query that should be executed
-     * @param sqlParams Values replacing the ?'s in the {@code sql} query
      * @param tableName Name of the table, querying to
      * @param type Type of the execution
+     * @param sqlParams Values replacing the ?'s in the {@code sql} query
      * @return A {@link CompletableFuture} supplying the return value of the {@link PreparedStatement#executeUpdate()}
      */
-    CompletableFuture<Integer> executeSql(@NotNull String sql, @NotNull List<Object> sqlParams, @NotNull String tableName, @Nullable String type);
+    CompletableFuture<Integer> executeSql(@NotNull String sql, @NotNull String tableName, @Nullable String type, @NotNull List<Object> sqlParams);
 
     /**
      * Execute a SQL query <br>
@@ -51,11 +50,11 @@ public interface AsyncDBManager extends DBManager {
      *     executeSelect("SELECT email, number FROM users WHERE username = ?", {@link List}.of("Mr_Tesz"), "users");
      * </code>
      * @param sql Sql query
-     * @param sqlParams Values replacing the ?'s in the {@code sql} query
      * @param tableName Name of the table, to select from
+     * @param sqlParams Values replacing the ?'s in the {@code sql} query
      * @return A {@link CompletableFuture} supplying a {@link SelectionResults} object
      */
-    CompletableFuture<SelectionResults> executeSelect(@NotNull String sql, @NotNull List<Object> sqlParams, @NotNull String tableName);
+    CompletableFuture<SelectionResults> executeSelect(@NotNull String sql, @NotNull String tableName, @NotNull List<Object> sqlParams);
 
     /**
      * Execute a selection query <br>
@@ -160,7 +159,7 @@ public interface AsyncDBManager extends DBManager {
      * <code>
      *     dropTable("current-weak-save");
      * </code>
-     * @param tableName Name of the table, dropping from
+     * @param tableName Name of the table to drop
      * @return A {@link CompletableFuture} supplying the return value of the {@link PreparedStatement#executeUpdate()}
      */
     CompletableFuture<Integer> dropTable(@NotNull String tableName);

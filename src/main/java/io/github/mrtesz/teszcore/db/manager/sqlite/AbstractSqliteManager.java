@@ -7,6 +7,7 @@ import io.github.mrtesz.teszcore.api.db.manager.AsyncDBManager;
 import io.github.mrtesz.teszcore.api.db.manager.SyncDBManager;
 import io.github.mrtesz.teszcore.db.manager.AbstractDBManager;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
+import io.github.mrtesz.teszcore.util.Conditions;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +35,7 @@ public abstract class AbstractSqliteManager extends AbstractDBManager {
         this.dataSource = dataSource;
     }
 
-    public @NotNull HikariConfig createHikariConfig() {
+    protected @NotNull HikariConfig createHikariConfig() {
         HikariConfig config = new HikariConfig();
 
         config.setJdbcUrl(url);
@@ -51,9 +52,8 @@ public abstract class AbstractSqliteManager extends AbstractDBManager {
     }
 
     @Override
-    public void connect() {
-        if(isClosed())
-            throw new IllegalStateException(projectName + " executed after disable! Manager already closed");
+    public void connect() throws IllegalStateException {
+        Conditions.checkState(!isClosed(), projectName + " executed after disable! Manager already closed");
 
         long start = System.currentTimeMillis();
 
@@ -64,21 +64,8 @@ public abstract class AbstractSqliteManager extends AbstractDBManager {
     }
 
     @Override
-    public void disconnect() {
-        long start = System.currentTimeMillis();
-
-        if(dataSource != null && !dataSource.isClosed()) {
-            dataSource.close();
-            dataSource = null;
-            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL3, projectName).info("Disconnected from '" + url + "' in " + (System.currentTimeMillis() - start) + " ms");
-        } else
-            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).info("Couldn't disconnect from '" + url + "': Not connected");
-    }
-
-    @Override
-    public void checkConnection() {
-        if (isClosed())
-            throw new IllegalStateException(projectName + " executed after disable! Manager already closed");
+    public void checkConnection() throws IllegalStateException {
+        Conditions.checkState(!isClosed(), projectName + " executed after disable! Manager already closed");
 
         if (getDataSource() == null || getDataSource().isClosed()) {
             connect();
@@ -88,13 +75,30 @@ public abstract class AbstractSqliteManager extends AbstractDBManager {
     }
 
     @Override
+    public void disconnect() {
+        long start = System.currentTimeMillis();
+
+        if(dataSource != null && !dataSource.isClosed()) {
+            try {
+                getConnection().close();
+                dataSource.close();
+            } catch (SQLException e) {
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while disconnect: " + e.getMessage());
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
+            }
+            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL3, projectName).info("Disconnected from '" + url + "' in " + (System.currentTimeMillis() - start) + " ms");
+        } else
+            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).info("Couldn't disconnect from '" + url + "': Not connected");
+    }
+
+    @Override
     public Connection getConnection() {
         checkConnection();
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {
             TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error("Error while getConnection: " + e.getMessage());
-            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).logException(e);
+            TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
             return null;
         }
     }
@@ -104,7 +108,7 @@ public abstract class AbstractSqliteManager extends AbstractDBManager {
      * @param timeoutSecs References the {@link AsyncSqliteManager#timeoutSeconds}
      */
     @Override
-    public AsyncDBManager async(int timeoutSecs) {
+    public AsyncSqliteManager async(int timeoutSecs) {
         return new AsyncSqliteManager(name, url, dataSource, projectName, timeoutSecs);
     }
 
@@ -112,7 +116,7 @@ public abstract class AbstractSqliteManager extends AbstractDBManager {
      * Creates a {@link SqliteManager} with the existing arguments of the object calling this method
      */
     @Override
-    public SyncDBManager sync() {
+    public SqliteManager sync() {
         return new SqliteManager(name, url, dataSource, projectName);
     }
 }

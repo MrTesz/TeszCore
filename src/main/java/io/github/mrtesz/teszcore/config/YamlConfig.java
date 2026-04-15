@@ -1,10 +1,8 @@
 package io.github.mrtesz.teszcore.config;
 
 import io.github.mrtesz.teszcore.copyable.Copyable;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import io.github.mrtesz.teszcore.exceptions.YamlConfigException;
+import lombok.*;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,6 +13,7 @@ import org.yaml.snakeyaml.serializer.AnchorGenerator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,17 +26,22 @@ public class YamlConfig implements Copyable<YamlConfig> {
 
     private final Path filePath;
     private final Yaml yaml;
-    private Map<String, Object> data;
+    private final boolean autosave;
 
-    private YamlConfig(@NotNull Path filePath, @NotNull Yaml yaml) {
+    @Setter
+    private Map<String, Object> data;
+    private Map<String, Object> defaults;
+
+    private YamlConfig(@NotNull Path filePath, @NotNull Yaml yaml, boolean autosave) {
         this.filePath = filePath;
         this.yaml = yaml;
+        this.autosave = autosave;
 
         load();
     }
 
     @SuppressWarnings("unchecked")
-    public void load() {
+    public void load() throws YamlConfigException {
         try {
             if (filePath.getParent() != null)
                 Files.createDirectories(filePath.getParent());
@@ -55,26 +59,30 @@ public class YamlConfig implements Copyable<YamlConfig> {
             }
 
         } catch (IOException e) {
-            throw new RuntimeException("Could not load YAML file " + filePath, e);
+            throw new YamlConfigException("Could not load YAML file " + filePath, e);
         }
     }
-    public void save() {
-        try (OutputStreamWriter writer =
-                     new OutputStreamWriter(Files.newOutputStream(filePath), StandardCharsets.UTF_8)) {
+    public void save() throws YamlConfigException {
+        save(StandardCharsets.UTF_8);
+    }
+    public void save(@NotNull Charset cs) throws YamlConfigException {
+        try (OutputStreamWriter writer = new OutputStreamWriter(Files.newOutputStream(filePath), cs)) {
             yaml.dump(data, writer);
         } catch (IOException e) {
-            throw new RuntimeException("Could not save YAML file " + filePath, e);
+            throw new YamlConfigException("Could not save YAML file " + filePath, e);
         }
     }
 
-    public void addDefault(String path, Object value) {
-        if (!contains(path)) {
+    public void addDefault(@NotNull String path, Object value) {
+        defaults.put(path, value);
+    }
+    public void setDefault(@NotNull String path, Object value) {
+        if (!contains(path))
             set(path, value);
-        }
     }
 
     @SuppressWarnings("unchecked")
-    public void set(String path, Object value) {
+    public void set(@NotNull String path, @Nullable Object value) {
         String[] keys = path.split("\\.");
         Map<String, Object> section = data;
 
@@ -85,92 +93,93 @@ public class YamlConfig implements Copyable<YamlConfig> {
         }
 
         section.put(keys[keys.length - 1], value);
-        save();
+        if (autosave)
+            save();
     }
 
-    public String getString(String path) {
-        Object val = get(path);
+    public @Nullable String getString(@NotNull String path) {
+        var val = get(path);
         return val != null ? String.valueOf(val) : null;
     }
-    public String getString(String path, String def) {
-        String val = getString(path);
+    public String getString(@NotNull String path, String def) {
+        var val = getString(path);
         return val != null ? val : def;
     }
 
-    public int getInt(String path) {
+    public int getInt(@NotNull String path) {
         return getInt(path, 0);
     }
-    public int getInt(String path, int def) {
+    public int getInt(@NotNull String path, int def) {
         Object val = get(path);
         return val instanceof Number n ? n.intValue() : def;
     }
-    public Integer getIntOrElse(String path, Integer def) {
+    public @Nullable Integer getIntOrNull(@NotNull String path) {
         Object val = get(path);
-        return val instanceof Number n ? n.intValue() : def;
+        return val instanceof Number n ? n.intValue() : null;
     }
 
-    public long getLong(String path) {
+    public long getLong(@NotNull String path) {
         return this.getLong(path, 0);
     }
-    public long getLong(String path, long def) {
+    public long getLong(@NotNull String path, long def) {
         Object val = get(path);
         return val instanceof Number n ? n.longValue() : def;
     }
-    public Long getLongOrElse(String path, Long def) {
+    public @Nullable Long getLongOrNull(@NotNull String path) {
         Object val = get(path);
-        return val instanceof Number n ? n.longValue() : def;
+        return val instanceof Number n ? n.longValue() : null;
     }
 
-    public float getFloat(String path) {
+    public float getFloat(@NotNull String path) {
         return this.getFloat(path, 0);
     }
-    public float getFloat(String path, float def) {
+    public float getFloat(@NotNull String path, float def) {
         Object val = get(path);
         return val instanceof Number n ? n.floatValue() : def;
     }
-    public Float getFloatOrElse(String path, Float def) {
+    public @Nullable Float getFloatOrNull(@NotNull String path) {
         Object val = get(path);
-        return val instanceof Number n ? n.floatValue() : def;
+        return val instanceof Number n ? n.floatValue() : null;
     }
 
-    public short getShort(String path) {
+    public short getShort(@NotNull String path) {
         return this.getShort(path, (short) 0);
     }
-    public short getShort(String path, short def) {
+    public short getShort(@NotNull String path, short def) {
         Object val = get(path);
         return val instanceof Number n ? n.shortValue() : def;
     }
-    public Short getShortOrElse(String path, Short def) {
+    public @Nullable Short getShortOrNull(@NotNull String path) {
         Object val = get(path);
-        return val instanceof Number n ? n.shortValue() : def;
+        return val instanceof Number n ? n.shortValue() : null;
     }
 
-    public double getDouble(String path) {
+    public double getDouble(@NotNull String path) {
         return getDouble(path, 0);
     }
-    public double getDouble(String path, double def) {
+    public double getDouble(@NotNull String path, double def) {
         Object val = get(path);
         return val instanceof Number n ? n.doubleValue() : def;
     }
-    public Double getDoubleOrElse(String path, Double def) {
+    public @Nullable Double getDoubleOrNull(@NotNull String path) {
         Object val = get(path);
-        return val instanceof Number n ? n.doubleValue() : def;
+        return val instanceof Number n ? n.doubleValue() : null;
     }
 
-    public boolean getBoolean(String path) {
+    public boolean getBoolean(@NotNull String path) {
         Object val = get(path);
-        return val instanceof Boolean && (Boolean) val;
+        return val instanceof Boolean bool && bool;
     }
-    public boolean getBoolean(String path, boolean def) {
+    public boolean getBoolean(@NotNull String path, boolean def) {
         Object val = get(path);
         return val instanceof Boolean b ? b : def;
     }
-    public Boolean getBooleanOrElse(String path, Boolean def) {
+    public @Nullable Boolean getBooleanOrNull(@NotNull String path) {
         Object val = get(path);
-        return val instanceof Boolean b ? b : def;
+        return val instanceof Boolean b ? b : null;
     }
 
-    public List<String> getStringList(String path) {
+    public List<String> getStringList(@NotNull String path) {
         Object val = get(path);
         if (val instanceof List<?>) {
             List<String> list = new ArrayList<>();
@@ -181,9 +190,31 @@ public class YamlConfig implements Copyable<YamlConfig> {
         }
         return Collections.emptyList();
     }
+    public List<String> getStringList(@NotNull String path, List<String> def) {
+        Object val = get(path);
+        if (val instanceof List<?>) {
+            List<String> list = new ArrayList<>();
+            for (Object o : (List<?>) val) {
+                list.add(String.valueOf(o));
+            }
+            return list;
+        }
+        return def;
+    }
+    public @Nullable List<String> getStringListOrNull(@NotNull String path) {
+        Object val = get(path);
+        if (val instanceof List<?>) {
+            List<String> list = new ArrayList<>();
+            for (Object o : (List<?>) val) {
+                list.add(String.valueOf(o));
+            }
+            return list;
+        }
+        return null;
+    }
 
     @SuppressWarnings("unchecked")
-    private Object get(String path) {
+    private @Nullable Object get(@NotNull String path) {
         String[] keys = path.split("\\.");
         Map<String, Object> section = data;
 
@@ -202,10 +233,10 @@ public class YamlConfig implements Copyable<YamlConfig> {
             section = (Map<String, Object>) val;
         }
 
-        return null;
+        return defaults.get(path);
     }
 
-    public boolean contains(String path) {
+    public boolean contains(@NotNull String path) {
         return get(path) != null;
     }
 
@@ -218,17 +249,14 @@ public class YamlConfig implements Copyable<YamlConfig> {
     }
 
     @SuppressWarnings("unchecked")
-    public List<String> getAllPaths(@NotNull Map<String, Object> section, String parent) {
-        List<String> paths = new ArrayList<>();
+    private Set<String> collectPaths(@NotNull Map<String, Object> section, @NotNull String parent) {
+        Set<String> paths = new LinkedHashSet<>();
 
         for (Map.Entry<String, Object> entry : section.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
+            String fullPath = parent.isEmpty() ? entry.getKey() : parent + "." + entry.getKey();
 
-            String fullPath = parent.isEmpty() ? key : parent + "." + key;
-
-            if (value instanceof Map<?, ?> map) {
-                paths.addAll(getAllPaths((Map<String, Object>) map, fullPath));
+            if (entry.getValue() instanceof Map<?, ?> map) {
+                paths.addAll(collectPaths((Map<String, Object>) map, fullPath));
             } else {
                 paths.add(fullPath);
             }
@@ -237,29 +265,17 @@ public class YamlConfig implements Copyable<YamlConfig> {
         return paths;
     }
 
-    /**
-     * Get all paths from a set parent. (Paths contains parent)
-     * @param parent Parent path
-     * @return all paths under parent
-     */
+    public Set<String> getAllPaths() {
+        return collectPaths(data, "");
+    }
+
     @SuppressWarnings("unchecked")
-    public Set<String> getPaths(String parent) {
-        Set<String> paths = new HashSet<>();
+    public Set<String> getPaths(@NotNull String parent) {
+        Object section = get(parent);
+        if (!(section instanceof Map<?, ?> map))
+            return Collections.emptySet();
 
-        for (Map.Entry<String, Object> entry : getRaw().entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-
-            String fullPath = parent.isEmpty() ? key : parent + "." + key;
-
-            if (value instanceof Map<?, ?> map) {
-                paths.addAll(getAllPaths((Map<String, Object>) map, fullPath));
-            } else {
-                paths.add(fullPath);
-            }
-        }
-
-        return paths;
+        return collectPaths((Map<String, Object>) map, parent);
     }
 
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -269,12 +285,14 @@ public class YamlConfig implements Copyable<YamlConfig> {
         @Getter @Accessors(fluent = true)
         private @NotNull DumperOptions dumperOptions = new DumperOptions();
 
+        /// Save the config after set() automatically. Default: true
+        private boolean autosave = true;
         private @Nullable String filePath;
-
-        private String fileName;
+        private @NotNull String fileName;
 
         public YamlConfig build() {
-            Objects.requireNonNull(fileName);
+            Objects.requireNonNull(fileName, "'fileName' in YamlConfig.Builder#build");
+            Objects.requireNonNull(dumperOptions, "'dumperOptions' in YamlConfig.Builder#build");
 
             Path path = filePath == null
                     ? Paths.get(fileName + ".yml")
@@ -282,7 +300,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
 
             Yaml yaml = new Yaml(dumperOptions);
 
-            return new YamlConfig(path, yaml);
+            return new YamlConfig(path, yaml, autosave);
         }
 
         public Builder setFilePath(@Nullable String filePath) {
@@ -293,16 +311,20 @@ public class YamlConfig implements Copyable<YamlConfig> {
             this.fileName = fileName;
             return this;
         }
-        public Builder setDumperOptions(DumperOptions dumperOptions) {
+        public Builder setAutosave(boolean autosave) {
+            this.autosave = autosave;
+            return this;
+        }
+        public Builder setDumperOptions(@NotNull DumperOptions dumperOptions) {
             this.dumperOptions = dumperOptions;
             return this;
         }
 
-        public Builder setDefaultScalarStyle(DumperOptions.ScalarStyle defaultStyle) {
+        public Builder setDefaultScalarStyle(@NotNull DumperOptions.ScalarStyle defaultStyle) {
             dumperOptions.setDefaultScalarStyle(defaultStyle);
             return this;
         }
-        public Builder setDefaultFlowStyle(DumperOptions.FlowStyle defaultFlowStyle) {
+        public Builder setDefaultFlowStyle(@NotNull DumperOptions.FlowStyle defaultFlowStyle) {
             dumperOptions.setDefaultFlowStyle(defaultFlowStyle);
             return this;
         }
@@ -330,7 +352,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
             dumperOptions.setIndentWithIndicator(indentWithIndicator);
             return this;
         }
-        public Builder setWith(int bestWidth) {
+        public Builder setWidth(int bestWidth) {
             dumperOptions.setWidth(bestWidth);
             return this;
         }
@@ -338,7 +360,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
             dumperOptions.setSplitLines(splitLines);
             return this;
         }
-        public Builder setLineBreak(DumperOptions.LineBreak lineBreak) {
+        public Builder setLineBreak(@NotNull DumperOptions.LineBreak lineBreak) {
             dumperOptions.setLineBreak(lineBreak);
             return this;
         }
@@ -350,7 +372,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
             dumperOptions.setExplicitEnd(explicitEnd);
             return this;
         }
-        public Builder setTimeZone(TimeZone timeZone) {
+        public Builder setTimeZone(@Nullable TimeZone timeZone) {
             dumperOptions.setTimeZone(timeZone);
             return this;
         }
@@ -366,11 +388,11 @@ public class YamlConfig implements Copyable<YamlConfig> {
             dumperOptions.setNonPrintableStyle(nonPrintableStyle);
             return this;
         }
-        public Builder setVersion(DumperOptions.Version version) {
+        public Builder setVersion(@Nullable DumperOptions.Version version) {
             dumperOptions.setVersion(version);
             return this;
         }
-        public Builder setTags(Map<String, String> tags) {
+        public Builder setTags(@Nullable Map<String, String> tags) {
             dumperOptions.setTags(tags);
             return this;
         }
@@ -385,7 +407,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
 
         @Override
         public Builder copy() {
-            return new Builder(this.dumperOptions, this.filePath, this.fileName);
+            return new Builder(this.dumperOptions, this.autosave, this.filePath, this.fileName);
         }
     }
 
@@ -395,6 +417,6 @@ public class YamlConfig implements Copyable<YamlConfig> {
 
     @Override
     public YamlConfig copy() {
-        return new YamlConfig(this.filePath, this.yaml, this.data);
+        return new YamlConfig(this.filePath, this.yaml, this.autosave, this.data, this.defaults);
     }
 }
