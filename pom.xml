@@ -6,7 +6,7 @@
 
     <groupId>io.github.mrtesz</groupId>
     <artifactId>teszcore</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <packaging>jar</packaging>
 
     <name>teszcore</name>
@@ -29,7 +29,7 @@
         <developer>
             <id>mrtesz</id>
             <name>MrTesz</name>
-            <url>https://github.com/MrTesz</url>
+            <url>https://mrtesz.github.io/</url>
         </developer>
     </developers>
 
@@ -149,7 +149,7 @@
         <dependency>
             <groupId>io.github.mrtesz</groupId>
             <artifactId>ansi-impl</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </dependency>
 
         <!-- Yaml -->
