@@ -4,6 +4,7 @@ import io.github.mrtesz.teszcore.exceptions.IllegalNumberRangeException;
 import io.github.mrtesz.teszcore.exceptions.NotNullException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -76,7 +77,8 @@ public class Conditions {
      * @param obj object
      * @throws NullPointerException if {@code obj} is null
      */
-    public static <T> T checkNonNull(T obj) throws NullPointerException {
+    @Contract("null -> fail; !null -> param1")
+    public static <T> T checkNonNull(@Nullable T obj) throws NullPointerException {
         if (obj == null) throw new NullPointerException();
         return obj;
     }
@@ -86,7 +88,8 @@ public class Conditions {
      * @param message message in the exception, when thrown
      * @throws NullPointerException if {@code obj} is null
      */
-    public static <T> T checkNonNull(T obj, @Nullable String message) throws NullPointerException {
+    @Contract("null, _ -> fail; !null, _ -> param1")
+    public static <T> T checkNonNull(@Nullable T obj, @Nullable String message) throws NullPointerException {
         if (obj == null) throw new NullPointerException(message);
         return obj;
     }
@@ -96,7 +99,8 @@ public class Conditions {
      * @param obj object
      * @throws NotNullException if {@code obj} is not null
      */
-    public static <T> void checkNull(T obj) throws NotNullException {
+    @Contract("!null -> fail")
+    public static <T> void checkNull(@Nullable T obj) throws NotNullException {
         if (obj != null) throw new NotNullException();
     }
     /**
@@ -105,7 +109,8 @@ public class Conditions {
      * @param message message in the exception, when thrown
      * @throws NotNullException if {@code obj} is not null
      */
-    public static <T> void checkNull(T obj, @Nullable String message) throws NotNullException {
+    @Contract("!null, _ -> fail")
+    public static <T> void checkNull(@Nullable T obj, @Nullable String message) throws NotNullException {
         if (obj != null) throw new NotNullException(message);
     }
 }
