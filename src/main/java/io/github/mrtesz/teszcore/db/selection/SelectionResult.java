@@ -4,7 +4,6 @@ import io.github.mrtesz.teszcore.copyable.Copyable;
 import io.github.mrtesz.teszcore.exceptions.DatabaseException;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.sql.Date;
 import java.sql.Timestamp;

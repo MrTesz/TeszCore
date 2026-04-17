@@ -97,7 +97,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
             save();
     }
 
-    public @Nullable String getString(@NotNull String path) {
+    public String getString(@NotNull String path) {
         var val = get(path);
         return val != null ? String.valueOf(val) : null;
     }
@@ -113,7 +113,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
         Object val = get(path);
         return val instanceof Number n ? n.intValue() : def;
     }
-    public @Nullable Integer getIntOrNull(@NotNull String path) {
+    public Integer getIntOrNull(@NotNull String path) {
         Object val = get(path);
         return val instanceof Number n ? n.intValue() : null;
     }
@@ -125,7 +125,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
         Object val = get(path);
         return val instanceof Number n ? n.longValue() : def;
     }
-    public @Nullable Long getLongOrNull(@NotNull String path) {
+    public Long getLongOrNull(@NotNull String path) {
         Object val = get(path);
         return val instanceof Number n ? n.longValue() : null;
     }
@@ -137,7 +137,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
         Object val = get(path);
         return val instanceof Number n ? n.floatValue() : def;
     }
-    public @Nullable Float getFloatOrNull(@NotNull String path) {
+    public Float getFloatOrNull(@NotNull String path) {
         Object val = get(path);
         return val instanceof Number n ? n.floatValue() : null;
     }
@@ -149,7 +149,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
         Object val = get(path);
         return val instanceof Number n ? n.shortValue() : def;
     }
-    public @Nullable Short getShortOrNull(@NotNull String path) {
+    public Short getShortOrNull(@NotNull String path) {
         Object val = get(path);
         return val instanceof Number n ? n.shortValue() : null;
     }
@@ -161,7 +161,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
         Object val = get(path);
         return val instanceof Number n ? n.doubleValue() : def;
     }
-    public @Nullable Double getDoubleOrNull(@NotNull String path) {
+    public Double getDoubleOrNull(@NotNull String path) {
         Object val = get(path);
         return val instanceof Number n ? n.doubleValue() : null;
     }
@@ -174,7 +174,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
         Object val = get(path);
         return val instanceof Boolean b ? b : def;
     }
-    public @Nullable Boolean getBooleanOrNull(@NotNull String path) {
+    public Boolean getBooleanOrNull(@NotNull String path) {
         Object val = get(path);
         return val instanceof Boolean b ? b : null;
     }
@@ -201,7 +201,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
         }
         return def;
     }
-    public @Nullable List<String> getStringListOrNull(@NotNull String path) {
+    public List<String> getStringListOrNull(@NotNull String path) {
         Object val = get(path);
         if (val instanceof List<?>) {
             List<String> list = new ArrayList<>();
