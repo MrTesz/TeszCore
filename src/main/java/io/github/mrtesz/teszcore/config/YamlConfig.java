@@ -30,7 +30,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
 
     @Setter
     private Map<String, Object> data;
-    private Map<String, Object> defaults;
+    private Map<String, Object> defaults = new HashMap<>();
 
     private YamlConfig(@NotNull Path filePath, @NotNull Yaml yaml, boolean autosave) {
         this.filePath = filePath;
