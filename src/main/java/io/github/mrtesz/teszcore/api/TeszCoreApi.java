@@ -89,7 +89,7 @@ public class TeszCoreApi implements Copyable<TeszCoreApi> {
      * @throws IllegalArgumentException when the {@link Initializer#loggerFilePath} is not null and doesn't end with a '/'
      */
     public static TeszCoreApi initialize(Initializer initializer) throws DuplicateInitializationException, IllegalArgumentException {
-        TeszCoreApi currentInstance = getInstance();
+        TeszCoreApi currentInstance = instance;
         if (currentInstance != null && !initializer.overwrite)
             throw new DuplicateInitializationException("Failed to initialize TeszCoreApi.java: An instance of TeszCore is already initialized. Previous Installation: " + currentInstance.getInitializedWith());
         if (initializer.loggerFilePath != null && !initializer.loggerFilePath.endsWith("/"))
