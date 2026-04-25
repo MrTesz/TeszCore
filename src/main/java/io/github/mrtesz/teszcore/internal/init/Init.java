@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 public class Init {
 
     private final Logger logger;
+    private LoggerContext loggerContext = null;
     private final @Nullable java.util.logging.Logger javaLogger;
 
     @Setter
@@ -45,8 +46,8 @@ public class Init {
     @SuppressWarnings("SameParameterValue")
     private Logger setupLogger(@NotNull String name, @Nullable String path, @NotNull String fileName,
                                boolean fileEnabled, @NotNull String maxFilesToKeep, Level consoleLoggerLevel) {
-        LoggerContext context = (LoggerContext) LogManager.getContext(false);
-        Configuration config = context.getConfiguration();
+        this.loggerContext = new LoggerContext("TeszCoreContext-" + name);
+        Configuration config = loggerContext.getConfiguration();
 
         RollingFileAppender fileAppender = null;
         if (fileEnabled) {
@@ -96,7 +97,7 @@ public class Init {
         loggerConfig.addAppender(consoleAppender, Level.INFO, null);
 
         config.addLogger(name, loggerConfig);
-        context.updateLoggers();
+        loggerContext.updateLoggers();
 
         return LogManager.getLogger(name);
     }

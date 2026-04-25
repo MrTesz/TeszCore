@@ -1,20 +1,23 @@
 package io.github.mrtesz.teszcore.api;
 
 import io.github.mrtesz.teszcore.copyable.Copyable;
-import io.github.mrtesz.teszcore.internal.init.Init;
 import io.github.mrtesz.teszcore.db.manager.mariadb.MariaDBManager;
 import io.github.mrtesz.teszcore.db.manager.sqlite.SqliteManager;
 import io.github.mrtesz.teszcore.exceptions.DuplicateInitializationException;
+import io.github.mrtesz.teszcore.internal.init.Init;
 import io.github.mrtesz.teszcore.logger.TeszCoreLogger;
 import io.github.mrtesz.teszcore.logger.TeszCoreLoggerFactory;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
 import io.github.mrtesz.teszcore.util.Conditions;
 import lombok.*;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.logging.Logger;
 
 /**
@@ -86,14 +89,13 @@ public class TeszCoreApi implements Copyable<TeszCoreApi> {
      * @param initializer Initializer class (previously created with the {@link Initializer#builder()})
      * @return The created {@link TeszCoreApi} instance (can also be obtained with {@link TeszCoreApi#getInstance()}
      * @throws DuplicateInitializationException when a {@link TeszCoreApi} instance was already initialized by other projects (can be bypassed with setting {@link Initializer#overwrite} to true)
-     * @throws IllegalArgumentException when the {@link Initializer#loggerFilePath} is not null and doesn't end with a '/'
      */
-    public static TeszCoreApi initialize(Initializer initializer) throws DuplicateInitializationException, IllegalArgumentException {
+    public static TeszCoreApi initialize(Initializer initializer) throws DuplicateInitializationException {
         TeszCoreApi currentInstance = instance;
         if (currentInstance != null && !initializer.overwrite)
             throw new DuplicateInitializationException("Failed to initialize TeszCoreApi.java: An instance of TeszCore is already initialized. Previous Installation: " + currentInstance.getInitializedWith());
-        if (initializer.loggerFilePath != null && !initializer.loggerFilePath.endsWith("/"))
-            throw new IllegalArgumentException("path in TeszCoreApi#<init> doesn't end with '/'!");
+
+        initializer.loggerFilePath = validateAndNormalizePath(initializer.loggerFilePath);
 
         return new TeszCoreApi(initializer,
                 initializer.javaLogger,
@@ -104,6 +106,27 @@ public class TeszCoreApi implements Copyable<TeszCoreApi> {
                 initializer.loggerName,
                 initializer.loggerFileName,
                 initializer.teszCoreLoggerFactory);
+    }
+    private static String validateAndNormalizePath(@Nullable String path) {
+        if (path == null) return null;
+
+        path = path.trim();
+        if (path.isEmpty()) return null;
+
+        Path normalized = Path.of(path).normalize();
+
+        File dir = normalized.toFile();
+        if (!dir.exists())
+            if (!dir.mkdirs())
+                if (!dir.exists()) // race condition check
+                    throw new IllegalStateException("Could not create log directory: " + normalized);
+
+        if (!dir.isDirectory())
+            throw new IllegalArgumentException("Log path is not a directory: " + normalized);
+        if (!dir.canWrite())
+            throw new IllegalArgumentException("Log path is not writable: " + normalized);
+
+        return normalized.toString().replace("\\", "/");
     }
 
     /** Logs an exception */
@@ -152,6 +175,10 @@ public class TeszCoreApi implements Copyable<TeszCoreApi> {
 
     public org.apache.logging.log4j.Logger getLog4jLogger() {
         return init.getLogger();
+    }
+
+    public LoggerContext getLoggerContext() {
+        return init.getLoggerContext();
     }
 
     private Initializer getInitializedWith() {
