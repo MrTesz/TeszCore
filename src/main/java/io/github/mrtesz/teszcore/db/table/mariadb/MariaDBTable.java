@@ -101,28 +101,28 @@ public class MariaDBTable implements DBTable {
     }
     @Override
     public MariaDBTable addText(@NotNull String name, String def) {
-        return addColumn(name, "TEXT DEFAULT " + def);
+        return addColumn(name, "TEXT DEFAULT '" + def + "'");
     }
 
     public MariaDBTable addVarchar(@NotNull String name, int length) {
         return addColumn(name, "VARCHAR(" + length + ")");
     }
     public MariaDBTable addVarchar(@NotNull String name, int length, String def) {
-        return addColumn(name, "VARCHAR(" + length + ") DEFAULT " + def);
+        return addColumn(name, "VARCHAR(" + length + ") DEFAULT '" + def + "'");
     }
 
     public MariaDBTable addMediumText(@NotNull String name) {
         return addColumn(name, "MEDIUMTEXT");
     }
     public MariaDBTable addMediumText(@NotNull String name, String def) {
-        return addColumn(name, "MEDIUMTEXT DEFAULT " + def);
+        return addColumn(name, "MEDIUMTEXT DEFAULT '" + def + "'");
     }
 
     public MariaDBTable addLongText(@NotNull String name) {
         return addColumn(name, "LONGTEXT");
     }
     public MariaDBTable addLongText(@NotNull String name, String def) {
-        return addColumn(name, "LONGTEXT DEFAULT " + def);
+        return addColumn(name, "LONGTEXT DEFAULT '" + def + "'");
     }
 
     public MariaDBTable addBoolean(@NotNull String name) {

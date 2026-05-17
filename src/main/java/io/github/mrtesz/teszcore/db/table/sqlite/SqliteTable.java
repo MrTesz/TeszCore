@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("unused")
 public class SqliteTable implements DBTable {
 
     private final @Getter String name;
@@ -98,7 +99,7 @@ public class SqliteTable implements DBTable {
     }
     @Override
     public SqliteTable addText(String name, String def) {
-        return addColumn(name, "TEXT DEFAULT " + def);
+        return addColumn(name, "TEXT DEFAULT '" + def + "'");
     }
 
     @Override
