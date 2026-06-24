@@ -4,7 +4,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.mrtesz.teszcore.api.TeszCoreApi;
 import io.github.mrtesz.teszcore.api.db.manager.AsyncDBManager;
 import io.github.mrtesz.teszcore.api.db.table.DBTable;
-import io.github.mrtesz.teszcore.db.table.mariadb.MariaDBTable;
 import io.github.mrtesz.teszcore.db.selection.SelectionResults;
 import io.github.mrtesz.teszcore.db.table.sqlite.SqliteTable;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
@@ -34,7 +33,7 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
     @Override
     public CompletableFuture<Void> createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException {
         if(!(dbTable instanceof SqliteTable sqliteTable))
-            throw new IllegalArgumentException("DBTable object was not " + MariaDBTable.class.getName() + " but " + dbTable.getClass().getName() + ".");
+            throw new IllegalArgumentException("DBTable object was not " + SqliteTable.class.getName() + " but " + dbTable.getClass().getName() + ".");
 
         return CompletableFuture.runAsync(() -> {
 
@@ -102,7 +101,7 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
                         (v, ex) -> {
                             if (ex == null)
                                 TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error(
-                                        "Async createOrAlter task of AsyncMariaDBManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
+                                        "Async createOrAlter task of AsyncSqliteManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
                                 );
                             if (ex != null)
                                 TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(ex);
@@ -146,7 +145,7 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
                         (result, ex) -> {
                             if (result == null && ex == null)
                                 TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error(
-                                        "Async executeSql task of AsyncMariaDBManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
+                                        "Async executeSql task of AsyncSqliteManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
                                 );
                             if (ex != null)
                                 TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(ex);
@@ -223,7 +222,7 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
                         (result, ex) -> {
                             if (result == null && ex == null)
                                 TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error(
-                                        "Async executeSelect task of AsyncMariaDBManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
+                                        "Async executeSelect task of AsyncSqliteManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
                                 );
                             if (ex != null)
                                 TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(ex);
@@ -323,7 +322,7 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
                         (result, ex) -> {
                             if (result == null && ex == null)
                                 TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error(
-                                        "Async columnExists task of AsyncMariaDBManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
+                                        "Async columnExists task of AsyncSqliteManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
                                 );
                             if (ex != null)
                                 TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(ex);

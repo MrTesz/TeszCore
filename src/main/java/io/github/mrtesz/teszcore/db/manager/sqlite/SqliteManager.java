@@ -4,7 +4,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.mrtesz.teszcore.api.TeszCoreApi;
 import io.github.mrtesz.teszcore.api.db.manager.SyncDBManager;
 import io.github.mrtesz.teszcore.api.db.table.DBTable;
-import io.github.mrtesz.teszcore.db.table.mariadb.MariaDBTable;
 import io.github.mrtesz.teszcore.db.selection.SelectionResults;
 import io.github.mrtesz.teszcore.db.table.sqlite.SqliteTable;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
@@ -27,7 +26,7 @@ public class SqliteManager extends AbstractSqliteManager implements SyncDBManage
      * @throws IllegalArgumentException when the {@code dbTable} param is not a {@link SqliteTable}
      */
     public void createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException {
-        if(!(dbTable instanceof SqliteTable sqliteTable)) throw new IllegalArgumentException("DBTable object was not " + MariaDBTable.class.getName() + " but " + dbTable.getClass().getName() + ".");
+        if(!(dbTable instanceof SqliteTable sqliteTable)) throw new IllegalArgumentException("DBTable object was not " + SqliteTable.class.getName() + " but " + dbTable.getClass().getName() + ".");
 
         @NotNull String tableName = sqliteTable.getName();
         long start = System.currentTimeMillis();
