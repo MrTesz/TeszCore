@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/// Parent class of all MariaDBManagers
+/** Parent class of all MariaDBManagers **/
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractMariaDBManager extends AbstractDBManager {
 

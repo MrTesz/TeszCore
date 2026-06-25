@@ -5,6 +5,7 @@ import io.github.mrtesz.teszcore.db.manager.mariadb.MariaDBManager;
 import io.github.mrtesz.teszcore.db.manager.sqlite.SqliteManager;
 import io.github.mrtesz.teszcore.exceptions.DuplicateInitializationException;
 import io.github.mrtesz.teszcore.internal.init.Init;
+import io.github.mrtesz.teszcore.logged.Initializer;
 import io.github.mrtesz.teszcore.logger.TeszCoreLogger;
 import io.github.mrtesz.teszcore.logger.TeszCoreLoggerFactory;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
@@ -20,7 +21,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
-/// The API class
+/** The API class **/
 @SuppressWarnings("unused")
 public class TeszCoreApi implements Copyable<TeszCoreApi> {
 

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-/// Parent interface of all async database managers
+/** Parent interface of all async database managers **/
 @SuppressWarnings("unused")
 public interface AsyncDBManager extends DBManager {
 

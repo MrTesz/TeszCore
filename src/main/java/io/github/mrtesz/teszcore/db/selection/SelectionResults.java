@@ -8,14 +8,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Map;
 
-// Class for simple handling results of a selection
+/** Class for simple handling results of a selection **/
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class SelectionResults implements Copyable<SelectionResults> {
 
     private final List<Map<String, Object>> resultsMap;
     private final List<SelectionResult> results;
 
-    /// Execution results as a List of Maps representing the selected rows
+    /** Execution results as a List of Maps representing the selected rows **/
     public SelectionResults(@NotNull List<Map<String, Object>> results) {
         this.resultsMap = results;
         this.results = results.stream().map(SelectionResult::new).toList();

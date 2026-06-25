@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-/// Parent interface of all database managers
+/** Parent interface of all database managers **/
 public interface DBManager extends Copyable<DBManager> {
 
     /**
@@ -32,7 +32,7 @@ public interface DBManager extends Copyable<DBManager> {
      * @throws IllegalStateException if the DBManager is closed
      */
     void connect() throws IllegalStateException;
-    /// Close the database manager
+    /** Close the database manager **/
     void disconnect();
     /**
      * Connects the manager to the database again, when it is not connected

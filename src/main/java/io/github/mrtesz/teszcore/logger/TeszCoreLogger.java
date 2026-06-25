@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/// Main class for logging
+/** Main class for logging */
 @Getter
 public class TeszCoreLogger implements Copyable<TeszCoreLogger> {
 
@@ -66,12 +66,12 @@ public class TeszCoreLogger implements Copyable<TeszCoreLogger> {
         logger.error("{}[{}] {}", (projectName != null ? "[" + projectName + "] " : ""), lvl, msg);
     }
 
-    /// @see #printStackTrace(Throwable)
+    /** @see #printStackTrace(Throwable) */
     public void throwing(Throwable throwable) {
         printStackTrace(throwable);
     }
 
-    /// Log a throwable
+    /** Log a throwable */
     public void printStackTrace(Throwable throwable) {
         String type = throwable.getClass().getName();
         String message = throwable.getMessage();

@@ -7,20 +7,20 @@ import lombok.Setter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
-/// Utility tuple with 4 values
+/** Utility tuple with 4 values **/
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
 public class Quadruple<L, ML, MR, R> implements Copyable<Quadruple<L, ML, MR, R>> {
 
-    /// first value
+    /** first value **/
     private L left;
-    /// second value
+    /** second value **/
     private ML midLeft;
-    /// third value
+    /** third value **/
     private MR midRight;
-    /// fourth value
+    /** fourth value **/
     private R right;
 
     public String toString(@NotNull String format) {

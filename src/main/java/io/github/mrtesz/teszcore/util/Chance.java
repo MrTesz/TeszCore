@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Random;
 
-/// Util class for generating random values
+/** Util class for generating random values **/
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Chance {
 

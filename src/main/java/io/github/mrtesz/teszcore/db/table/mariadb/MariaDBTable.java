@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/// Builder class to configure MariaDB tables
+/** Builder class to configure MariaDB tables **/
 @SuppressWarnings("unused")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class MariaDBTable implements DBTable {

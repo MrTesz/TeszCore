@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/// Parent interface of all sync database managers
+/** Parent interface of all sync database managers **/
 @SuppressWarnings("unused")
 public interface SyncDBManager extends DBManager {
 

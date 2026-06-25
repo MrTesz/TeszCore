@@ -7,16 +7,16 @@ import lombok.Setter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
-/// Utility tuple with 2 values
+/** Utility tuple with 2 values **/
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 public class Pair<L, R> implements Copyable<Pair<L, R>> {
 
-    /// first value
+    /** first value **/
     L left;
-    /// second value
+    /** second value **/
     R right;
 
     public String toString(@NotNull String format) {

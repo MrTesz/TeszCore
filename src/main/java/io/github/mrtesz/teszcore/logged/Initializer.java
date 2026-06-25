@@ -11,13 +11,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 
-/// Utility class for initializing classes with wrapping logging
+/** Utility class for initializing classes with wrapping logging */
 @AllArgsConstructor
 public class Initializer implements Copyable<Initializer> {
 
-    /// The name of the project, using the Initializer
+    /** The name of the project, using the Initializer */
     private final @Nullable String usingProject;
-    /// Logger, the messages are sent in. Default: Logger at level 5
+    /** Logger, the messages are sent in. Default: Logger at level 5 */
     private final @NotNull TeszCoreLogger logger;
 
     public Initializer(@Nullable String usingProject) {

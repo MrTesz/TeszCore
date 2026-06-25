@@ -7,18 +7,18 @@ import lombok.Setter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
-/// Utility tuple with 3 values
+/** Utility tuple with 3 values **/
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 public class Triple<L, M, R> implements Copyable<Triple<L, M, R>> {
 
-    /// first value
+    /** first value **/
     public L left;
-    /// second value
+    /** second value **/
     public M middle;
-    /// third value
+    /** third value **/
     public R right;
 
     public String toString(@NotNull String format) {

@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/// Level of logging
+/** Level of logging */
 @Getter
 public enum DebugLevel {
 
@@ -25,11 +25,11 @@ public enum DebugLevel {
     LEVEL0(0, LoggerLevel.ERROR, "Error StackTraces"),
     LEVELMINUS1(-1, LoggerLevel.NOTHING, "Nothing");
 
-    /// Integer value of the level
+    /** Integer value of the level */
     private final int intValue;
-    /// LoggerLevel used for {@link TeszCoreLogger#log(String)}
+    /** LoggerLevel used for {@link TeszCoreLogger#log(String)} */
     private final LoggerLevel loggerLevel;
-    /// Usages this level is used for in classes of this project
+    /** Usages this level is used for in classes of this project */
     private final Set<String> uses;
 
     DebugLevel(int intValue, LoggerLevel loggerLevel, String... uses) {

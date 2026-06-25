@@ -20,7 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-/// Class for managing YAML files
+/** Class for managing YAML files */
 @SuppressWarnings("unused")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class YamlConfig implements Copyable<YamlConfig> {
@@ -338,13 +338,13 @@ public class YamlConfig implements Copyable<YamlConfig> {
         @Getter @Accessors(fluent = true)
         private @NotNull DumperOptions dumperOptions = new DumperOptions();
 
-        /// Save the config after set() automatically. Default: true
+        /** Save the config after set() automatically. Default: true */
         private boolean autosave = true;
-        /// Load the config file on build
+        /** Load the config file on build */
         private boolean autoload = true;
-        /// The path, the YAML file will be created in
+        /** The path, the YAML file will be created in */
         private @Nullable String filePath;
-        /// The name, the YAML file will be created with
+        /** The name, the YAML file will be created with */
         private @NotNull String fileName;
 
         /**
