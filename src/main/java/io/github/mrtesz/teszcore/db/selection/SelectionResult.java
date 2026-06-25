@@ -10,9 +10,11 @@ import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Set;
 
+/// Class for simple handling of a single table row.
 @AllArgsConstructor
 public class SelectionResult implements Copyable<SelectionResult> {
 
+    /// Map representing a row
     private final @NotNull Map<String, Object> result;
 
     public Object get(@NotNull String columnName) {

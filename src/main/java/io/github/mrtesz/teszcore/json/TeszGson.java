@@ -16,6 +16,7 @@ public class TeszGson {
     @Getter
     private static Gson gson = BUILDER.create();
 
+    /// Rebuilds the {@link #gson} with {@link #BUILDER}{@link GsonBuilder#create() #create}
     public static void rebuild() {
         gson = BUILDER.create();
     }

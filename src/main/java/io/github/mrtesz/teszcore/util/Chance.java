@@ -11,13 +11,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Random;
 
+/// Util class for generating random values
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Chance {
 
     private static final Random RANDOM = new Random();
 
     /**
-     * Rolls a percentage
+     * Rolls a `boolean` of a provided percentage
      * @param percent percent
      * @return the rolled result
      * @throws IllegalNumberRangeException if <code>percent</code> is not in the range 0.0-1.0
@@ -27,7 +28,7 @@ public class Chance {
         return RANDOM.nextDouble() < percent;
     }
     /**
-     * Rolls a percentage with a specified random
+     * Rolls a `boolean` of a provided percentage with a specified random
      * @param percent percent
      * @param random random
      * @return the rolled result
@@ -66,8 +67,7 @@ public class Chance {
 
     /**
      * A weighted entry holding a chance and a result value, used in {@link Chance#roll(Collection)}.
-     * The {@code chance} does not need to be normalized (e.g. sum to 1.0) —
-     * entries are rolled relative to each other.
+     * The {@code chance} does not need to be normalized (e.g. sum to 1.0) — entries are rolled relative to each other.
      */
     @Getter
     @ToString

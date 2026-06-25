@@ -20,9 +20,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
-/**
- * API Class
- */
+/// The API class
 @SuppressWarnings("unused")
 public class TeszCoreApi implements Copyable<TeszCoreApi> {
 
@@ -129,7 +127,10 @@ public class TeszCoreApi implements Copyable<TeszCoreApi> {
         return normalized.toString().replace("\\", "/");
     }
 
-    /** Logs an exception */
+    /**
+     * Logs a throwable by calling {@link TeszCoreLogger#printStackTrace}
+     * @param throwable The throwable to log
+     */
     public void logException(@NotNull Throwable throwable) {
         init.getLogger(DebugLevel.LEVEL0).printStackTrace(throwable);
     }
@@ -137,12 +138,18 @@ public class TeszCoreApi implements Copyable<TeszCoreApi> {
     /**
      * Creates a {@link TeszCoreLogger}
      * @param debugLevel Level of Logging used for your Message
+     * @return a new TeszCoreLogger
      */
     public TeszCoreLogger getLogger(@NotNull DebugLevel debugLevel) {
         return init.getLogger(debugLevel);
     }
 
-    /** Creates a {@link TeszCoreLogger} with project name for specific logs */
+    /**
+     * Creates a {@link TeszCoreLogger} with project name for specific logs
+     * @param debugLevel Level of Logging used for your Message
+     * @param projectName The name of the project, using the logger
+     * @return a new TeszCoreLogger
+     */
     public TeszCoreLogger getLogger(@NotNull DebugLevel debugLevel, @Nullable String projectName) {
         return init.getLogger(debugLevel, projectName);
     }
@@ -150,37 +157,49 @@ public class TeszCoreApi implements Copyable<TeszCoreApi> {
     /**
      * Creates a {@link MariaDBManager} for your project
      * @param projectName Name of the project using the method
-     * @param infoWhenCredentialsAreNull throw an error, if url, user or password is null
-     * @param name Name of database wich is used, when null "Main"
-     * @param url Url for the Database
-     * @param user User for the Database
-     * @param password Password for the Database
-     * @return A {@link MariaDBManager}
+     * @param infoWhenCredentialsAreNull throw an error, if url, user or password is null/blank
+     * @param name Name of the database manager Default: "Main"
+     * @param url Url of the database, connecting to
+     * @param user Username of the user, connecting with
+     * @param password Password of the user, connecting with
+     * @return a {@link MariaDBManager}
      */
     public MariaDBManager createMariaDBManager(@Nullable String projectName, boolean infoWhenCredentialsAreNull, @Nullable String name,
-                                              @Nullable String url, @Nullable String user, @Nullable String password) {
+                                               String url, String user, String password) {
         return new MariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, null, projectName);
     }
 
     /**
-     * Creates a SqliteManager for your Project
+     * Creates a {@link SqliteManager} for your Project
      * @param projectName The name of the Project using the method
-     * @param path Path to the .db file
-     * @param name Name of the .db file
-     * @return A {@link SqliteManager}
+     * @param path Path of the `.db` file — `null` uses the default location
+     * @param name Name of the `.db` file
+     * @return a {@link SqliteManager}
      */
     public SqliteManager createSqliteManager(@Nullable String projectName, @Nullable String path, @NotNull String name) {
         return new SqliteManager(path, name, null, projectName);
     }
 
+    /**
+     * Get the {@link org.apache.logging.log4j.Logger}, TeszCore uses internally
+     * @return the {@link org.apache.logging.log4j.Logger}, TeszCore uses internally
+     */
     public org.apache.logging.log4j.Logger getLog4jLogger() {
         return init.getLogger();
     }
 
+    /**
+     * Get the {@link org.apache.logging.log4j.core.LoggerContext}, the {@link #getLog4jLogger() log4j.Logger} uses
+     * @return the {@link org.apache.logging.log4j.core.LoggerContext}, the {@link #getLog4jLogger() log4j.Logger} uses
+     */
     public LoggerContext getLoggerContext() {
         return init.getLoggerContext();
     }
 
+    /**
+     * Get the {@link Initializer}, the API was latest initialized with
+     * @return the {@link Initializer}, the API was latest initialized with
+     */
     private Initializer getInitializedWith() {
         return initializedWith;
     }

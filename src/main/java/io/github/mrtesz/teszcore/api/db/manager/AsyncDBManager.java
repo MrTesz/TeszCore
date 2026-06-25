@@ -1,7 +1,11 @@
 package io.github.mrtesz.teszcore.api.db.manager;
 
 import io.github.mrtesz.teszcore.api.db.table.DBTable;
+import io.github.mrtesz.teszcore.db.manager.mariadb.AsyncMariaDBManager;
+import io.github.mrtesz.teszcore.db.manager.sqlite.AsyncSqliteManager;
 import io.github.mrtesz.teszcore.db.selection.SelectionResults;
+import io.github.mrtesz.teszcore.db.table.mariadb.MariaDBTable;
+import io.github.mrtesz.teszcore.db.table.sqlite.SqliteTable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,9 +15,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+/// Parent interface of all async database managers
 @SuppressWarnings("unused")
 public interface AsyncDBManager extends DBManager {
 
+    /**
+     * Create a database table using a {@link DBTable} object, suitable for the DBManager ({@link AsyncMariaDBManager}: {@link MariaDBTable} {@link AsyncSqliteManager}: {@link SqliteTable})
+     * @param dbTable Table that is created or altered
+     * @throws IllegalArgumentException when the {@code dbTable} param is not the suitable type for the DBManager
+     */
     CompletableFuture<Void> createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException;
 
     /**

@@ -6,20 +6,18 @@ import io.github.mrtesz.teszcore.exceptions.InitializerException;
 import io.github.mrtesz.teszcore.logger.TeszCoreLogger;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
-/**
- * Utility class for initializing classes with wrapping logging
- */
+/// Utility class for initializing classes with wrapping logging
 @AllArgsConstructor
 public class Initializer implements Copyable<Initializer> {
 
+    /// The name of the project, using the Initializer
     private final @Nullable String usingProject;
+    /// Logger, the messages are sent in. Default: Logger at level 5
     private final @NotNull TeszCoreLogger logger;
 
     public Initializer(@Nullable String usingProject) {

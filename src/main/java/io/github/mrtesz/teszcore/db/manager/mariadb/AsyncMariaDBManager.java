@@ -26,11 +26,6 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager implements Async
         this.timeoutSeconds = timeoutSeconds;
     }
 
-    /**
-     * Create a MariaDB table using a {@link MariaDBTable} object
-     * @param dbTable Table that is created or altered
-     * @throws IllegalArgumentException when the {@code dbTable} param is not a {@link MariaDBTable}
-     */
     @Override
     public CompletableFuture<Void> createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException {
         if (!(dbTable instanceof MariaDBTable mariaDBTable)) throw new IllegalArgumentException("DBTable object was not " + MariaDBTable.class.getName() + " but " + dbTable.getClass().getName() + ".");

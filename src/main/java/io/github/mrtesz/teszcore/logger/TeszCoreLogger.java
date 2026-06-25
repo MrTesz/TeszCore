@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/// Main class for logging
 @Getter
 public class TeszCoreLogger implements Copyable<TeszCoreLogger> {
 
@@ -26,7 +27,7 @@ public class TeszCoreLogger implements Copyable<TeszCoreLogger> {
     }
 
     /**
-     * Automatically logs the message provided, with the LoggerLevel provided by the given DebugLevel
+     * Log a message, according to the {@link LoggerLevel} of {@link DebugLevel}
      * @param msg message to log
      */
     public void log(String msg) {
@@ -37,7 +38,11 @@ public class TeszCoreLogger implements Copyable<TeszCoreLogger> {
             case LoggerLevel.ERROR -> error(msg);
         }
     }
-
+    /**
+     * Log a message, according to the provided `level`
+     * @param msg message to log
+     * @param level type of logging
+     */
     public void log(String msg, Level level) {
         if (level == Level.ERROR) error(msg);
         else if (level == Level.WARN) warning(msg);

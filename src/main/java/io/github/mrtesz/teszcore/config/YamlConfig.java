@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+/// Class for managing YAML files
 @SuppressWarnings("unused")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class YamlConfig implements Copyable<YamlConfig> {
@@ -32,14 +33,19 @@ public class YamlConfig implements Copyable<YamlConfig> {
     private Map<String, Object> data;
     private Map<String, Object> defaults = new HashMap<>();
 
-    private YamlConfig(@NotNull Path filePath, @NotNull Yaml yaml, boolean autosave) {
+    private YamlConfig(@NotNull Path filePath, @NotNull Yaml yaml, boolean autosave, boolean autoload) {
         this.filePath = filePath;
         this.yaml = yaml;
         this.autosave = autosave;
 
-        load();
+        if (autoload)
+            load();
     }
 
+    /**
+     * Creates the file or directory if not existent and loads the data of the YAML file
+     * @throws YamlConfigException when an I/O error occurs
+     */
     @SuppressWarnings("unchecked")
     public void load() throws YamlConfigException {
         try {
@@ -62,9 +68,19 @@ public class YamlConfig implements Copyable<YamlConfig> {
             throw new YamlConfigException("Could not load YAML file " + filePath, e);
         }
     }
+
+    /**
+     * Saves the current data to the YAML file
+     * @throws YamlConfigException when an I/O error occurs
+     */
     public void save() throws YamlConfigException {
         save(StandardCharsets.UTF_8);
     }
+    /**
+     * Saves the current data to the YAML file
+     * @param cs `cs` of `OutputStreamWriter(OutputStream, Charset)`
+     * @throws YamlConfigException when an I/O error occurs
+     */
     public void save(@NotNull Charset cs) throws YamlConfigException {
         try (OutputStreamWriter writer = new OutputStreamWriter(Files.newOutputStream(filePath), cs)) {
             yaml.dump(data, writer);
@@ -73,14 +89,29 @@ public class YamlConfig implements Copyable<YamlConfig> {
         }
     }
 
+    /**
+     * Add a new entry to the defaults map
+     * @param path Path
+     * @param value Value
+     */
     public void addDefault(@NotNull String path, Object value) {
         defaults.put(path, value);
     }
+    /**
+     * Saves a value to the YAML file if the path is empty
+     * @param path Path
+     * @param value Value
+     */
     public void setDefault(@NotNull String path, Object value) {
         if (!contains(path))
             set(path, value);
     }
 
+    /**
+     * Sets a value in the YAML file
+     * @param path Path
+     * @param value Value
+     */
     @SuppressWarnings("unchecked")
     public void set(@NotNull String path, @Nullable Object value) {
         String[] keys = path.split("\\.");
@@ -95,6 +126,29 @@ public class YamlConfig implements Copyable<YamlConfig> {
         section.put(keys[keys.length - 1], value);
         if (autosave)
             save();
+    }
+
+    @SuppressWarnings("unchecked")
+    private @Nullable Object get(@NotNull String path) {
+        String[] keys = path.split("\\.");
+        Map<String, Object> section = data;
+
+        for (int i = 0; i < keys.length; i++) {
+            Object val = section.get(keys[i]);
+
+            if (val == null)
+                return null;
+
+            if (i == keys.length - 1)
+                return val;
+
+            if (!(val instanceof Map))
+                return null;
+
+            section = (Map<String, Object>) val;
+        }
+
+        return defaults.get(path);
     }
 
     public String getString(@NotNull String path) {
@@ -213,37 +267,27 @@ public class YamlConfig implements Copyable<YamlConfig> {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
-    private @Nullable Object get(@NotNull String path) {
-        String[] keys = path.split("\\.");
-        Map<String, Object> section = data;
-
-        for (int i = 0; i < keys.length; i++) {
-            Object val = section.get(keys[i]);
-
-            if (val == null)
-                return null;
-
-            if (i == keys.length - 1)
-                return val;
-
-            if (!(val instanceof Map))
-                return null;
-
-            section = (Map<String, Object>) val;
-        }
-
-        return defaults.get(path);
-    }
-
+    /**
+     * See if a path contains a value
+     * @param path Path
+     * @return if the path contains a value
+     */
     public boolean contains(@NotNull String path) {
         return get(path) != null;
     }
 
+    /**
+     * See if the YAML file exists
+     * @return true if the YAML file exists
+     */
     public boolean exists() {
         return Files.exists(filePath);
     }
 
+    /**
+     * Get the raw data of the YAML
+     * @return raw data of the YAML
+     */
     public Map<String, Object> getRaw() {
         return data;
     }
@@ -265,10 +309,19 @@ public class YamlConfig implements Copyable<YamlConfig> {
         return paths;
     }
 
+    /**
+     * Collect all paths of the YAML
+     * @return all paths in the config (e.g. `database.host`, `database.port`)
+     */
     public Set<String> getAllPaths() {
         return collectPaths(data, "");
     }
 
+    /**
+     * Return all paths under the given parent path
+     * @param parent Path to the parent section (e.g. `database`)
+     * @return all paths under the given parent path (e.g. `database.host`, `database.port`), or empty if the path does not exist or is not a section
+     */
     @SuppressWarnings("unchecked")
     public Set<String> getPaths(@NotNull String parent) {
         Object section = get(parent);
@@ -287,10 +340,18 @@ public class YamlConfig implements Copyable<YamlConfig> {
 
         /// Save the config after set() automatically. Default: true
         private boolean autosave = true;
+        /// Load the config file on build
+        private boolean autoload = true;
+        /// The path, the YAML file will be created in
         private @Nullable String filePath;
+        /// The name, the YAML file will be created with
         private @NotNull String fileName;
 
-        public YamlConfig build() {
+        /**
+         * Build the {@link YamlConfig} instance
+         * @return the YamlConfig
+         */
+        public YamlConfig build() throws NullPointerException {
             Objects.requireNonNull(fileName, "'fileName' in YamlConfig.Builder#build");
             Objects.requireNonNull(dumperOptions, "'dumperOptions' in YamlConfig.Builder#build");
 
@@ -300,7 +361,7 @@ public class YamlConfig implements Copyable<YamlConfig> {
 
             Yaml yaml = new Yaml(dumperOptions);
 
-            return new YamlConfig(path, yaml, autosave);
+            return new YamlConfig(path, yaml, autosave, autoload);
         }
 
         public Builder setFilePath(@Nullable String filePath) {
@@ -407,10 +468,14 @@ public class YamlConfig implements Copyable<YamlConfig> {
 
         @Override
         public Builder copy() {
-            return new Builder(this.dumperOptions, this.autosave, this.filePath, this.fileName);
+            return new Builder(this.dumperOptions, this.autosave, this.autoload, this.filePath, this.fileName);
         }
     }
 
+    /**
+     * Generate a YamlConfig builder
+     * @return a YamlConfig builder
+     */
     public static Builder builder() {
         return new Builder();
     }

@@ -1,12 +1,13 @@
 package io.github.mrtesz.teszcore.logger.level;
 
+import io.github.mrtesz.teszcore.logger.TeszCoreLogger;
 import lombok.Getter;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/// Level of logging
 @Getter
 public enum DebugLevel {
 
@@ -26,7 +27,7 @@ public enum DebugLevel {
 
     /// Integer value of the level
     private final int intValue;
-    /// LoggerLevel used for {@link io.github.mrtesz.teszcore.logger.TeszCoreLogger#log(String)}
+    /// LoggerLevel used for {@link TeszCoreLogger#log(String)}
     private final LoggerLevel loggerLevel;
     /// Usages this level is used for in classes of this project
     private final Set<String> uses;
@@ -38,7 +39,7 @@ public enum DebugLevel {
     }
 
     /**
-     * Get a DebugLevel value which has the same intValue as the provided one
+     * Retrieve a `DebugLevel` from an integer value
      * @param intValue intValue of the DebugLevel
      * @return the DebugLevel which has the intValue provided
      * @throws IllegalArgumentException when no DebugLevel has this intValue

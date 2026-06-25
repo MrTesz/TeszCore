@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/// Parent class of all MariaDBManagers
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractMariaDBManager extends AbstractDBManager {
 
@@ -45,6 +46,11 @@ public abstract class AbstractMariaDBManager extends AbstractDBManager {
         return config;
     }
 
+    /**
+     * Connect the database manager with the database
+     * @throws IllegalStateException if the DBManager is closed
+     * @throws NullPointerException if any of the credentials are null/empty
+     */
     @Override
     public void connect() throws IllegalStateException, NullPointerException {
         Conditions.checkState(!isClosed(), projectName + " executed after disable! Manager already closed");
@@ -94,7 +100,7 @@ public abstract class AbstractMariaDBManager extends AbstractDBManager {
     }
 
     @Override
-    public Connection getConnection() {
+    public Connection getConnection() throws IllegalStateException {
         checkConnection();
         try {
             return dataSource.getConnection();
@@ -105,18 +111,11 @@ public abstract class AbstractMariaDBManager extends AbstractDBManager {
         }
     }
 
-    /**
-     * Creates an {@link AsyncMariaDBManager} with the existing arguments of the object calling this method
-     * @param timeoutSecs References the {@link AsyncMariaDBManager#timeoutSeconds}
-     */
     @Override
     public AsyncDBManager async(int timeoutSecs) {
         return new AsyncMariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, dataSource, projectName, timeoutSecs);
     }
 
-    /**
-     * Creates a {@link MariaDBManager} with the existing arguments of the object calling this method
-     */
     public SyncDBManager sync() {
         return new MariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, dataSource, projectName);
     }

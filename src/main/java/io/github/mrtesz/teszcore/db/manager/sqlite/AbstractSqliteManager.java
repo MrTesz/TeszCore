@@ -3,8 +3,6 @@ package io.github.mrtesz.teszcore.db.manager.sqlite;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.mrtesz.teszcore.api.TeszCoreApi;
-import io.github.mrtesz.teszcore.api.db.manager.AsyncDBManager;
-import io.github.mrtesz.teszcore.api.db.manager.SyncDBManager;
 import io.github.mrtesz.teszcore.db.manager.AbstractDBManager;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
 import io.github.mrtesz.teszcore.util.Conditions;
@@ -92,7 +90,7 @@ public abstract class AbstractSqliteManager extends AbstractDBManager {
     }
 
     @Override
-    public Connection getConnection() {
+    public Connection getConnection() throws IllegalStateException {
         checkConnection();
         try {
             return dataSource.getConnection();
@@ -103,18 +101,11 @@ public abstract class AbstractSqliteManager extends AbstractDBManager {
         }
     }
 
-    /**
-     * Creates an {@link AsyncSqliteManager} with the existing arguments of the object calling this method
-     * @param timeoutSecs References the {@link AsyncSqliteManager#timeoutSeconds}
-     */
     @Override
     public AsyncSqliteManager async(int timeoutSecs) {
         return new AsyncSqliteManager(name, url, dataSource, projectName, timeoutSecs);
     }
 
-    /**
-     * Creates a {@link SqliteManager} with the existing arguments of the object calling this method
-     */
     @Override
     public SqliteManager sync() {
         return new SqliteManager(name, url, dataSource, projectName);

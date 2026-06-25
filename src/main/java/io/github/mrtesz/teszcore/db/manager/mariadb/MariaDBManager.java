@@ -10,8 +10,8 @@ import io.github.mrtesz.teszcore.logger.level.DebugLevel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.Date;
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 
 public class MariaDBManager extends AbstractMariaDBManager implements SyncDBManager {
@@ -21,11 +21,6 @@ public class MariaDBManager extends AbstractMariaDBManager implements SyncDBMana
         super(infoWhenCredentialsAreNull, (name == null ? "Main" : name), url, user, password, dataSource, projectName);
     }
 
-    /**
-     * Create a MariaDB table using a {@link MariaDBTable} object
-     * @param dbTable Table that is created or altered
-     * @throws IllegalArgumentException when the {@code dbTable} param is not suitable for the method
-     */
     @Override
     public void createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException {
         if (!(dbTable instanceof MariaDBTable mariaDBTable)) throw new IllegalArgumentException("DBTable object was not " + MariaDBTable.class.getName() + " but " + dbTable.getClass().getName() + ".");

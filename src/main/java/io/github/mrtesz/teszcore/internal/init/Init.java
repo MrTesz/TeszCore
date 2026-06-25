@@ -1,9 +1,9 @@
 package io.github.mrtesz.teszcore.internal.init;
 
+import io.github.mrtesz.teszcore.internal.log4j.AnsiConsoleAppender;
 import io.github.mrtesz.teszcore.logger.TeszCoreLogger;
 import io.github.mrtesz.teszcore.logger.TeszCoreLoggerFactory;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
-import io.github.mrtesz.teszcore.internal.log4j.AnsiConsoleAppender;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.logging.log4j.Level;

@@ -5,9 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
+/// Parent class of all exceptions in TeszCore
 @Getter
 @NoArgsConstructor
 public abstract class TeszCoreException extends RuntimeException implements Copyable<TeszCoreException> {
+
     protected @Nullable String message = null;
     protected @Nullable Throwable cause = null;
 

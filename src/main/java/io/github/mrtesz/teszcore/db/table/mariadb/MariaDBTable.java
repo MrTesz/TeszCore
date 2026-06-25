@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/// Builder class to configure MariaDB tables
 @SuppressWarnings("unused")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class MariaDBTable implements DBTable {
@@ -21,8 +22,8 @@ public class MariaDBTable implements DBTable {
     private List<String> uniques = new ArrayList<>();
 
     /**
-     * Create a {@link MariaDBTable} Object
-     * @param name Name of the Table
+     * Create a {@link MariaDBTable}
+     * @param name Name of the table
      */
     public MariaDBTable(@NotNull String name) {
         this.name = name;

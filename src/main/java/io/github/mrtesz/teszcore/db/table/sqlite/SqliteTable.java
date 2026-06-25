@@ -19,8 +19,8 @@ public class SqliteTable implements DBTable {
     private Map<String, String> indexes = new HashMap<>();
 
     /**
-     * Create a Table Object
-     * @param name Name of the Table
+     * Create a {@link SqliteTable}
+     * @param name Name of the table
      */
     public SqliteTable(String name) {
         this.name = name;

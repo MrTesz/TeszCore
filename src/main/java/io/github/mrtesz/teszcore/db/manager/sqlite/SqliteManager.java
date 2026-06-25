@@ -20,11 +20,6 @@ public class SqliteManager extends AbstractSqliteManager implements SyncDBManage
         super(path, name, dataSource, projectName);
     }
 
-    /**
-     * Create a Sqlite table using a {@link SqliteTable} object
-     * @param dbTable The Table that is created or altered
-     * @throws IllegalArgumentException when the {@code dbTable} param is not a {@link SqliteTable}
-     */
     public void createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException {
         if(!(dbTable instanceof SqliteTable sqliteTable)) throw new IllegalArgumentException("DBTable object was not " + SqliteTable.class.getName() + " but " + dbTable.getClass().getName() + ".");
 

@@ -2,6 +2,7 @@ package io.github.mrtesz.teszcore.exceptions;
 
 import org.jetbrains.annotations.Nullable;
 
+///
 public class NotNullException extends TeszCoreException {
 
     public NotNullException() {

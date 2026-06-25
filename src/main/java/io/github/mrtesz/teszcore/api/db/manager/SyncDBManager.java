@@ -1,7 +1,11 @@
 package io.github.mrtesz.teszcore.api.db.manager;
 
 import io.github.mrtesz.teszcore.api.db.table.DBTable;
+import io.github.mrtesz.teszcore.db.manager.mariadb.MariaDBManager;
+import io.github.mrtesz.teszcore.db.manager.sqlite.SqliteManager;
 import io.github.mrtesz.teszcore.db.selection.SelectionResults;
+import io.github.mrtesz.teszcore.db.table.mariadb.MariaDBTable;
+import io.github.mrtesz.teszcore.db.table.sqlite.SqliteTable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,9 +14,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/// Parent interface of all sync database managers
 @SuppressWarnings("unused")
 public interface SyncDBManager extends DBManager {
 
+    /**
+     * Create a database table using a {@link DBTable} object, suitable for the DBManager ({@link MariaDBManager}: {@link MariaDBTable} {@link SqliteManager}: {@link SqliteTable})
+     * @param dbTable Table that is created or altered
+     * @throws IllegalArgumentException when the {@code dbTable} param is not the suitable type for the DBManager
+     */
     void createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException;
 
     /**

@@ -25,11 +25,6 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
         this.timeoutSeconds = timeoutSeconds;
     }
 
-    /**
-     * Create a Sqlite table using a {@link SqliteTable} object
-     * @param dbTable Table that is created or altered
-     * @throws IllegalArgumentException when the {@code dbTable} param is not a {@link SqliteTable}
-     */
     @Override
     public CompletableFuture<Void> createOrAlter(@NotNull DBTable dbTable) throws IllegalArgumentException {
         if(!(dbTable instanceof SqliteTable sqliteTable))

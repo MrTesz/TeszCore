@@ -1,7 +1,9 @@
 package io.github.mrtesz.teszcore.exceptions;
 
+import io.github.mrtesz.teszcore.util.Conditions;
 import lombok.Getter;
 
+/// Thrown in {@link Conditions}'s `#checkRange` methods
 @Getter
 public class IllegalNumberRangeException extends TeszCoreException {
 

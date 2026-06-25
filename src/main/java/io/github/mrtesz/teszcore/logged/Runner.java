@@ -5,15 +5,13 @@ import io.github.mrtesz.teszcore.copyable.Copyable;
 import io.github.mrtesz.teszcore.logger.TeszCoreLogger;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-/**
- * Utility class for running {@link Runnable}s and {@link java.util.function.Supplier}s with wrapping logging
- */
+
+/// Utility class for running {@link Runnable}s and {@link java.util.function.Supplier}s with wrapping logging
 @AllArgsConstructor
 public class Runner implements Copyable<Runner> {
 
@@ -24,9 +22,8 @@ public class Runner implements Copyable<Runner> {
         this(usingProject, TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL5, usingProject));
     }
 
-    /**
-     * Referencing {@link #executeSupply(Supplier, String, String, TeszCoreLogger)} with usingProject and logger being the params provided on construct
-     */
+
+    /// Referencing {@link #executeSupply(Supplier, String, String, TeszCoreLogger)} with usingProject and logger being the params provided on construct
     public <T> T get(@NotNull Supplier<T> supplier, @Nullable String extraInfo) {
         return executeSupply(supplier, extraInfo, usingProject, logger);
     }
@@ -34,12 +31,11 @@ public class Runner implements Copyable<Runner> {
         return get(supplier, null);
     }
 
-    /**
-     * Referencing {@link #executeRunnable(Runnable, String, String)} with usingProject being the String provided on construct
-     */
+    /// Referencing {@link #executeRunnable(Runnable, String, String)} with `usingProject` being the `String` provided on construct
     public void run(@NotNull Runnable runnable, @Nullable String extraInfo) {
         executeRunnable(runnable, extraInfo, usingProject);
     }
+    /// Referencing {@link #run(Runnable, String)} with `extraInfo` being `null`
     public void run(@NotNull Runnable runnable) {
         run(runnable, null);
     }
