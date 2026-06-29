@@ -6,7 +6,7 @@
 title: TeszCore
 description: Docs for TeszCore
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://mrtesz.github.io" # the base hostname & protocol for your site
+url: "https://mrtesz.github.io/TeszCore" # the base hostname & protocol for your site
 repository: MrTesz/TeszCore # for github-metadata
 
 remote_theme: just-the-docs/just-the-docs
