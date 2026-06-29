@@ -1,9 +1,3 @@
----
-
-title: Conditions
-nav_fold: false
----
-
 # Conditions
 ###### Last updated for version: 2.3.1
 

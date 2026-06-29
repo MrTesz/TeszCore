@@ -1,9 +1,3 @@
----
-
-title: Logging
-nav_fold: false
----
-
 # Logging
 ###### Last updated for version: 2.3.1
 
@@ -11,7 +5,7 @@ nav_fold: false
 You can create a `TeszCoreLogger` with `TeszCoreAPI#getLogger` this method requires a `DebugLevel` representing the importance of this log message; the lower the level, the more important the message is.
 
 ## Format
-The logger message is formatted as `<Project Name if provided>[<DebugLevel intValue>] <Message>`
+The logger message is formatted as `<projectName if provided>[<DebugLevel's intValue>] <Message>`
 
 ## Logger Methods
 You have different options to log a message:

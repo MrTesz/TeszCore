@@ -1,10 +1,3 @@
----
-
-title: Json
-nav_fold: false
----
-x112
-
 # Json
 ###### Last updated for version: 2.3.1
 
@@ -12,13 +5,13 @@ In TeszCore the class `TeszGson` is used for de-/serializing values to JSON and 
 But different to the normal `Gson` you would use, in this class you can register new de-/serializer adapters, 
 which will stay registered for until the java process is terminated, which results in accessible de-/serializers for all dependent projects.
 
----
 ## De-/Serialisation
 
 You can start serializing with normal objects directly, you don't even have to initialize the `TeszCoreAPI`.<br>
 As in normal Gson you can serialize objects with `#toJson` and `#fromJson`:
 ```java
 record Data(String foo, int bar) {}
+
 //...
 
 Data data = new Data("baz", 10);
@@ -30,7 +23,6 @@ String dataJson = TeszGson.toJson(data);
 Data data = TeszGson.fromJson(dataJson, Data.class);
 ```
 
----
 ## Register new adapters
 
 When you have difficult objects which can't be automatically serialized by `Gson`, 

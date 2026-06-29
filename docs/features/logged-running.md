@@ -1,10 +1,4 @@
----
-
-title: Wrapping Logging
-nav_fold: false
----
-
-# Wrapping Logging
+# Logged Running
 ###### Last updated for version: 2.3.1
 
 With the classes `Initializer` and `Runner` you can execute Constructors, Runnables, Suppliers with logging 

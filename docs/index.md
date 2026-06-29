@@ -1,21 +1,15 @@
----
-parent: Projects
-title: TeszCore
-nav_fold: false
----
-
 # TeszCore
-## Utility project for easy SQL Database usage, logging and easy development
+TeszCore is a utility project, created for easy SQL database management, logging and other utility features.
 
-## Infos:
-Developers: [Mr_Tesz](https://github.com/MrTesz)<br>
-GitHub: [[Github]](https://github.com/MrTesz/TeszCore)<br>
-Javadocs: [[JavaDoc.io]](https://javadoc.io/doc/io.github.mrtesz/teszcore/latest/index.html)
-License: [[License]](LICENSE)<br>
-Changelog: [[Changelog]](Changelog)
+## Infos
+- [Contributors](https://github.com/MrTesz/TeszCore/graphs/contributors)
+- [Changelog](changelog/changelog.md)
+- [GitHub](https://github.com/MrTesz/TeszCore)
+- [JavaDocs](https://javadoc.io/doc/io.github.mrtesz/teszcore/latest/index.html)
+- [License](https://github.com/MrTesz/TeszCore/blob/main/LICENSE)
 
-## Maven:
-[central.sonatype.com](https://central.sonatype.com/artifact/io.github.mrtesz/teszcore/overview)
+## Maven
+[sonatype.com](https://central.sonatype.com/artifact/io.github.mrtesz/teszcore/overview)
 
 ```xml
 <!-- TeszCore -->                      
@@ -27,11 +21,12 @@ Changelog: [[Changelog]](Changelog)
 ```
 
 #### Dependencies: 
-- [io.github.mrtesz:ansi-impl](https://github.com/MrTesz/ansi-impl) for parsing paragraph codes in logger messages to ansi colors
-- org.yaml:snakeyaml for [YamlConfig](YAML)
-- org.jetbrains:annotations for transparent value annotation
-- org.apache.logging.log4j:log4j-core for logging
-- com.zaxxer:HikariCP for easy SQL connection pooling
-- org.mariadb.jdbc:mariadb-java-client for MariaDB support
-- org.xerial:sqlite-jdbc for Sqlite support
-- org.projectlombok:lombok for allowing clean source code via generated methods
+- [`io.github.mrtesz:ansi-impl`](https://github.com/MrTesz/ansi-impl) for parsing paragraph codes in logger messages to ansi colors
+- `com.google.code.gson:gson` for [JSON](features/json)
+- `org.yaml:snakeyaml` for [YAML management](features/yaml)
+- `org.jetbrains:annotations` for transparent value annotation
+- `org.apache.logging.log4j:log4j-core` for logging
+- `com.zaxxer:HikariCP` for SQL connection pooling
+- `org.mariadb.jdbc:mariadb-java-client` for MariaDB support
+- `org.xerial:sqlite-jdbc` for Sqlite support
+- `org.projectlombok:lombok` for allowing clean source code via generated methods

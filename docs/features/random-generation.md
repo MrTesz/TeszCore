@@ -1,9 +1,3 @@
----
-
-title: Random Generation
-nav_fold: false
----
-
 # Random Generation
 ###### Last updated for version: 2.3.1
 
