@@ -1,5 +1,5 @@
 ---
-parent: TeszCore
+
 title: Random Generation
 nav_fold: false
 ---

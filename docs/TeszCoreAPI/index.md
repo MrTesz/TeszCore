@@ -1,5 +1,5 @@
 ---
-parent: TeszCore
+
 title: TeszCoreAPI
 nav_fold: false
 ---

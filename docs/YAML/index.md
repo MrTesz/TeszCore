@@ -1,5 +1,5 @@
 ---
-parent: TeszCore
+
 title: YAML
 nav_fold: false
 ---

@@ -1,5 +1,5 @@
 ---
-parent: TeszCore
+
 title: Json
 nav_fold: false
 ---

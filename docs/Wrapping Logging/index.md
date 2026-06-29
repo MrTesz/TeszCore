@@ -1,5 +1,5 @@
 ---
-parent: TeszCore
+
 title: Wrapping Logging
 nav_fold: false
 ---

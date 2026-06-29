@@ -1,5 +1,5 @@
 ---
-parent: TeszCore
+
 title: Conditions
 nav_fold: false
 ---

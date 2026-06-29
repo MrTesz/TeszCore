@@ -1,5 +1,5 @@
 ---
-parent: TeszCore
+
 title: Database Managing
 nav_fold: false
 ---
