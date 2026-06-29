@@ -3,11 +3,11 @@
 # you will see them accessed via {{ site.title }}, {{ site.github_repo }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
-title: Mr_Tesz
-description: Website of Mr_Tesz
+title: TeszCore
+description: Docs for TeszCore
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://mrtesz.github.io" # the base hostname & protocol for your site
-repository: MrTesz/MrTesz.github.io # for github-metadata
+repository: MrTesz/TeszCore # for github-metadata
 
 remote_theme: just-the-docs/just-the-docs
 color_scheme: dark
@@ -31,21 +31,18 @@ exclude:
 heading_anchors: true
 
 aux_links_new_tab: true
-aux_links:
+aux_links: []
 
 # Sort order for navigation links
 # nav_sort: case_insensitive # default, equivalent to nil
 nav_sort: case_insensitive # Capital letters sorted before lowercase
 
 # External navigation links
-nav_external_links:
+nav_external_links: []
 
 # Footer
 back_to_top: true
 back_to_top_text: "Back to top"
-
-footer_content: |
-    Copyright &copy; 2026 Mr_Tesz. All rights reserved<br>
 
 last_edit_timestamp: false # show or hide edit time - page must have `last_modified_date` defined in the frontmatter
 last_edit_time_format: "%b %e %Y at %I:%M %p" # uses ruby's time format: https://ruby-doc.org/stdlib-2.7.0/libdoc/time/rdoc/Time.html
