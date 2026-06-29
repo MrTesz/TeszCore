@@ -31,7 +31,7 @@ public interface AsyncDBManager extends DBManager {
      * e.g.: <br>
      * <code>
      *     executeSql("UPDATE users SET name = ? WHERE id = ?", {@link List}.of(username, userId), "users", "update username");
-     * </code>
+     * </code>sync
      * @param sql Query that should be executed
      * @param tableName Name of the table, querying to
      * @param type Type of the execution

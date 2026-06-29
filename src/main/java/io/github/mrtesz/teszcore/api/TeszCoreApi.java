@@ -5,7 +5,6 @@ import io.github.mrtesz.teszcore.db.manager.mariadb.MariaDBManager;
 import io.github.mrtesz.teszcore.db.manager.sqlite.SqliteManager;
 import io.github.mrtesz.teszcore.exceptions.DuplicateInitializationException;
 import io.github.mrtesz.teszcore.internal.init.Init;
-import io.github.mrtesz.teszcore.logged.Initializer;
 import io.github.mrtesz.teszcore.logger.TeszCoreLogger;
 import io.github.mrtesz.teszcore.logger.TeszCoreLoggerFactory;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
@@ -169,16 +168,28 @@ public class TeszCoreApi implements Copyable<TeszCoreApi> {
                                                String url, String user, String password) {
         return new MariaDBManager(infoWhenCredentialsAreNull, name, url, user, password, null, projectName);
     }
+    /**
+     * Creates a {@link MariaDBManager} for your project
+     * @param projectName Name of the project using the method
+     * @param infoWhenCredentialsAreNull throw an error, if url, user or password is null/blank
+     * @param url Url of the database, connecting to
+     * @param user Username of the user, connecting with
+     * @param password Password of the user, connecting with
+     * @return a {@link MariaDBManager}
+     */
+    public MariaDBManager createMariaDBManager(@Nullable String projectName, boolean infoWhenCredentialsAreNull, String url, String user, String password) {
+        return new MariaDBManager(infoWhenCredentialsAreNull, null, url, user, password, null, projectName);
+    }
 
     /**
      * Creates a {@link SqliteManager} for your Project
      * @param projectName The name of the Project using the method
      * @param path Path of the `.db` file — `null` uses the default location
-     * @param name Name of the `.db` file
+     * @param fileName Name of the `.db` file
      * @return a {@link SqliteManager}
      */
-    public SqliteManager createSqliteManager(@Nullable String projectName, @Nullable String path, @NotNull String name) {
-        return new SqliteManager(path, name, null, projectName);
+    public SqliteManager createSqliteManager(@Nullable String projectName, @Nullable String path, @NotNull String fileName) {
+        return new SqliteManager(path, fileName, null, projectName);
     }
 
     /**
