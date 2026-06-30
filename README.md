@@ -20,4 +20,5 @@ TeszCore is a utility project, created for easy SQL database management, logging
 </dependency>
 ```
 
-Learn More: [View the Docs](https://mrtesz.github.io/TeszCore/)
+## Learn More 
+[View the Docs](https://mrtesz.github.io/TeszCore/)
