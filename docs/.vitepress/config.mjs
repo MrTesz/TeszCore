@@ -7,11 +7,10 @@ export default defineConfig({
   base: '/TeszCore/',
   cleanUrls: true,
   themeConfig: {
+    // https://vitepress.dev/reference/default-theme-config
     search: {
       provider: 'local'
     },
-
-    // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Javadoc', link: 'https://javadoc.io/doc/io.github.mrtesz/teszcore/latest/index.html' }
