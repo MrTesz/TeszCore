@@ -2,7 +2,7 @@
 TeszCore is a utility project, created for easy SQL database management, logging and other utility features.
 
 ## Infos
-- [Contributors](https://github.com/MrTesz/TeszCore/graphs/contributors)
+- [Contributors](https://github.com/MrTesz/TeszCore/graphs/contributors?all=1)
 - [Changelog](changelog/changelog.md)
 - [GitHub](https://github.com/MrTesz/TeszCore)
 - [JavaDocs](https://javadoc.io/doc/io.github.mrtesz/teszcore/latest/index.html)
