@@ -1,5 +1,5 @@
 # Logging
-###### Last updated for version: 2.3.1
+###### Last updated for version: 2.4.0
 
 ## Creation
 You can create a `TeszCoreLogger` with `TeszCoreAPI#getLogger` this method requires a `DebugLevel` representing the importance of this log message; the lower the level, the more important the message is.

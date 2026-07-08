@@ -39,7 +39,8 @@ export default defineConfig({
               {text: '2.0.5', link: '/changelog/version/2.0.5'},
               {text: '2.0.6', link: '/changelog/version/2.0.6'},
               {text: '2.1.0', link: '/changelog/version/2.1.0'},
-              {text: '2.3.1', link: '/changelog/version/2.3.1'}
+              {text: '2.3.1', link: '/changelog/version/2.3.1'},
+              {text: '2.4.0', link: '/changelog/version/2.4.0'}
             ]
           },
           { text: 'Bugs', link: '/changelog/bugs' }
