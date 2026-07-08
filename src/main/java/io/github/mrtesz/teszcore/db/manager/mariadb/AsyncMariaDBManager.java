@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.mrtesz.teszcore.api.TeszCoreApi;
 import io.github.mrtesz.teszcore.api.db.manager.AsyncDBManager;
 import io.github.mrtesz.teszcore.api.db.table.DBTable;
+import io.github.mrtesz.teszcore.db.batch.BatchSqlStatement;
 import io.github.mrtesz.teszcore.db.selection.SelectionResults;
 import io.github.mrtesz.teszcore.db.table.mariadb.MariaDBTable;
 import io.github.mrtesz.teszcore.logger.level.DebugLevel;
@@ -132,6 +133,54 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager implements Async
     @Override
     public CompletableFuture<Integer> executeSql(@NotNull String sql, @NotNull String tableName, @Nullable String type) {
         return executeSql(sql, tableName, type, List.of());
+    }
+
+    @Override
+    public CompletableFuture<int[]> executeBatchSql(@NotNull List<BatchSqlStatement> sqlStatements, @NotNull String tableName) {
+        long start = System.currentTimeMillis();
+
+        checkConnection();
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(null)) {
+                for (BatchSqlStatement stmt : sqlStatements) {
+                    int i = 1;
+                    for (Object o : stmt.getParams()) {
+                        switch (o) {
+                            case null -> ps.setObject(i++, null);
+                            case String s -> ps.setString(i++, s);
+                            case Integer n -> ps.setInt(i++, n);
+                            case Long l -> ps.setLong(i++, l);
+                            case Boolean b -> ps.setBoolean(i++, b);
+                            case Date d -> ps.setDate(i++, d);
+                            default -> ps.setObject(i++, o);
+                        }
+                    }
+                    ps.addBatch(stmt.getSql());
+                }
+
+                int[] result = ps.executeBatch();
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL10, projectName)
+                        .debug("Executed batch of " + sqlStatements.size() + " queries in " + tableName + " in " + (System.currentTimeMillis() - start) + " ms");
+                return result;
+            } catch (SQLException e) {
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName)
+                        .error("Error while executing batch in '" + tableName + "' Error: " + e.getMessage());
+                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(e);
+            }
+
+            return new int[0];
+        })
+                .completeOnTimeout(null, timeoutSeconds, TimeUnit.SECONDS)
+                .whenComplete(
+                        (result, ex) -> {
+                            if (result == null && ex == null)
+                                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL1, projectName).error(
+                                        "Async executeSql task of AsyncMariaDBManager " + getName() + " of Project " + projectName + " timed out after " + timeoutSeconds + " seconds."
+                                );
+                            if (ex != null)
+                                TeszCoreApi.getInstance().getLogger(DebugLevel.LEVEL0, projectName).printStackTrace(ex);
+                        }
+                );
     }
 
     @Override

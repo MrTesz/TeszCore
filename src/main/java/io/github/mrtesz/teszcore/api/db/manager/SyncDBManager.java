@@ -1,6 +1,7 @@
 package io.github.mrtesz.teszcore.api.db.manager;
 
 import io.github.mrtesz.teszcore.api.db.table.DBTable;
+import io.github.mrtesz.teszcore.db.batch.BatchSqlStatement;
 import io.github.mrtesz.teszcore.db.manager.mariadb.MariaDBManager;
 import io.github.mrtesz.teszcore.db.manager.sqlite.SqliteManager;
 import io.github.mrtesz.teszcore.db.selection.SelectionResults;
@@ -50,6 +51,19 @@ public interface SyncDBManager extends DBManager {
      * @return Return value of {@link PreparedStatement#executeUpdate()}
      */
     int executeSql(@NotNull String sql, String tableName, String type);
+
+    /**
+     * Executes multiple SQL statements in batch mode for better performance<br>
+     * e.g.:<br><code>
+     *     executeBatchSql(batchStatementList, "users", "batch update");
+     * </code>
+     * @param sqlStatements List of SQL statements with their parameters
+     * @param tableName Name of the table, querying to
+     * @return Return value of {@link PreparedStatement#executeBatch()}
+     */
+    default int[] executeBatchSql(@NotNull List<BatchSqlStatement> sqlStatements, @NotNull String tableName) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Execute a selection query with a {@link List} replacing the question marks in the {@code sql} <br>

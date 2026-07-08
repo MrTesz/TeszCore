@@ -1,6 +1,7 @@
 package io.github.mrtesz.teszcore.api.db.manager;
 
 import io.github.mrtesz.teszcore.api.db.table.DBTable;
+import io.github.mrtesz.teszcore.db.batch.BatchSqlStatement;
 import io.github.mrtesz.teszcore.db.manager.mariadb.AsyncMariaDBManager;
 import io.github.mrtesz.teszcore.db.manager.sqlite.AsyncSqliteManager;
 import io.github.mrtesz.teszcore.db.selection.SelectionResults;
@@ -52,6 +53,19 @@ public interface AsyncDBManager extends DBManager {
      * @return A {@link CompletableFuture} supplying the return value of the {@link PreparedStatement#executeUpdate()}
      */
     CompletableFuture<Integer> executeSql(@NotNull String sql, @NotNull String tableName, @Nullable String type);
+
+    /**
+     * Executes multiple SQL statements in batch mode for better performance<br>
+     * e.g.:<br><code>
+     *     executeBatchSql(batchStatementList, "users", "batch update");
+     * </code>
+     * @param sqlStatements List of SQL statements with their parameters
+     * @param tableName Name of the table, querying to
+     * @return A {@link CompletableFuture} supplying the return value of {@link PreparedStatement#executeBatch()}
+     */
+    default CompletableFuture<int[]> executeBatchSql(@NotNull List<BatchSqlStatement> sqlStatements, @NotNull String tableName) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Execute a selection query with a {@link List} replacing the question marks in the {@code sql}<br>
