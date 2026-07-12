@@ -1,4 +1,9 @@
 import { defineConfig } from 'vitepress'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
+
+const pom = readFileSync(resolve(__dirname, '../pom.xml'), 'utf-8')
+const version = pom.match(/<version>(.*?)<\/version>/)[1]
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -7,6 +12,7 @@ export default defineConfig({
   base: '/TeszCore/',
   cleanUrls: true,
   themeConfig: {
+    version,
     // https://vitepress.dev/reference/default-theme-config
     search: {
       provider: 'local'
@@ -24,29 +30,6 @@ export default defineConfig({
         ]
       },
       {
-        text: 'Versions',
-        items: [
-          {
-            text: 'Changelog',
-            collapsed: true,
-            link: '/changelog/changelog',
-            items: [
-              {text: '2.0.0', link: '/changelog/version/2.0.0'},
-              {text: '2.0.1', link: '/changelog/version/2.0.1'},
-              {text: '2.0.2', link: '/changelog/version/2.0.2'},
-              {text: '2.0.3', link: '/changelog/version/2.0.3'},
-              {text: '2.0.4', link: '/changelog/version/2.0.4'},
-              {text: '2.0.5', link: '/changelog/version/2.0.5'},
-              {text: '2.0.6', link: '/changelog/version/2.0.6'},
-              {text: '2.1.0', link: '/changelog/version/2.1.0'},
-              {text: '2.3.1', link: '/changelog/version/2.3.1'},
-              {text: '2.4.0', link: '/changelog/version/2.4.0'}
-            ]
-          },
-          { text: 'Bugs', link: '/changelog/bugs' }
-        ]
-      },
-      {
         text: 'Features',
         items: [
           { text: 'TeszCoreAPI', link: '/features/teszcoreapi' },
@@ -61,6 +44,13 @@ export default defineConfig({
           { text: 'JSON', link: '/features/json' },
           { text: 'Random Generation', link: '/features/random-generation' },
           { text: 'Conditions', link: '/features/conditions' },
+        ]
+      },
+      {
+        text: 'Versions',
+        items: [
+          {text: 'Changelog', link: '/changelog/changelog'},
+          {text: 'Bugs', link: '/changelog/bugs'}
         ]
       }
     ],

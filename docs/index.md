@@ -16,7 +16,7 @@ TeszCore is a utility project, created for easy SQL database management, logging
 <dependency>
     <groupId>io.github.mrtesz</groupId>
     <artifactId>teszcore</artifactId>
-    <version><!-- replace with latest version --></version>
+    <version>{{ $themeConfig.version }}</version>
 </dependency>
 ```
 

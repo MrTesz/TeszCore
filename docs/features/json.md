@@ -1,5 +1,5 @@
 # Json
-###### Last updated for version: 2.4.0
+###### Last updated for version: 2.4.1
 
 In TeszCore the class `TeszGson` is used for de-/serializing values to JSON and vice versa.<br>
 But different to the normal `Gson` you would use, in this class you can register new de-/serializer adapters, 

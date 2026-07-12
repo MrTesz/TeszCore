@@ -1,5 +1,5 @@
 # YAML
-###### Last updated for version: 2.4.0
+###### Last updated for version: 2.4.1
 
 With the `YamlConfig` class you can create/load/manage YAML files
 

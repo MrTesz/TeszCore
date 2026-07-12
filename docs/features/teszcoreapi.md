@@ -1,5 +1,5 @@
 # TeszCoreAPI
-###### Last updated for version: 2.4.0
+###### Last updated for version: 2.4.1
 
 ## Usage
 
@@ -20,7 +20,7 @@ TeszCoreApi.initialize(
         TeszCoreApi.Initializer.builder()
                 .loggerName("MyProjectLogger") // name of the logger
                 .loggerFileName("MyProject") // name of the file, the logs are written to
-                .loggerFilePath("logs/") // path to the log file
+                .loggerFilePath("logs") // path to the log file
                 .build()
 );
 ```

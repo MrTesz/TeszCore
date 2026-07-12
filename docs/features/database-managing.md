@@ -1,5 +1,5 @@
 # Database Managing
-###### Last updated for version: 2.4.0
+###### Last updated for version: 2.4.1
 
 Database managing is a big part of this project and, by the way, the purpose this project was created for (initially as "DBUtils").<br>
 This project provides managing of MariaDB and Sqlite databases natively, but you can also create a custom DBManager if you want to. (See [Create a custom DBManager](#create-a-custom-dbmanager))
@@ -64,7 +64,7 @@ This method creates a new `Async...Manager` with the same credentials and connec
 Async DBMangers are executing queries with a `CompletableFuture` so you can also provide an action, when the execution is run.
 
 > [!NOTE]
-> To see through all method signatures and what you can do with specific database managers, view the [javadocs](https://javadoc.io/static/io.github.mrtesz/teszcore/2.4.0/io/github/mrtesz/teszcore/db/manager/package-summary.html)
+> To see through all method signatures and what you can do with specific database managers, view the [javadocs](https://javadoc.io/static/io.github.mrtesz/teszcore/{{ $themeConfig.version }}/io/github/mrtesz/teszcore/db/manager/package-summary.html)
 
 ## Create a custom DBManager
 

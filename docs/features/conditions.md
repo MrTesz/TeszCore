@@ -1,5 +1,5 @@
 # Conditions
-###### Last updated for version: 2.4.0
+###### Last updated for version: 2.4.1
 
 Like in other libraries the `Conditions` class in TeszCore provides methods like `#checkArgument`, `#checkState` and `#checkNonNull` to check basic everyday use conditions. 
 But unlike most others, it also has `#checkRange`, to check if a `Number` is in a given range min or maximum.
