@@ -124,7 +124,7 @@ public class TeszCoreApi implements Copyable<TeszCoreApi> {
         if (!dir.canWrite())
             throw new IllegalArgumentException("Log path is not writable: " + normalized);
 
-        return normalized.toString().replace("\\", "/");
+        return normalized.toString().replace("\\", "/") + "/";
     }
 
     /**
