@@ -105,7 +105,7 @@ public class MariaDBManager extends AbstractMariaDBManager implements SyncDBMana
         long start = System.currentTimeMillis();
 
         checkConnection();
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(null)) {
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sqlStatements.getFirst().getSql())) {
             boolean first = true;
             for (BatchSqlStatement stmt : sqlStatements) {
                 int i = 1;
