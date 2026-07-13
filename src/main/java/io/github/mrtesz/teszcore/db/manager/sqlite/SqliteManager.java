@@ -125,7 +125,8 @@ public class SqliteManager extends AbstractSqliteManager implements SyncDBManage
         long start = System.currentTimeMillis();
 
         checkConnection();
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(null)) {
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sqlStatements.getFirst().getSql())) {
+            boolean first = true;
             for (BatchSqlStatement stmt : sqlStatements) {
                 int i = 1;
                 for (Object o : stmt.getParams()) {
@@ -138,6 +139,10 @@ public class SqliteManager extends AbstractSqliteManager implements SyncDBManage
                         case Date d -> ps.setDate(i++, d);
                         default -> ps.setObject(i++, o);
                     }
+                }
+                if (first) {
+                    first = false;
+                    continue;
                 }
                 ps.addBatch(stmt.getSql());
             }

@@ -1,5 +1,5 @@
 # Logged Running
-###### Last updated for version: 2.4.1
+###### Last updated for version: 2.4.2
 
 With the classes `Initializer` and `Runner` you can execute Constructors, Runnables, Suppliers with logging 
 at the start and the end.

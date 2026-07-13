@@ -1,9 +1,4 @@
 import { defineConfig } from 'vitepress'
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
-
-const pom = readFileSync(resolve(__dirname, '../pom.xml'), 'utf-8')
-const version = pom.match(/<version>(.*?)<\/version>/)[1]
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -12,7 +7,7 @@ export default defineConfig({
   base: '/TeszCore/',
   cleanUrls: true,
   themeConfig: {
-    version,
+    version: "2.4.2",
     // https://vitepress.dev/reference/default-theme-config
     search: {
       provider: 'local'

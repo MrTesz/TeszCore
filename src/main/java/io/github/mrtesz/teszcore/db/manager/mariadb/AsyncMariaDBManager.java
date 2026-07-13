@@ -142,6 +142,7 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager implements Async
         checkConnection();
         return CompletableFuture.supplyAsync(() -> {
             try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(null)) {
+                boolean first = true;
                 for (BatchSqlStatement stmt : sqlStatements) {
                     int i = 1;
                     for (Object o : stmt.getParams()) {
@@ -154,6 +155,11 @@ public class AsyncMariaDBManager extends AbstractMariaDBManager implements Async
                             case Date d -> ps.setDate(i++, d);
                             default -> ps.setObject(i++, o);
                         }
+                    }
+
+                    if (first) {
+                        first = false;
+                        continue;
                     }
                     ps.addBatch(stmt.getSql());
                 }

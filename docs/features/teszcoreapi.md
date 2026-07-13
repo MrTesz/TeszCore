@@ -1,5 +1,5 @@
 # TeszCoreAPI
-###### Last updated for version: 2.4.1
+###### Last updated for version: 2.4.2
 
 ## Usage
 

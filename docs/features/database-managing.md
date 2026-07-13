@@ -1,5 +1,5 @@
 # Database Managing
-###### Last updated for version: 2.4.1
+###### Last updated for version: 2.4.2
 
 Database managing is a big part of this project and, by the way, the purpose this project was created for (initially as "DBUtils").<br>
 This project provides managing of MariaDB and Sqlite databases natively, but you can also create a custom DBManager if you want to. (See [Create a custom DBManager](#create-a-custom-dbmanager))

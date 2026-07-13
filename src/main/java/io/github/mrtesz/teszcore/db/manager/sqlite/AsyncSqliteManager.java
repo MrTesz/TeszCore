@@ -160,7 +160,8 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
             long start = System.currentTimeMillis();
 
             checkConnection();
-            try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(null)) {
+            try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sqlStatements.getFirst().getSql())) {
+                boolean first = true;
                 for (BatchSqlStatement stmt : sqlStatements) {
                     int i = 1;
                     for (Object o : stmt.getParams()) {
@@ -173,6 +174,10 @@ public class AsyncSqliteManager extends AbstractSqliteManager implements AsyncDB
                             case Date d -> ps.setDate(i++, d);
                             default -> ps.setObject(i++, o);
                         }
+                    }
+                    if (first) {
+                        first = false;
+                        continue;
                     }
                     ps.addBatch(stmt.getSql());
                 }

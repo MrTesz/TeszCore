@@ -1,5 +1,5 @@
 # Random Generation
-###### Last updated for version: 2.4.1
+###### Last updated for version: 2.4.2
 
 In TeszCore there is one class, which provides methods for:
 - Rolling a boolean, from a given percentage value (true if that percentage is hit) - `Chance#roll(int)`, `Chance#roll(int, Random)`, `Chance#roll(double)`, `Chance#roll(double, Random)`
